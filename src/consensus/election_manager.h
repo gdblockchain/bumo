@@ -57,13 +57,14 @@ namespace bumo {
 		static void ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg);
 		
 		int64_t CoinToVotes(int64_t coin);
+		int64_t FeeToVotes(int64_t fee);
 		enum FeesOwner {
 			SELF = 0,
 			CREATOR = 1,
 			APP = 2,
 			VALIDATOR = 3
 		};
-		bool GetFeesShareByOwner(FeesOwner owner, uint32_t rate);
+		bool GetFeesShareByOwner(FeesOwner owner, uint32_t& rate);
 
 		void GetAbnormalRecords(Json::Value& record);
 		void AddAbnormalRecord(const std::string& abnormal_node);

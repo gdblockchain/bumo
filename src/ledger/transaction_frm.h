@@ -98,6 +98,7 @@ namespace bumo {
 		bool PayFee(std::shared_ptr<Environment> environment,int64_t& total_fee);
 		bool ReturnFee(int64_t& total_fee);
 		bool AllocateFeesByShare(const std::string& address, int64_t total, uint32_t share);
+		bool UpdateFeeVoting(CandidatePtr candidate, int64_t fee);
 		int64_t GetFeeLimit() const;
 		int64_t GetGasPrice() const;
 		int64_t GetActualGas() const;

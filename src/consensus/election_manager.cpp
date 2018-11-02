@@ -170,7 +170,16 @@ namespace bumo {
 		}
 	}
 
-	bool ElectionManager::GetFeesShareByOwner(FeesOwner owner, uint32_t rate) {
+	int64_t ElectionManager::FeeToVotes(int64_t fee) {
+		if (election_config_.fee_to_vote_rate() < 1) {
+			return 0;
+		}
+		else {
+			return fee / election_config_.coin_to_vote_rate();
+		}
+	}
+
+	bool ElectionManager::GetFeesShareByOwner(FeesOwner owner, uint32_t& rate) {
 		std::vector<std::string> vec = utils::String::split(election_config_.fee_distribution_rate(), ":");
 		if (vec.size() != 4) {
 			LOG_ERROR("Failed to get fees share, owner type:" FMT_I64"", owner);
@@ -195,7 +204,7 @@ namespace bumo {
 			}
 			if (i == owner) owner_value = value;
 		}
-		rate = owner_value / count;
+		rate = owner_value * 100 / count; // multiply by 100 to avoid float number convert
 
 		return true;
 	}

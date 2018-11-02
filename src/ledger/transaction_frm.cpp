@@ -281,11 +281,11 @@ namespace bumo {
 
 		return false;
 	}
-	
+
 	//Use this function to calculate the total fee.
 	bool TransactionFrm::ReturnFee(int64_t& total_fee) {
 		int64_t actual_fee=0;
-		if (!utils::SafeIntMul(GetActualGas(), GetGasPrice(), actual_fee)){
+		if (!utils::SafeIntMul(GetActualGas(), GetGasPrice(), actual_fee)){	
 			result_.set_desc(utils::String::Format("Calculation overflowed when gas quantity(" FMT_I64 ") * gas price(" FMT_I64 ").", GetActualGas(), GetGasPrice()));
 			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
 			return false;
@@ -313,7 +313,7 @@ namespace bumo {
 			
 			// return creator's share of fee 
 			uint32_t creator_share = 0;
-			if (ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::CREATOR, creator_share)) {
+			if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::CREATOR, creator_share)) {
 				LOG_ERROR("Failed to get creator's share of fee");
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
@@ -328,7 +328,7 @@ namespace bumo {
 					return false;
 				}
 				else {
-					LOG_TRACE("Return fee to creator done, rate: " FMT_I64 ", actual fee: " FMT_I64 "", creator_share, actual_fee);
+					LOG_TRACE("Return fee to creator done, rate: "FMT_I64", actual fee: " FMT_I64 "", creator_share, actual_fee);
 				}
 			}
 			else {
@@ -337,7 +337,7 @@ namespace bumo {
 
 			// get validator share
 			uint32_t validator_share_tmp = 0;
-			if (ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::VALIDATOR, validator_share_tmp)) {
+			if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::VALIDATOR, validator_share_tmp)) {
 				LOG_ERROR("Failed to get validator's share of fee");
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
@@ -350,7 +350,14 @@ namespace bumo {
 			uint32_t dapp_share = 0;
 			int64_t return_source = 0;
 			uint32_t source_share = 0;
-			if (!source_account->GetVoteFor().empty()) {
+			std::string vote_for = source_account->GetVoteFor();
+			CandidatePtr candidate;
+			if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
+				LOG_ERROR("Failed to get candidate info of %s from transaction environment.", vote_for.c_str());
+				vote_for = "";
+				source_account->SetVoteFor(vote_for);
+			}
+			if (!vote_for.empty()) {
 				std::string jsonstr;
 				if (!metadata.empty() && utils::String::HexStringToBin(metadata, jsonstr)) {
 					Json::Value meta_json;
@@ -389,6 +396,7 @@ namespace bumo {
 							LOG_ERROR(result_.desc().c_str());
 							break;
 						}
+						return_source /= 100;
 					}
 					else {
 						LOG_ERROR("Failed to parse application address from metadata string, %s", metadata);
@@ -404,6 +412,7 @@ namespace bumo {
 						LOG_ERROR(result_.desc().c_str());
 						break;
 					}
+					return_source /= 100;
 				}
 			}
 			else {
@@ -418,6 +427,7 @@ namespace bumo {
 				LOG_ERROR(result_.desc().c_str());
 				break;
 			}
+			return_validator /= 100;
 
 			// total_fee - fee_limit + return_validator = total_fee + (return_validator - fee_limit)
 			int64_t tmp_fee = 0;
@@ -434,6 +444,9 @@ namespace bumo {
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
 				LOG_ERROR(result_.desc().c_str());
 				break;
+			}
+			else {
+				LOG_TRACE("Return fee to validator done, share: " FMT_I64 ", amount: "FMT_I64", actual fee: " FMT_I64 "", validator_share, return_validator, actual_fee);
 			}
 
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
@@ -456,11 +469,30 @@ namespace bumo {
 			proto_source_account.set_balance(new_balance);
 
 			LOG_TRACE("Account(%s) received a refund of the extra fee(" FMT_I64 ") on transaction(%s) and its latest balance is " FMT_I64 ".", str_address.c_str(), fee, utils::String::BinToHexString(hash_).c_str(), new_balance);
-
+			if (!vote_for.empty() && candidate) {
+				if (!UpdateFeeVoting(candidate, actual_fee)) {
+					result_.set_desc(utils::String::Format("Failed to update fee votes for candidate %s", vote_for.c_str()));
+					result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+					LOG_ERROR(result_.desc().c_str());
+					break;
+				}
+			}
 			return true;
 		} while (false);
 
 		return false;
+	}
+
+	bool TransactionFrm::UpdateFeeVoting(CandidatePtr candidate, int64_t fee) {
+		// Add fee voting to vote for candidate
+		int64_t votes = ElectionManager::GetInstance()->FeeToVotes(fee);
+		int64_t fee_votes = 0;
+		if (!utils::SafeIntAdd(candidate->fee_vote(), votes, fee_votes)) {
+			LOG_ERROR("Calculation overflowed when candidate fee votes:(" FMT_I64 ") + new fee votes(" FMT_I64 ") of return.", candidate->fee_vote(), votes);
+			return false;
+		}
+		candidate->set_fee_vote(fee_votes);
+		return true;
 	}
 
 	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t total, uint32_t share) {
@@ -478,7 +510,7 @@ namespace bumo {
 			return false;
 		}
 
-		if (!account->AddBalance(amount)) {
+		if (!account->AddBalance(amount/100)) { // share already multiply by 100
 			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
 			return false;
 		}
