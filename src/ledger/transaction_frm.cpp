@@ -310,9 +310,127 @@ namespace bumo {
 				result_.set_code(protocol::ERRCODE_ACCOUNT_NOT_EXIST);
 				break;
 			}
+			
+			// return creator's share of fee 
+			uint32_t creator_share = 0;
+			if (ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::CREATOR, creator_share)) {
+				LOG_ERROR("Failed to get creator's share of fee");
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+				break;
+			}
 
-			if (!utils::SafeIntSub(total_fee, fee, total_fee)){
-				result_.set_desc(utils::String::Format("Calculation overflowed when total fee(" FMT_I64 ") - extra fee(" FMT_I64 ") paid by source account(%s).", total_fee, fee, str_address.c_str()));
+			std::string creator = source_account->GetCreator();
+			uint32_t validator_share = 0;
+			int64_t return_validator = 0;
+			if (!creator.empty()) { // the share of fee will be include in the block reward
+				if (!AllocateFeesByShare(creator, actual_fee, creator_share)) {
+					LOG_ERROR("Failed to return the share of fee to creator %s", creator.c_str());
+					return false;
+				}
+				else {
+					LOG_TRACE("Return fee to creator done, rate: " FMT_I64 ", actual fee: " FMT_I64 "", creator_share, actual_fee);
+				}
+			}
+			else {
+				validator_share = creator_share;
+			}
+
+			// get validator share
+			uint32_t validator_share_tmp = 0;
+			if (ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::VALIDATOR, validator_share_tmp)) {
+				LOG_ERROR("Failed to get validator's share of fee");
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+				break;
+			}
+			validator_share += validator_share_tmp;
+
+			// return application's share of fee               
+			std::string metadata = transaction_env_.transaction().metadata();
+			int64_t return_dapp = 0;
+			uint32_t dapp_share = 0;
+			int64_t return_source = 0;
+			uint32_t source_share = 0;
+			if (!source_account->GetVoteFor().empty()) {
+				std::string jsonstr;
+				if (!metadata.empty() && utils::String::HexStringToBin(metadata, jsonstr)) {
+					Json::Value meta_json;
+					std::string dapp_address;
+					std::string dapp_rate;
+					if (meta_json.fromString(jsonstr) && meta_json.isMember("from_account")) {
+						dapp_address = meta_json["from_account"].asString();
+						if (meta_json.isMember("from_share_fee")) {
+							dapp_share = meta_json["from_share_fee"].asUInt();
+							if (dapp_share > 1 - validator_share - creator_share) {
+								dapp_share = 1 - validator_share - creator_share;
+							}
+							else {
+								source_share = 1 - creator_share - dapp_share - validator_share;
+							}
+						}
+						else {
+							dapp_share = 1 - validator_share - creator_share;
+						}
+
+						// DAU reward of application
+						if (!AllocateFeesByShare(dapp_address, actual_fee, dapp_share)) {
+							result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", dapp_address.c_str()));
+							result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+							break;
+						}
+						else {
+							LOG_TRACE("Return fee to dapp done, rate: " FMT_I64 ", actual fee: " FMT_I64 "", dapp_share, actual_fee);
+						}
+
+						// DAU reward of source address
+						if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
+							result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source share(" FMT_I64 ").",
+								actual_fee, creator_share));
+							result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+							LOG_ERROR(result_.desc().c_str());
+							break;
+						}
+					}
+					else {
+						LOG_ERROR("Failed to parse application address from metadata string, %s", metadata);
+					}
+				}
+				else {
+					// source account got all the rest share if no metadata set
+					source_share = 1 - validator_share - creator_share;
+					if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
+						result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source account share(" FMT_I64 ").",
+							actual_fee, source_share));
+						result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+						LOG_ERROR(result_.desc().c_str());
+						break;
+					}
+				}
+			}
+			else {
+				// validator got all the rest share if no vote_for set
+				validator_share = 1 - creator_share;
+			}
+
+			if (!utils::SafeIntMul(actual_fee, (int64_t)validator_share, return_validator)) {
+				result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * validator share(" FMT_I64 ").",
+					actual_fee, creator_share));
+				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+				LOG_ERROR(result_.desc().c_str());
+				break;
+			}
+
+			// total_fee - fee_limit + return_validator = total_fee + (return_validator - fee_limit)
+			int64_t tmp_fee = 0;
+			if (!utils::SafeIntSub(return_validator, GetFeeLimit(), tmp_fee)) {
+				result_.set_desc(utils::String::Format("Calculation overflowed when DAU reward of validator(" FMT_I64 ") - fee limit(" FMT_I64 ").",
+					actual_fee, creator_share));
+				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+				LOG_ERROR(result_.desc().c_str());
+				break;
+			}
+
+			if (!utils::SafeIntAdd(total_fee, tmp_fee, total_fee)){
+				result_.set_desc(utils::String::Format("Calculation overflowed when total fee(" FMT_I64 ") + extra fee(" FMT_I64 ") paid by source account(%s).", total_fee, fee, str_address.c_str()));
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
 				LOG_ERROR(result_.desc().c_str());
 				break;
@@ -320,8 +438,15 @@ namespace bumo {
 
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
 			int64_t new_balance =0;
+			if (!utils::SafeIntAdd(fee, return_source, fee)){
+				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s return fee:(" FMT_I64 ") + DAU reward(" FMT_I64 ") of return.",
+					str_address.c_str(), fee, return_source));
+				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+				LOG_ERROR(result_.desc().c_str());
+				break;
+			}
 			if (!utils::SafeIntAdd(proto_source_account.balance(), fee, new_balance)){
-				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s blance:(" FMT_I64 ") + extra fee(" FMT_I64 ") of return.",
+				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s balance:(" FMT_I64 ") + extra fee(" FMT_I64 ") of return.",
 					str_address.c_str(), proto_source_account.balance(), fee));
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
 				LOG_ERROR(result_.desc().c_str());
@@ -336,6 +461,28 @@ namespace bumo {
 		} while (false);
 
 		return false;
+	}
+
+	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t total, uint32_t share) {
+		AccountFrm::pointer account;
+		if (!environment_->GetEntry(address, account)) {
+			LOG_ERROR("Account(%s) does not exist", address.c_str());
+			return false;
+		}
+
+		if (share == 0) return true;
+
+		int64_t amount = 0;
+		if (!utils::SafeIntMul(total, (int64_t)share, amount)) {
+			LOG_ERROR("Calculation overflowed when total:(" FMT_I64 ") * share(" FMT_I64 ") of return.", total, share);
+			return false;
+		}
+
+		if (!account->AddBalance(amount)) {
+			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
+			return false;
+		}
+		return true;
 	}
 
 	int64_t TransactionFrm::GetNonce() const {

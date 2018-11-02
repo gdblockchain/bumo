@@ -180,9 +180,14 @@ namespace bumo {
 		uint32_t owner_value = 0;
 		for (int i = 0; i < 4; i++) {
 			uint32_t value = 0;
-			if (!utils::String::SafeStoui(vec[i], value)) {
-				LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
-				return false;
+			if (vec[i].empty() || vec[i] == "0") {
+				value = 0;
+			} 
+			else {
+				if (!utils::String::SafeStoui(vec[i], value)) {
+					LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
+					return false;
+				}
 			}
 			if (!utils::SafeIntAdd(count, value, count)){
 				LOG_ERROR("Overflowed when get fees share.");

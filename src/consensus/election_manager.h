@@ -61,7 +61,7 @@ namespace bumo {
 			SELF = 0,
 			CREATOR = 1,
 			APP = 2,
-			VALIDATORS = 3
+			VALIDATOR = 3
 		};
 		bool GetFeesShareByOwner(FeesOwner owner, uint32_t rate);
 
