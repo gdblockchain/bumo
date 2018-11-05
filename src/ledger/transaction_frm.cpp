@@ -306,184 +306,173 @@ namespace bumo {
 
 		do {
 			if (!environment_->GetEntry(str_address, source_account)) {
-				LOG_ERROR("Source account(%s) does not exist", str_address.c_str());
+				result_.set_desc(utils::String::Format("Source account(%s) does not exist", str_address.c_str()));
 				result_.set_code(protocol::ERRCODE_ACCOUNT_NOT_EXIST);
 				break;
 			}
 			
-			// return creator's share of fee 
-			uint32_t creator_share = 0;
-			if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::CREATOR, creator_share)) {
-				LOG_ERROR("Failed to get creator's share of fee");
-				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-				break;
-			}
-
-			std::string creator = source_account->GetCreator();
-			uint32_t validator_share = 0;
-			int64_t return_validator = 0;
-			if (!creator.empty()) { // the share of fee will be include in the block reward
-				if (!AllocateFeesByShare(creator, actual_fee, creator_share)) {
-					LOG_ERROR("Failed to return the share of fee to creator %s", creator.c_str());
-					return false;
-				}
-				else {
-					LOG_TRACE("Return fee to creator done, create share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)creator_share, actual_fee);
-				}
-			}
-			else {
-				validator_share = creator_share;
-			}
-
-			// get validator share
-			uint32_t validator_share_tmp = 0;
-			if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::VALIDATOR, validator_share_tmp)) {
-				LOG_ERROR("Failed to get validator's share of fee");
-				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-				break;
-			}
-			validator_share += validator_share_tmp;
-
-			// return application's share of fee               
-			std::string metadata = transaction_env_.transaction().metadata();
-			int64_t return_dapp = 0;
-			uint32_t dapp_share = 0;
 			int64_t return_source = 0;
-			uint32_t source_share = 0;
-			std::string vote_for = source_account->GetVoteFor();
-			CandidatePtr candidate;
-			if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
-				LOG_ERROR("Failed to get candidate info of %s from transaction environment.", vote_for.c_str());
-				vote_for = "";
-				source_account->SetVoteFor(vote_for);
-			}
-			if (!vote_for.empty()) {
-				std::string jsonstr;
-				if (!metadata.empty() && utils::String::HexStringToBin(metadata, jsonstr)) {
-					Json::Value meta_json;
-					std::string dapp_address;
-					std::string dapp_rate;
-					if (meta_json.fromString(jsonstr) && meta_json.isMember("from_account")) {
-						dapp_address = meta_json["from_account"].asString();
-						if (meta_json.isMember("from_share_fee")) {
-							dapp_share = meta_json["from_share_fee"].asUInt();
-							if (dapp_share > 100 - validator_share - creator_share) {
-								dapp_share = 100 - validator_share - creator_share;
-							}
-							else {
-								source_share = 100 - creator_share - dapp_share - validator_share;
-							}
-						}
-						else {
-							dapp_share = 100 - validator_share - creator_share;
-						}
-
-						// DAU reward of application
-						if (!AllocateFeesByShare(dapp_address, actual_fee, dapp_share)) {
-							result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", dapp_address.c_str()));
-							result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-							break;
-						}
-						else {
-							LOG_TRACE("Return fee to dapp done, rate: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)dapp_share, actual_fee);
-						}
-
-						// DAU reward of source address
-						if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
-							result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source share(" FMT_I64 ").",
-								actual_fee, creator_share));
-							result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-							LOG_ERROR(result_.desc().c_str());
-							break;
-						}
-						return_source /= 100;
-					}
-					else {
-						LOG_ERROR("Failed to parse application address from metadata string, %s", metadata);
-					}
-				}
-				else {
-					// source account got all the rest share if no metadata set
-					source_share = 100 - validator_share - creator_share;
-					if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
-						result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source account share(" FMT_I64 ").",
-							actual_fee, source_share));
-						result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-						LOG_ERROR(result_.desc().c_str());
-						break;
-					}
-					return_source /= 100;
-				}
-			}
-			else {
-				// validator got all the rest share if no vote_for set
-				validator_share = 100 - creator_share;
-			}
-
-			if (!utils::SafeIntMul(actual_fee, (int64_t)validator_share, return_validator)) {
-				result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * validator share(" FMT_I64 ").",
-					actual_fee, creator_share));
-				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				LOG_ERROR(result_.desc().c_str());
+			if (DauReward(actual_fee, source_account, total_fee, return_source)) {
+				result_.set_desc("Failed to do dau reward");
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
 			}
-			return_validator /= 100;
-
-			// total_fee - fee_limit + return_validator = total_fee + (return_validator - fee_limit)
-			int64_t tmp_fee = 0;
-			if (!utils::SafeIntSub(return_validator, GetFeeLimit(), tmp_fee)) {
-				result_.set_desc(utils::String::Format("Calculation overflowed when DAU reward of validator(" FMT_I64 ") - fee limit(" FMT_I64 ").",
-					actual_fee, creator_share));
-				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				LOG_ERROR(result_.desc().c_str());
-				break;
-			}
-
-			if (!utils::SafeIntAdd(total_fee, tmp_fee, total_fee)){
-				result_.set_desc(utils::String::Format("Calculation overflowed when total fee(" FMT_I64 ") + extra fee(" FMT_I64 ") paid by source account(%s).", total_fee, fee, str_address.c_str()));
-				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				LOG_ERROR(result_.desc().c_str());
-				break;
-			}
-			else {
-				LOG_TRACE("Return fee to validator done, share: " FMT_I64 ", amount: "FMT_I64", actual fee: " FMT_I64 "", (int64_t)validator_share, return_validator, actual_fee);
-			}
-
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
 			int64_t new_balance =0;
 			if (!utils::SafeIntAdd(fee, return_source, fee)){
 				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s return fee:(" FMT_I64 ") + DAU reward(" FMT_I64 ") of return.",
 					str_address.c_str(), fee, return_source));
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				LOG_ERROR(result_.desc().c_str());
 				break;
 			}
 			if (!utils::SafeIntAdd(proto_source_account.balance(), fee, new_balance)){
 				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s balance:(" FMT_I64 ") + extra fee(" FMT_I64 ") of return.",
 					str_address.c_str(), proto_source_account.balance(), fee));
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				LOG_ERROR(result_.desc().c_str());
+				
 				break;
 			}
 
 			proto_source_account.set_balance(new_balance);
 
 			LOG_TRACE("Account(%s) received a refund of the extra fee(" FMT_I64 ") on transaction(%s) and its latest balance is " FMT_I64 ".", str_address.c_str(), fee, utils::String::BinToHexString(hash_).c_str(), new_balance);
-			if (!vote_for.empty() && candidate) {
-				if (!UpdateFeeVoting(candidate, actual_fee)) {
-					result_.set_desc(utils::String::Format("Failed to update fee votes for candidate %s", vote_for.c_str()));
-					result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-					LOG_ERROR(result_.desc().c_str());
-					break;
-				}
-			}
 			return true;
 		} while (false);
 
+		if (result_.code() != ERROR_SUCCESS) LOG_ERROR(result_.desc().c_str());
 		return false;
 	}
 
-	bool TransactionFrm::UpdateFeeVoting(CandidatePtr candidate, int64_t fee) {
+	bool TransactionFrm::DauReward(int64_t actual_fee, AccountFrm::pointer& source_account, int64_t& total_fee, int64_t& return_source) {
+		// return creator's share of fee 
+		uint32_t creator_share = 0;
+		if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::CREATOR, creator_share)) {
+			result_.set_desc(utils::String::Format("Failed to get creator's share of fee"));
+			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+			return false;
+		}
+
+		std::string creator = source_account->GetCreator();
+		uint32_t validator_share = 0;
+		int64_t return_validator = 0;
+		if (!creator.empty()) { // the share of fee will be include in the block reward
+			if (!AllocateFeesByShare(creator, actual_fee, creator_share)) {
+				result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", creator.c_str()));
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+				return false;
+			}
+			LOG_TRACE("Return fee to creator done, create share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)creator_share, actual_fee);
+		}
+		else {
+			validator_share = creator_share;
+		}
+
+		// get validator share
+		uint32_t validator_share_tmp = 0;
+		if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::VALIDATOR, validator_share_tmp)) {
+			result_.set_desc("Failed to get validator's share of fee");
+			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+			return false;
+		}
+		validator_share += validator_share_tmp;
+
+		// return the share of fee to application and source address             
+		std::string metadata = transaction_env_.transaction().metadata();
+		uint32_t source_share = 0;
+		uint32_t dapp_share = 0;
+		int64_t return_dapp = 0;
+		
+		std::string vote_for = source_account->GetVoteFor();
+		CandidatePtr candidate = nullptr;
+		if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
+			result_.set_desc(utils::String::Format("Failed to get candidate info of %s from transaction environment.", vote_for.c_str()));
+			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+			vote_for = "";
+			source_account->SetVoteFor(vote_for);
+		}
+		if (vote_for.empty()) {
+			// validator got all the rest share if no vote_for set
+			validator_share = 100 - creator_share;
+		} else {
+			LOG_TRACE("metadata string is :%s", metadata.c_str());
+			Json::Value meta_json;
+			bool is_json = meta_json.fromString(metadata);
+			bool has_account = meta_json.isMember("from_account");
+			if (metadata.empty() || !is_json || !has_account) {
+				// source account got all the rest share if no metadata set
+				source_share = 100 - validator_share - creator_share;
+				if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
+					result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source account share(" FMT_I64 ").",
+						actual_fee, source_share));
+					result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+					result_.set_desc(utils::String::Format(result_.desc().c_str()));
+					return false;
+				}
+			} else {
+				std::string dapp_address;
+				std::string dapp_rate;
+				dapp_address = meta_json["from_account"].asString();
+				if (meta_json.isMember("share")) dapp_share = meta_json["share"].asUInt();
+				uint32_t tmp_share = validator_share + creator_share;
+				dapp_share = (dapp_share > 100 - tmp_share) ? 100 - tmp_share : dapp_share;
+				source_share = 100 - creator_share - dapp_share - validator_share;
+
+				// DAU reward of application
+				if (!AllocateFeesByShare(dapp_address, actual_fee, dapp_share)) {
+					result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", dapp_address.c_str()));
+					result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+					return false;
+				}
+				LOG_TRACE("Return fee to dapp done, share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)dapp_share, actual_fee);
+
+				// DAU reward of source address
+				if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
+					result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source share(" FMT_I64 ").",
+						actual_fee, creator_share));
+					result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+					return false;
+				}
+				LOG_TRACE("Return fee to source done, share: " FMT_I64 ", amount: " FMT_I64 "", (int64_t)dapp_share, return_source);
+			}
+			return_source /= 100;
+		}
+
+		if (!utils::SafeIntMul(actual_fee, (int64_t)validator_share, return_validator)) {
+			result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * validator share(" FMT_I64 ").",
+				actual_fee, creator_share));
+			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+			result_.set_desc(utils::String::Format(result_.desc().c_str()));
+			return false;
+		}
+		return_validator /= 100;
+
+		// total_fee - fee_limit + return_validator = total_fee + (return_validator - fee_limit)
+		int64_t tmp_fee = 0;
+		if (!utils::SafeIntSub(return_validator, GetFeeLimit(), tmp_fee)) {
+			result_.set_desc(utils::String::Format("Calculation overflowed when DAU reward of validator(" FMT_I64 ") - fee limit(" FMT_I64 ").",
+				actual_fee, creator_share));
+			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+			return false;
+		}
+
+		if (!utils::SafeIntAdd(total_fee, tmp_fee, total_fee)){
+			result_.set_desc(utils::String::Format("Calculation overflowed when total fee(" FMT_I64 ") + extra fee(" FMT_I64 ").", total_fee, tmp_fee));
+			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+			return false;
+		}
+		LOG_TRACE("Return fee to validator done, share: " FMT_I64 ", amount: "FMT_I64", actual fee: " FMT_I64 "", (int64_t)validator_share, return_validator, actual_fee);
+
+		if (!vote_for.empty() && candidate) {
+			if (!UpdateFeeVoting(candidate, actual_fee)) {
+				result_.set_desc(utils::String::Format("Failed to update fee votes for candidate %s", vote_for.c_str()));
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool TransactionFrm::UpdateFeeVoting(CandidatePtr& candidate, int64_t fee) {
 		// Add fee voting to vote for candidate
 		int64_t votes = ElectionManager::GetInstance()->FeeToVotes(fee);
 		int64_t fee_votes = 0;
@@ -491,6 +480,7 @@ namespace bumo {
 			LOG_ERROR("Calculation overflowed when candidate fee votes:(" FMT_I64 ") + new fee votes(" FMT_I64 ") of return.", candidate->fee_vote(), votes);
 			return false;
 		}
+		LOG_TRACE("Update fee voting, old votes: " FMT_I64 ", new votes: " FMT_I64 "", candidate->fee_vote(), fee_votes);
 		candidate->set_fee_vote(fee_votes);
 		return true;
 	}
