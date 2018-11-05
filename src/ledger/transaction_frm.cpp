@@ -328,7 +328,7 @@ namespace bumo {
 					return false;
 				}
 				else {
-					LOG_TRACE("Return fee to creator done, rate: "FMT_I64", actual fee: " FMT_I64 "", creator_share, actual_fee);
+					LOG_TRACE("Return fee to creator done, create share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)creator_share, actual_fee);
 				}
 			}
 			else {
@@ -367,15 +367,15 @@ namespace bumo {
 						dapp_address = meta_json["from_account"].asString();
 						if (meta_json.isMember("from_share_fee")) {
 							dapp_share = meta_json["from_share_fee"].asUInt();
-							if (dapp_share > 1 - validator_share - creator_share) {
-								dapp_share = 1 - validator_share - creator_share;
+							if (dapp_share > 100 - validator_share - creator_share) {
+								dapp_share = 100 - validator_share - creator_share;
 							}
 							else {
-								source_share = 1 - creator_share - dapp_share - validator_share;
+								source_share = 100 - creator_share - dapp_share - validator_share;
 							}
 						}
 						else {
-							dapp_share = 1 - validator_share - creator_share;
+							dapp_share = 100 - validator_share - creator_share;
 						}
 
 						// DAU reward of application
@@ -385,7 +385,7 @@ namespace bumo {
 							break;
 						}
 						else {
-							LOG_TRACE("Return fee to dapp done, rate: " FMT_I64 ", actual fee: " FMT_I64 "", dapp_share, actual_fee);
+							LOG_TRACE("Return fee to dapp done, rate: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)dapp_share, actual_fee);
 						}
 
 						// DAU reward of source address
@@ -404,7 +404,7 @@ namespace bumo {
 				}
 				else {
 					// source account got all the rest share if no metadata set
-					source_share = 1 - validator_share - creator_share;
+					source_share = 100 - validator_share - creator_share;
 					if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
 						result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source account share(" FMT_I64 ").",
 							actual_fee, source_share));
@@ -417,7 +417,7 @@ namespace bumo {
 			}
 			else {
 				// validator got all the rest share if no vote_for set
-				validator_share = 1 - creator_share;
+				validator_share = 100 - creator_share;
 			}
 
 			if (!utils::SafeIntMul(actual_fee, (int64_t)validator_share, return_validator)) {
@@ -446,7 +446,7 @@ namespace bumo {
 				break;
 			}
 			else {
-				LOG_TRACE("Return fee to validator done, share: " FMT_I64 ", amount: "FMT_I64", actual fee: " FMT_I64 "", validator_share, return_validator, actual_fee);
+				LOG_TRACE("Return fee to validator done, share: " FMT_I64 ", amount: "FMT_I64", actual fee: " FMT_I64 "", (int64_t)validator_share, return_validator, actual_fee);
 			}
 
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
@@ -509,8 +509,9 @@ namespace bumo {
 			LOG_ERROR("Calculation overflowed when total:(" FMT_I64 ") * share(" FMT_I64 ") of return.", total, share);
 			return false;
 		}
-
-		if (!account->AddBalance(amount/100)) { // share already multiply by 100
+		// the share already multiply by 100
+		amount /= 100;
+		if (!account->AddBalance(amount)) {
 			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
 			return false;
 		}
