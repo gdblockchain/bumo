@@ -179,17 +179,21 @@ namespace bumo{
 
 	bool Environment::GetValidatorCandidate(const std::string& addr, CandidatePtr& candidate){
 
-		if (!candidates_.Get(addr, candidate)){
-			candidate = ElectionManager::Instance().GetValidatorCandidate(addr);
-			if (!candidate){
+		CandidatePtr cache = nullptr;
+		if (candidates_.Get(addr, cache)){
+			candidate = cache;
+		}
+		else{
+			cache = ElectionManager::Instance().GetValidatorCandidate(addr);
+			if (cache){
+				candidate = std::make_shared<protocol::ValidatorCandidate>(*cache);
+				candidates_.Set(addr, candidate);
+			}
+			else{
 				candidate = nullptr;
 				return false;
 			}
-
-			CandidatePtr cache = std::make_shared<protocol::ValidatorCandidate>(*candidate);
-			candidates_.Set(addr, cache);
 		}
-
 		return true;
 	}
 
