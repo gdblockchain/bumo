@@ -180,6 +180,10 @@ namespace bumo {
 		}
 	}
 
+	int64_t ElectionManager::GetValidatorsRefreshInterval() {
+		return election_config_.validators_refresh_interval();
+	}
+
 	bool ElectionManager::GetFeesShareByOwner(FeesOwner owner, uint32_t& rate) {
 		std::vector<std::string> vec = utils::String::split(election_config_.fee_distribution_rate(), ":");
 		if (vec.size() != 4) {
@@ -305,6 +309,102 @@ namespace bumo {
 	void ElectionManager::UpdateToDB(){
 		if (!Storage::Instance().account_db()->WriteBatch(*(candidate_mpt_->batch_))) {
 			PROCESS_EXIT("Failed to write accounts to database: %s", Storage::Instance().account_db()->error_desc().c_str());
+		}
+	}
+
+	bool ElectionManager::CheckAbnormalRecord(int64_t& total_penalty) {
+		std::unordered_map<std::string, int64_t>::iterator ait = abnormal_records_.begin();
+		
+		for (; ait != abnormal_records_.end(); ait++) {
+			if (ait->second > 10) {
+				// penalty_amount = pledge * penalty_rate * (num_abnormal - 10) / 100
+				int64_t penalty_100 = 0;
+				if (!utils::SafeIntMul(ait->second - 10, election_config_.penalty_rate(), penalty_100)) {
+					LOG_ERROR("Calculation overflowed when abnormal records:(" FMT_I64 ") * penalty rate(" FMT_I64 ") of return.", ait->second, election_config_.penalty_rate());
+					return false;
+				}
+
+				CandidatePtr candidate = GetValidatorCandidate(ait->first);
+				if (!candidate) {
+					LOG_ERROR("Failed to get candidate info of %s", ait->first.c_str());
+					return false;
+				}
+
+				int64_t penalty_amount = 0;
+				if (penalty_100 > 100) {
+					penalty_amount = candidate->pledge();
+				}
+				else {
+					if (!utils::SafeIntMul(candidate->pledge(), penalty_100, penalty_amount)) {
+						LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") * penalty_100 (" FMT_I64 ") of return.", candidate->pledge(), penalty_100);
+						return false;
+					}
+					penalty_amount /= 100;
+				}
+				
+				if (!utils::SafeIntAdd(total_penalty, candidate->pledge(), total_penalty)) {
+					LOG_ERROR("Calculation overflowed when total penalty:(" FMT_I64 ") + pledge(" FMT_I64 ") of return.", total_penalty, candidate->pledge());
+					return false;
+				}
+				int64_t new_pledge = 0;
+				if (!utils::SafeIntSub(candidate->pledge(), penalty_amount, new_pledge)) {
+					LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") * penalty_100 (" FMT_I64 ") of return.", candidate->pledge(), penalty_100);
+					return false;
+				}
+				candidate->set_pledge(new_pledge);
+
+				ait->second = 0; // clear abnormal records
+			} else if (ait->second > 0){
+				LOG_ERROR("Candidate %s has " FMT_I64 " times abnormal records", ait->first.c_str(), ait->second);
+			}
+		}
+		return true;
+	}
+
+	bool ElectionManager::DynastyChange(Json::Value& validators_json) {
+		// check abnormal records and make punishment
+		int64_t total_penalty = 0;
+		if (CheckAbnormalRecord(total_penalty)) {
+			LOG_ERROR("Failed to check and handle abnormal records");
+			return false;
+		}
+
+		// sort candidate and update validators
+		std::multimap<int64_t, CandidatePtr> new_validators;
+		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
+		for (; it != validator_candidates_.end(); it++) {
+			int64_t key = it->second->coin_vote() + it->second->fee_vote();
+			if (new_validators.size() < General::MAX_VALIDATORS) {
+				new_validators.insert(std::make_pair(key, it->second));
+			}
+			else {
+				if (new_validators.begin()->first < key) {
+					new_validators.insert(std::make_pair(key, it->second));
+					new_validators.erase(new_validators.begin());
+				}
+			}
+		}
+
+		std::multimap<int64_t, CandidatePtr>::iterator vit = new_validators.begin();
+		for (; vit != new_validators.end(); vit++) 
+		{
+			Json::Value value;
+			value.append(vit->second->address());
+			value.append(utils::String::ToString(vit->second->pledge()));
+			validators_json.append(value);
+		}
+
+		int64_t reward = total_penalty / validator_candidates_.size();
+		int64_t reward_left = total_penalty % validator_candidates_.size();
+		// add pledge coin and clear fee_votes
+		for (; it != validator_candidates_.end(); it++) {
+			int64_t new_pledge = 0;
+			if (!utils::SafeIntAdd(it->second->pledge(), reward, new_pledge)) {
+				LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") + reward(" FMT_I64 ") of return.", it->second->pledge(), reward);
+				return false;
+			}
+			it->second->set_pledge(new_pledge);
+			it->second->clear_fee_vote();
 		}
 	}
 }

@@ -434,7 +434,7 @@ namespace bumo {
 				PROCESS_EXIT("Failed to write ledger and transaction to database(%s)", ledger_db->error_desc().c_str());
 			}
 
-			//Write acount db
+			//Write account db
 			if (!Storage::Instance().account_db()->WriteBatch(*batch)) {
 				PROCESS_EXIT("Failed to write account to database, %s", Storage::Instance().account_db()->error_desc().c_str());
 			}
@@ -555,6 +555,21 @@ namespace bumo {
 		closing_ledger->environment_->UpdateValidatorCandidate();
 		ElectionManager::Instance().ValidatorCandidatesStorage();
 		ElectionManager::Instance().UpdateToDB();
+		
+		//for validator upgrade
+		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
+		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
+		if (header->seq() % interval_block) {
+			LOG_INFO("Start validator dynasty change");
+			Json::Value validators_json;
+			if (ElectionManager::Instance().DynastyChange(validators_json)) {
+				closing_ledger->environment_->UpdateNewValidators(validators_json);
+				LOG_INFO("Validators dynasty change done");
+			}
+			else {
+				LOG_ERROR("Failed to do validators dynasty change");
+			}
+		}
 
 		int64_t time0 = utils::Timestamp().HighResolution();
 		int64_t new_count = 0, change_count = 0;
@@ -594,7 +609,6 @@ namespace bumo {
 		std::shared_ptr<WRITE_BATCH> account_db_batch = tree_->batch_;
 		account_db_batch->Put(bumo::General::KEY_LEDGER_SEQ, utils::String::Format(FMT_I64, ledger_seq));
 		
-		//for validator upgrade
 		if (new_set.validators_size() > 0 || closing_ledger->environment_->GetVotedValidators(validators_, new_set)) {
 			ValidatorsSet(account_db_batch, new_set);
 			validators_ = new_set;
