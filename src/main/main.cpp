@@ -199,14 +199,6 @@ int main(int argc, char *argv[]){
 		object_exit.Push(std::bind(&bumo::ConsensusManager::Exit, &consensus_manager));
 		LOG_INFO("Initialized consensus manager successfully");
 
-		bumo::ElectionManager& election_manager = bumo::ElectionManager::Instance();
-		if (!bumo::g_enable_ || !election_manager.Initialize()){
-			LOG_ERROR("Failed to initialize election manager");
-			break;
-		}
-		object_exit.Push(std::bind(&bumo::ElectionManager::Exit, &election_manager));
-		LOG_INFO("Initialized election manager successfully");
-
 		bumo::LedgerManager &ledgermanger = bumo::LedgerManager::Instance();
 		if (!bumo::g_enable_ || !ledgermanger.Initialize()) {
 			LOG_ERROR("Failed to initialize ledger manager");
@@ -214,6 +206,14 @@ int main(int argc, char *argv[]){
 		}
 		object_exit.Push(std::bind(&bumo::LedgerManager::Exit, &ledgermanger));
 		LOG_INFO("Initialized ledger successfully");
+
+		bumo::ElectionManager& election_manager = bumo::ElectionManager::Instance();
+		if (!bumo::g_enable_ || !election_manager.Initialize()){
+			LOG_ERROR("Failed to initialize election manager");
+			break;
+		}
+		object_exit.Push(std::bind(&bumo::ElectionManager::Exit, &election_manager));
+		LOG_INFO("Initialized election manager successfully");
 
 		bumo::GlueManager &glue = bumo::GlueManager::Instance();
 		if (!bumo::g_enable_ || !glue.Initialize()){
