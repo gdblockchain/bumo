@@ -559,7 +559,7 @@ namespace bumo {
 		//for validator upgrade
 		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
-		if (header->seq() % interval_block) {
+		if (header->seq() % interval_block == 0) {
 			LOG_INFO("Start validator dynasty change");
 			Json::Value validators_json;
 			if (ElectionManager::Instance().DynastyChange(validators_json)) {

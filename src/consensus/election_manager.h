@@ -24,6 +24,7 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 #include <utils/headers.h>
 #include <common/general.h>
 #include <common/storage.h>
+#include <common/pb2json.h>
 #include <main/configure.h>
 #include "ledger/kv_trie.h"
 

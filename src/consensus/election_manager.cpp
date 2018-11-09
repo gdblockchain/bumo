@@ -14,7 +14,7 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "election_manager.h"
-#include "ledger/ledger_manager.h"
+
 
 namespace bumo {
 	ElectionManager::ElectionManager(): candidate_mpt_(nullptr){
@@ -104,6 +104,27 @@ namespace bumo {
 	}
 
 	void ElectionManager::GetModuleStatus(Json::Value &data){
+		data["name"] = "election_manager";
+		data["configuration"] = Proto2Json(election_config_);
+		Json::Value candidates;
+		// add candidates
+		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
+		for (; it != validator_candidates_.end(); it++) {
+			Json::Value value = Proto2Json(*it->second);
+			candidates.append(value);
+		}
+		data["candidates"] = candidates;
+
+		// add abnormal records
+		std::unordered_map<std::string, int64_t>::iterator ait = abnormal_records_.begin();
+		Json::Value records;
+		for (; ait != abnormal_records_.end(); ait++) {
+			Json::Value value;
+			value["address"] = ait->first;
+			value["count"] = ait->second;
+			records.append(value);
+		}
+		data["abnormal_records"] = records;
 	}
 
 	void ElectionManager::ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg) {
@@ -289,7 +310,7 @@ namespace bumo {
 					validator_candidates_[candidate->address()] = candidate;
 				}
 			}
-			else{
+			/*else{
 				auto set = LedgerManager::Instance().Validators();
 				for (size_t i = 0; i < set.validators_size(); i++){
 					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
@@ -297,7 +318,7 @@ namespace bumo {
 					candidate->set_pledge(set.mutable_validators(i)->pledge_coin_amount());
 					validator_candidates_[candidate->address()] = candidate;
 				}
-			}
+			}*/
 		}
 		catch (std::exception& e){
 			return false;
@@ -362,9 +383,12 @@ namespace bumo {
 	}
 
 	bool ElectionManager::DynastyChange(Json::Value& validators_json) {
+
+		if (validator_candidates_.size() == 0) return false;
+
 		// check abnormal records and make punishment
 		int64_t total_penalty = 0;
-		if (CheckAbnormalRecord(total_penalty)) {
+		if (!CheckAbnormalRecord(total_penalty)) {
 			LOG_ERROR("Failed to check and handle abnormal records");
 			return false;
 		}
@@ -406,5 +430,6 @@ namespace bumo {
 			it->second->set_pledge(new_pledge);
 			it->second->clear_fee_vote();
 		}
+		return true;
 	}
 }
