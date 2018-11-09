@@ -14,7 +14,6 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "election_manager.h"
-#include "ledger/ledger_manager.h"
 
 namespace bumo {
 	ElectionManager::ElectionManager(): candidate_mpt_(nullptr){
@@ -282,21 +281,10 @@ namespace bumo {
 		try{
 			std::vector<std::string> entries;
 			candidate_mpt_->GetAll("", entries);
-			if (!entries.empty()){
-				for (size_t i = 0; i < entries.size(); i++){
-					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
-					candidate->ParseFromString(entries[i]);
-					validator_candidates_[candidate->address()] = candidate;
-				}
-			}
-			else{
-				auto set = LedgerManager::Instance().Validators();
-				for (size_t i = 0; i < set.validators_size(); i++){
-					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
-					candidate->set_address(set.mutable_validators(i)->address());
-					candidate->set_pledge(set.mutable_validators(i)->pledge_coin_amount());
-					validator_candidates_[candidate->address()] = candidate;
-				}
+			for (size_t i = 0; i < entries.size(); i++){
+				CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
+				candidate->ParseFromString(entries[i]);
+				validator_candidates_[candidate->address()] = candidate;
 			}
 		}
 		catch (std::exception& e){
