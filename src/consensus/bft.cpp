@@ -298,7 +298,7 @@ namespace bumo {
 				lastvc_instance->view_number_, lastvc_instance->new_view_round_);
 		}
 
-		//Check the view change object that should be teminated
+		//Check the view change object that should be terminated
 		//for (PbftVcInstanceMap::iterator iter_vc = vc_instances_.begin(); iter_vc != vc_instances_.end(); ){
 		//	if (iter_vc->second.ShouldTeminated(current_time, g_pbft_vcinstance_terminatedtime_)){
 		//		vc_instances_.erase(iter_vc++);

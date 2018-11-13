@@ -1219,7 +1219,7 @@ namespace bumo{
 			else{
 				int64_t newAmount = 0;
 				if (!utils::SafeIntAdd(candidate->pledge(), iAmount, newAmount)){
-					error_desc = utils::String::Format("Pledge amount(%ld) + additional amount(%s) overflowed", candidate->pledge(), sAmount);
+					error_desc = utils::String::Format("Pledge amount(%ld) + additional amount(%s) overflowed", candidate->pledge(), sAmount.c_str());
 					break;
 				}
 

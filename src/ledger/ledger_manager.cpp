@@ -557,10 +557,10 @@ namespace bumo {
 		ElectionManager::Instance().UpdateToDB();
 		
 		//for validator upgrade
-		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
+		/*int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
 		if (header->seq() % interval_block == 0) {
-			LOG_INFO("Start validator dynasty change");
+			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", header->seq());
 			Json::Value validators_json;
 			if (ElectionManager::Instance().DynastyChange(validators_json)) {
 				closing_ledger->environment_->UpdateNewValidators(validators_json);
@@ -569,7 +569,7 @@ namespace bumo {
 			else {
 				LOG_ERROR("Failed to do validators dynasty change");
 			}
-		}
+		}*/
 
 		int64_t time0 = utils::Timestamp().HighResolution();
 		int64_t new_count = 0, change_count = 0;

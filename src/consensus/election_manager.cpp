@@ -58,10 +58,9 @@ namespace bumo {
 		LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
 
 		// Validator abnormal records
-		std::string key = "abnormal_records";
 		auto db = Storage::Instance().account_db();
 		std::string json_str;
-		if (db->Get(key, json_str)) {
+		if (db->Get(General::ABNORMAL_RECORDS, json_str)) {
 			abnormal_records_.clear();
 			Json::Value abnormal_json;
 			if (abnormal_json.fromString(json_str)) {
@@ -74,11 +73,6 @@ namespace bumo {
 					abnormal_records_.insert(std::make_pair(item["address"].asString(), item["count"].asInt64()));
 				}
 			}
-		}
-		else {
-			// write test value
-			abnormal_records_.insert(std::make_pair("buQcjgnBuoLkKdoggtJsQxiEPAFifgQBKu16", 10));
-			abnormal_records_.insert(std::make_pair("buQWQ4rwVW8RCzatR8XnRnhMCaCeMkE46qLR", 1));
 		}
 
 		TimerNotify::RegisterModule(this);
@@ -128,14 +122,13 @@ namespace bumo {
 	}
 
 	void ElectionManager::ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg) {
-		batch->Put("election_config", ecfg.SerializeAsString());
+		batch->Put(General::ELECTION_CONFIG, ecfg.SerializeAsString());
 	}
 
 	bool ElectionManager::ElectionConfigGet(protocol::ElectionConfig &ecfg) {
-		std::string key = "election_config";
 		auto db = Storage::Instance().account_db();
 		std::string str;
-		if (!db->Get(key, str)) {
+		if (!db->Get(General::ELECTION_CONFIG, str)) {
 			return false;
 		}
 		return ecfg.ParseFromString(str);
@@ -161,8 +154,6 @@ namespace bumo {
 	}
 
 	void ElectionManager::UpdateAbnormalRecords() {
-		std::string key = "abnormal_records";
-
 		Json::Value abnormal_json;
 		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
 			it != abnormal_records_.end();
@@ -173,7 +164,7 @@ namespace bumo {
 			abnormal_json.append(item);
 		}
 		auto batch = candidate_mpt_->batch_;
-		batch->Put("abnormal_records", abnormal_json.toFastString());
+		batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
 		KeyValueDb *db = Storage::Instance().account_db();
 		if (!db->WriteBatch(*batch)){
 			LOG_ERROR("Failed to write abnormal records to database(%s)", db->error_desc().c_str());
@@ -325,19 +316,21 @@ namespace bumo {
 	bool ElectionManager::CheckAbnormalRecord(int64_t& total_penalty) {
 		std::unordered_map<std::string, int64_t>::iterator ait = abnormal_records_.begin();
 		
+		bool error = false;
 		for (; ait != abnormal_records_.end(); ait++) {
 			if (ait->second > 10) {
 				// penalty_amount = pledge * penalty_rate * (num_abnormal - 10) / 100
 				int64_t penalty_100 = 0;
 				if (!utils::SafeIntMul(ait->second - 10, election_config_.penalty_rate(), penalty_100)) {
 					LOG_ERROR("Calculation overflowed when abnormal records:(" FMT_I64 ") * penalty rate(" FMT_I64 ") of return.", ait->second, election_config_.penalty_rate());
-					return false;
+					error = false;
+					break;
 				}
 
 				CandidatePtr candidate = GetValidatorCandidate(ait->first);
 				if (!candidate) {
 					LOG_ERROR("Failed to get candidate info of %s", ait->first.c_str());
-					return false;
+					continue;
 				}
 
 				int64_t penalty_amount = 0;
@@ -347,27 +340,31 @@ namespace bumo {
 				else {
 					if (!utils::SafeIntMul(candidate->pledge(), penalty_100, penalty_amount)) {
 						LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") * penalty_100 (" FMT_I64 ") of return.", candidate->pledge(), penalty_100);
-						return false;
+						error = false;
+						break;
 					}
 					penalty_amount /= 100;
 				}
 				
 				if (!utils::SafeIntAdd(total_penalty, candidate->pledge(), total_penalty)) {
 					LOG_ERROR("Calculation overflowed when total penalty:(" FMT_I64 ") + pledge(" FMT_I64 ") of return.", total_penalty, candidate->pledge());
-					return false;
+					error = false;
+					break;
 				}
 				int64_t new_pledge = 0;
 				if (!utils::SafeIntSub(candidate->pledge(), penalty_amount, new_pledge)) {
 					LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") * penalty_100 (" FMT_I64 ") of return.", candidate->pledge(), penalty_100);
-					return false;
+					error = false;
+					break;
 				}
 				candidate->set_pledge(new_pledge);
-
-				ait->second = 0; // clear abnormal records
 			} else if (ait->second > 0){
 				LOG_ERROR("Candidate %s has " FMT_I64 " times abnormal records", ait->first.c_str(), ait->second);
 			}
 		}
+		abnormal_records_.clear(); // clear all abnormal records
+		if (error) return false;
+
 		return true;
 	}
 
