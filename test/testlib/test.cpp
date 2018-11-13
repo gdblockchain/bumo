@@ -167,7 +167,7 @@ void TestStringUtils(){
 }
 
 void OnTimer(){
-	LOG_INFO("Time is up ");
+	LOG_INFO("Time is up !");
 }
 
 void TestTimer(){
