@@ -11,8 +11,6 @@ void test_bumokey(){
 		//bumo::PublicKey pkey(strpkey);
 		std::string sig = skey.Sign("hello");
 		
-		//auto ppp = pkey.GetBase58PublicKey();
-
 		assert(bumo::PublicKey::Verify("hello", sig, strpkey));
 		//auto addr1 = skey.GetBase58Address();
 		//auto addr2 = pkey.GetBase58Address();
