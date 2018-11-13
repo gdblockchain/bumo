@@ -2,8 +2,8 @@
 
 ## 简介
 
-ATP1.0(Account based Tokenization Protocol) 指基于 BuChain的账号结构对资产进行发行、转移和增发Token的标准协议，Token在此文代表账号资产。 
-**登记Token**：设置Token metadata参数。
+ATP1.0(Account based Tokenization Protocol) 指基于 BuChain的账号结构对资产进行发行、转移和增发Token的标准协议，Token在此文代表账号资产。   
+**登记Token**：设置Token metadata参数。  
 **发行Token**：账户发行一笔数字Token，执行成功后账户的Token余额中会出现这一笔Token。  
 **转移Token**：账户将一笔Token转给目标账户。  
 **增发Token**：账户继续在原Token代码上发行一定数量的Token，执行成功后账户的Token余额会增加。  
