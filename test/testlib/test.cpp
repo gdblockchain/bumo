@@ -130,6 +130,7 @@ void TestAsio(){
 }
 
 void TestThread(){
+	//start thread
 	MyThread nThread;
 	utils::Thread thread1(&nThread);
 	utils::Thread thread2(&nThread);
