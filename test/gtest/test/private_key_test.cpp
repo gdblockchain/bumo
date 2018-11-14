@@ -75,7 +75,6 @@ TEST_F(PrivateKeyTest, Verify){
 	EXPECT_FALSE(bubi::PublicKey::Verify(data, signature, publicKey2));
 }
 
-//测试PublicKey类中方法
 TEST_F(PrivateKeyTest, PublicKey){
 	bubi::PublicKey pub;
 	EXPECT_TRUE(bubi::PublicKey::IsAddressValid(priv_key->GetBase58Address()));
