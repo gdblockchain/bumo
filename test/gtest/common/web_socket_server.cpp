@@ -1013,25 +1013,21 @@ namespace bumo{
 
 		 switch (current_condition) {
 		 case LEDGER_LATEST_LEDGER:
-			 if (rcv.context.size() == 0)
-			 {
+			 if (rcv.context.size() == 0) {
 				 param["seq"] = 10;
 			 }
-			 else
-			 {
+			 else{
 				 param["seq"] = result["ledger_seq"].asInt();
 			 }
 			
 			 param["num"] = 1;
 			 break;
-		 case LEDGER_LATEST_20_LEDGER:
-		 {
+		 case LEDGER_LATEST_20_LEDGER:{
 										 
 			int current_height = result["ledger_seq"].asInt();
 			current_height = 0 ? 10 : current_height;
 
-			for (int i = 0; i <20; i++)
-			{
+			for (int i = 0; i <20; i++){
 				std::string param = "/getLedger?seq=";
 				char t[128] = { 0 };
 				sprintf(t, "%d", current_height - i);
@@ -1080,8 +1076,7 @@ namespace bumo{
 			 param["seq"] = (result["ledger_seq"].asInt() > 0 ? result["ledger_seq"].asInt() : 10);
 		 }
 	 }
-	 void WebSocketServer::RequestTest()
-	 {
+	 void WebSocketServer::RequestTest() {
 
 		 if (connet_clients_.size() != 0)
 			 connet_clients_.clear();
@@ -1107,8 +1102,7 @@ namespace bumo{
 
 		 std::string method;
 
-		 switch (msg_processor_.GetCurrentRequestTest())
-		 {
+		 switch (msg_processor_.GetCurrentRequestTest()) {
 		 case BUMO:
 			 method = "bumo";
 			 break;
@@ -1136,16 +1130,13 @@ namespace bumo{
 		 default:
 			 break;
 		 }
-		 if (msg_processor_.GetCurrentRequestTest() == UPGRADE)
-		 {
+		 if (msg_processor_.GetCurrentRequestTest() == UPGRADE){
 			 UpgradeLayout(parameter);
 		 }
-		 if (msg_processor_.GetCurrentRequestTest() == LEDGER)
-		 {
+		 if (msg_processor_.GetCurrentRequestTest() == LEDGER) {
 			 LedgerLayout(parameter);
 		 }
-		 if (msg_processor_.GetCurrentRequestTest() == SETCONFG)
-		 {
+		 if (msg_processor_.GetCurrentRequestTest() == SETCONFG){
 			SetConfigLayout(parameter);
 		 }
 		 msg_processor_.SendRequestMessage(method, true, parameter);
@@ -1159,12 +1150,10 @@ namespace bumo{
 	 }
 	
 #ifdef WIN32
-	bool WebSocketServer::IsLaterThan(WIN32_FIND_DATA wfd1, WIN32_FIND_DATA wfd2)
-	{
+	bool WebSocketServer::IsLaterThan(WIN32_FIND_DATA wfd1, WIN32_FIND_DATA wfd2){
 		if (wfd1.ftLastWriteTime.dwHighDateTime > wfd2.ftLastWriteTime.dwHighDateTime)
 			return true;
-		if (wfd1.ftLastWriteTime.dwHighDateTime == wfd2.ftLastWriteTime.dwHighDateTime)
-		{
+		if (wfd1.ftLastWriteTime.dwHighDateTime == wfd2.ftLastWriteTime.dwHighDateTime){
 			if (wfd1.ftLastWriteTime.dwLowDateTime > wfd2.ftLastWriteTime.dwLowDateTime)
 				return true;			
 		}
@@ -1172,8 +1161,7 @@ namespace bumo{
 	}
 #endif
 	
-	bool WebSocketServer::RecordErrorLogLatestTime()
-	{
+	bool WebSocketServer::RecordErrorLogLatestTime(){
 		
 		
 #ifdef WIN32
@@ -1186,16 +1174,14 @@ namespace bumo{
 		WIN32_FIND_DATA wfd;
 		HANDLE hFind;		
 		hFind = FindFirstFile(logpath.c_str(), &wfd);
-		if ( hFind == INVALID_HANDLE_VALUE)
-		{
+		if ( hFind == INVALID_HANDLE_VALUE){
 			printf("no log file in log folder!\n");
 			return false;
 		}
 			
 		WIN32_FIND_DATA latest_log = wfd;
 		
-		do
-		{
+		do{
 			latest_log = IsLaterThan(latest_log, wfd)?latest_log:wfd;
 
 		} while (FindNextFile(hFind, &wfd));
@@ -1228,16 +1214,14 @@ namespace bumo{
 
 		dir = opendir( logpath2.c_str() );  
 		
-		if (dir == NULL)
-		{
+		if (dir == NULL){
 			printf("log path %s does not exist!\n",logpath2.c_str())	;
 			return false;
 		}
 		std::string root = logpath2+"/";
 		printf("root = %s \n",root.c_str());
 		
-		while ((filename = readdir(dir)) != NULL)
-		{
+		while ((filename = readdir(dir)) != NULL){
 			
 			std::string str1 = "monitor-err";
 			std::string filename1 = (std::string)filename->d_name;
@@ -1247,31 +1231,26 @@ namespace bumo{
 			logpath2 = root + filename1;
 			
 			struct stat statbuf;
-			if (stat (logpath2.c_str(), &statbuf) == -1)
-			{
+			if (stat (logpath2.c_str(), &statbuf) == -1){
 				printf ("Get stat on %s Error %s\n", logpath2.c_str(), strerror (errno));
 				return false;
 			}
 			if (S_ISDIR(statbuf.st_mode))
 				return false;
-			if (S_ISREG(statbuf.st_mode))
-			{
-				if(statbuf.st_mtime>latest_time)
-				{
+			if (S_ISREG(statbuf.st_mode)){
+				if(statbuf.st_mtime>latest_time){
 					latest_log = filename;
 					latest_time = statbuf.st_mtime;
 					printf("find a newer file,replace\n");
 				}
 			}			
 		}
-		if(latest_log!=NULL)
-		{
+		if(latest_log!=NULL){
 			printf("latest_log is %s", latest_log->d_name);
 
 			logpath2 = root + (std::string)latest_log->d_name;
 		}
-		else
-		{
+		else{
 			printf("no file found in path %s", root.c_str());
 		}
 
@@ -1288,8 +1267,7 @@ namespace bumo{
 		char ch = fgetc(pfile);
 		int i = 0;
 		
-		while (ch != '[')
-		{
+		while (ch != '['){
 
 			i--;
 			fseek(pfile, i, SEEK_END);
@@ -1299,8 +1277,7 @@ namespace bumo{
 		i = 1;
 		fpos_t temp;
 		fgetpos(pfile, &temp);
-		while (ch != ']')
-		{
+		while (ch != ']'){
 			ch = fgetc(pfile);
 			pre_err_log_timestamp_[i++] = ch;	
 					
@@ -1313,8 +1290,7 @@ namespace bumo{
 	}
 
 
-	bool WebSocketServer::VerifyErrorLog(int err_code)
-	{
+	bool WebSocketServer::VerifyErrorLog(int err_code){
 		//find all file name under logpath	
 		int i = 0;
 #ifdef WIN32
@@ -1329,10 +1305,8 @@ namespace bumo{
 		WIN32_FIND_DATA latest_log = wfd;
 		WIN32_FIND_DATA second_latest_log = wfd;
 
-		do
-		{
-			if (IsLaterThan(wfd, latest_log)==1)
-			{
+		do{
+			if (IsLaterThan(wfd, latest_log)==1){
 				second_latest_log = latest_log;
 				latest_log = wfd;
 				
@@ -1375,8 +1349,7 @@ namespace bumo{
 
 		dir = opendir( logpath2.c_str() );  
 		
-		if (dir == NULL)
-		{
+		if (dir == NULL){
 			printf("log path %s does not exist!\n",logpath2.c_str())	;
 			return false;
 		}
@@ -1384,8 +1357,7 @@ namespace bumo{
 		std::string root = logpath2+"/";
 		printf("root = %s \n",root.c_str());
 		
-		while ((filename = readdir(dir)) != NULL)
-		{
+		while ((filename = readdir(dir)) != NULL){
 			
 			std::string str1 = "monitor-err";
 			std::string filename1 = (std::string)filename->d_name;
@@ -1395,8 +1367,7 @@ namespace bumo{
 			logpath2 = root + filename1;
 			
 			struct stat statbuf;
-			if (stat (logpath2.c_str(), &statbuf) == -1)
-			{
+			if (stat (logpath2.c_str(), &statbuf) == -1){
 
 				printf ("Get stat on %s Error %s\n", logpath2.c_str(), strerror (errno));
 
@@ -1408,12 +1379,9 @@ namespace bumo{
 
 				return false;
 
-			if (S_ISREG(statbuf.st_mode))
+			if (S_ISREG(statbuf.st_mode)){
 
-			{
-
-				if(statbuf.st_mtime>latest_time)
-				{
+				if(statbuf.st_mtime>latest_time){
 					latest_log = filename;
 					latest_time = statbuf.st_mtime;
 					printf("find a newer file,replace\n");
@@ -1437,12 +1405,10 @@ namespace bumo{
 
 		char actual_err_log_timestamp[40] = { 0 };
 		
-		if (!fsetpos(pfile, &pos_of_end_of_err_log))
-		{
+		if (!fsetpos(pfile, &pos_of_end_of_err_log)){
 			char ch = fgetc(pfile);
 			int i = 0;
-			while (ch != '[')
-			{		
+			while (ch != '['){		
 				i++;
 #ifdef WIN32
 				fpos_t pos = pos_of_end_of_err_log - i;
@@ -1461,8 +1427,7 @@ namespace bumo{
 			i = 1;
 			fpos_t temp;
 			fgetpos(pfile, &temp);
-			while (ch != ']')
-			{
+			while (ch != ']'){
 				ch = fgetc(pfile);
 				actual_err_log_timestamp[i++] = ch;
 
@@ -1472,26 +1437,22 @@ namespace bumo{
 		
 		//compare the actual one with the previous one
 		bool flag = true;
-		for (int i = 0; i < 40; ++i)
-		{
-			if (actual_err_log_timestamp[i] != pre_err_log_timestamp_[i])
-			{
+		for (int i = 0; i < 40; ++i){
+			if (actual_err_log_timestamp[i] != pre_err_log_timestamp_[i]){
 				flag = false;
 				break;
 			}			
 
 		}
 		
-		if (flag)
-		{
+		if (flag){
 			//start to read the content and compare
 			fsetpos(pfile, &pos_of_end_of_err_log);
 			char buffer_temp[1028] = {0};
 			int i = fread(buffer_temp, 1, 1028, pfile);
 			std::string a = buffer_temp;
 			std::string target;
-			switch (err_code)
-			{
+			switch (err_code){
 			case 0:
 				target = "";
 				break;
@@ -1543,8 +1504,7 @@ namespace bumo{
 
 			}
 			
-			if (a.find(target) != std::string::npos)
-			{
+			if (a.find(target) != std::string::npos){
 				printf("found error log!\n");
 				return true;
 			}			
@@ -1557,8 +1517,7 @@ namespace bumo{
 	}
 
 	//to generate a random value
-	std::string MsgProcessor::generateRandom()
-	{
+	std::string MsgProcessor::generateRandom(){
 		srand((int)time(0));
 		uint64_t rad =  random(999999999);
 
@@ -1570,8 +1529,7 @@ namespace bumo{
 
 	//All test interface	
 
-	void WebSocketServer::NormalResponseTest1()
-	{
+	void WebSocketServer::NormalResponseTest1(){
 		printf("do nothing");
 		printf("**Test Start**this is a test for normal condition!\n");
 		if (connet_clients_.size() != 0)
@@ -1589,10 +1547,8 @@ namespace bumo{
 
 		bool flag(false);
 		//wait for a connection
-		while (utils::Timestamp::HighResolution() - start_time < 10000000)
-		{
-			if (connet_clients_.size() == 1)
-			{
+		while (utils::Timestamp::HighResolution() - start_time < 10000000){
+			if (connet_clients_.size() == 1){
 				flag = true;
 				break;
 			}
@@ -1621,10 +1577,8 @@ namespace bumo{
 		start_time = utils::Timestamp::HighResolution();
 
 		//wait for a connection
-		while (utils::Timestamp::HighResolution() - start_time < 10000000)
-		{
-			if (connet_clients_.size() == 0)
-			{
+		while (utils::Timestamp::HighResolution() - start_time < 10000000){
+			if (connet_clients_.size() == 0){
 				break;
 			}
 			utils::Sleep(1);
