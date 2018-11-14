@@ -513,9 +513,11 @@ namespace bumo {
 			return true;
 		}
 
-		std::string key = ComposePrefix(General::VALIDATOR_LEADER_KEY_PREFIX, ledger_.header().seq() - 1);
+		std::string key = ComposePrefix(General::VALIDATOR_LEADER, ledger_.header().seq() - 1);
 		std::string addr;
-		if (!Consensus::LoadValue(key, addr)){
+
+		auto db = Storage::Instance().account_db();
+		if (!db->Get(key, addr)) {
 			LOG_ERROR("Failed to get validator leader of ledger(" FMT_I64 ")", ledger_.header().seq() - 1);
 			return false;
 		}

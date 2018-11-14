@@ -541,10 +541,14 @@ namespace bumo {
 		header->set_version(last_closed_ledger_->GetProtoHeader().version());
 
 		std::string abnormal_node;
-		for (int i = 0; consensus_value.entry().size(); i++) {
+		std::string validator_leader;
+		for (int i = 0; i < consensus_value.entry().size(); i++) {
 			const protocol::KeyPair& kv = consensus_value.entry(i);
 			if (kv.key() == "abnormal_node") {
 				abnormal_node = kv.value();
+			}
+			else if(kv.key() == General::VALIDATOR_LEADER){
+				validator_leader = kv.value();
 			}
 		}
 
@@ -607,7 +611,8 @@ namespace bumo {
 
 		int64_t ledger_seq = closing_ledger->GetProtoHeader().seq();
 		std::shared_ptr<WRITE_BATCH> account_db_batch = tree_->batch_;
-		account_db_batch->Put(bumo::General::KEY_LEDGER_SEQ, utils::String::Format(FMT_I64, ledger_seq));
+		account_db_batch->Put(General::KEY_LEDGER_SEQ, utils::String::Format(FMT_I64, ledger_seq));
+		account_db_batch->Put(ComposePrefix(General::VALIDATOR_LEADER, ledger_seq), validator_leader);
 		
 		if (new_set.validators_size() > 0 || closing_ledger->environment_->GetVotedValidators(validators_, new_set)) {
 			ValidatorsSet(account_db_batch, new_set);
