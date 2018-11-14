@@ -4,15 +4,12 @@
 #include <utils/crypto.h>
 #include <utils/strings.h>
 
-class PrivateKeyTest :public testing::Test
-{
+class PrivateKeyTest :public testing::Test{
 protected:
-	virtual void SetUp()
-	{
+	virtual void SetUp(){
 		priv_key = new bubi::PrivateKey(bubi::ED25519SIG);
 	}
-	virtual void TearDown()
-	{
+	virtual void TearDown(){
 		delete priv_key;
 		priv_key = NULL;
 	}
@@ -20,7 +17,7 @@ protected:
 	bubi::PrivateKey* priv_key;
 };
 
-//²âÊÔPrivateKeyÀà·µ»Ø¹«Ë½Ô¿ºÍµØÖ·²»Îª¿Õ
+//æµ‹è¯•PrivateKeyç±»è¿”å›žå…¬ç§é’¥å’Œåœ°å€ä¸ä¸ºç©º
 TEST_F(PrivateKeyTest, KeyNotNULL){
 
 	EXPECT_TRUE(priv_key->IsValid());
@@ -29,7 +26,7 @@ TEST_F(PrivateKeyTest, KeyNotNULL){
 	EXPECT_STRNE("", priv_key->GetBase58Address().c_str());
 };
 
-//²âÊÔPrivateKeyÀàÊ¹ÓÃ´ø²Î¹¹½¨º¯Êý´´½¨µÄ¶ÔÏó·µ»ØµÄ¹«Ë¾Ô¿ºÍµØÖ·²»Îª¿Õ
+//æµ‹è¯•PrivateKeyç±»ä½¿ç”¨å¸¦å‚æž„å»ºå‡½æ•°åˆ›å»ºçš„å¯¹è±¡è¿”å›žçš„å…¬å¸é’¥å’Œåœ°å€ä¸ä¸ºç©º
 TEST_F(PrivateKeyTest,PrivateKey2){
 	bubi::PrivateKey priv_key2(priv_key->GetBase58PrivateKey());
 	EXPECT_TRUE(priv_key2.IsValid());
@@ -38,30 +35,30 @@ TEST_F(PrivateKeyTest,PrivateKey2){
 	EXPECT_STRNE("", priv_key2.GetBase58Address().c_str());
 };
 
-//²âÊÔÇ©Ãû
+//æµ‹è¯•ç­¾å
 TEST_F(PrivateKeyTest, Sign){
 	EXPECT_STRNE("", priv_key->Sign("").c_str());
 };
 
-//²âÊÔÑéÖ¤
+//æµ‹è¯•éªŒè¯
 TEST_F(PrivateKeyTest, Verify){
 	std::string data="Hello";
 	std::string signature;
-	//Éú³É¹«Ë½Ô¿³×
+	//ç”Ÿæˆå…¬ç§é’¥åŒ™
 	ed25519_secret_key raw_priv_key_;
 	ed25519_public_key raw_pub_key_;
 	ed25519_randombytes_unsafe(raw_priv_key_, sizeof(raw_priv_key_));
 	ed25519_publickey(raw_priv_key_, raw_pub_key_);
-	//Ç©Ãû
+	//ç­¾å
 	ed25519_signature sig;
 	ed25519_sign((unsigned char *)data.c_str(), data.size(), raw_priv_key_, raw_pub_key_, sig);
 	signature.append((const char *)sig, sizeof(sig));
 
-	//¶Ô¹«Ô¿½øÐÐbase58±àÂë
+	//å¯¹å…¬é’¥è¿›è¡Œbase58ç¼–ç 
 	std::string key;
 	key.append((const char *)raw_pub_key_, sizeof(raw_pub_key_));
 	std::string publicKey = utils::Base58::Encode(key);
-	//Ö´ÐÐ²âÊÔÑéÖ¤
+	//æ‰§è¡Œæµ‹è¯•éªŒè¯
 	EXPECT_TRUE(false);
 	EXPECT_TRUE(bubi::PublicKey::Verify(data, signature, publicKey));
 	EXPECT_FALSE(bubi::PublicKey::Verify(data + "1", signature, publicKey));
@@ -82,7 +79,7 @@ TEST_F(PrivateKeyTest, Verify){
 	EXPECT_FALSE(bubi::PublicKey::Verify(data, signature, publicKey2));
 }
 
-//²âÊÔPublicKeyÀàÖÐ·½·¨
+//æµ‹è¯•PublicKeyç±»ä¸­æ–¹æ³•
 TEST_F(PrivateKeyTest, PublicKey){
 	bubi::PublicKey pub;
 	EXPECT_TRUE(bubi::PublicKey::IsAddressValid(priv_key->GetBase58Address()));
