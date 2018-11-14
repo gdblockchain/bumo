@@ -36,8 +36,7 @@ void encode_decode(){
 void sign_verify(){
     bubi::PrivateKey skey(bubi::SIGNTYPE_ED25519);
     std::string strpubkey = skey.GetEncPublicKey();
-    for (int i = 0; i < 1; i++)
-    {
+    for (int i = 0; i < 1; i++){
         std::string data = "hello" + std::to_string(i);
         std::string sig = skey.Sign(data);
         ASSERT_EQ(bubi::PublicKey::Verify(data, sig, strpubkey), true);
