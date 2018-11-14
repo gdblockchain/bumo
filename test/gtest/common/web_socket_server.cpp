@@ -87,8 +87,7 @@ namespace bumo{
 
 	bool MsgProcessor::Exit() {
 		try {
-			if (thread_ptr_)
-			{
+			if (thread_ptr_){
 				thread_ptr_->JoinWithStop();
 				delete thread_ptr_;
 				thread_ptr_ = NULL;
@@ -192,28 +191,23 @@ namespace bumo{
 	//send to client
 	void WebSocketServer::Send(std::string &data){
 		utils::MutexGuard guard(connet_clients_mutex_);
-		for (auto i : connet_clients_)
-		{
+		for (auto i : connet_clients_){
 			server_ptr_->send(i.second, data, websocketpp::frame::opcode::value::text);
 		}
 	}
 	
 
-	bool MsgProcessor::ProcessSendMessages(const std::string& msg)
-	{
+	bool MsgProcessor::ProcessSendMessages(const std::string& msg){
 		bool bret = false;
 		try {
 			do {
 				//first to check if need conversion
 				Json::Value content;
 				content.fromString(msg);
-				if (content.isMember("parameter") || content.isMember("result"))
-				{
+				if (content.isMember("parameter") || content.isMember("result")){
 					Json::Value parameter_or_result = content.isMember("parameter") ? content["parameter"] : content["result"];
-					if (parameter_or_result.isMember("session_id"))
-					{
-						if (parameter_or_result["session_id"].asString() == "random_key")
-						{
+					if (parameter_or_result.isMember("session_id"){
+						if (parameter_or_result["session_id"].asString() == "random_key"){
 							parameter_or_result["session_id"] = random_key_;
 						}
 						if (content.isMember("parameter"))
@@ -224,8 +218,7 @@ namespace bumo{
 					server_ptr_->send(connection_hdl_, content.toFastString(), websocketpp::frame::opcode::text);
 					
 				}
-				else
-				{
+				else{
 					//it is the abnormal message for abnormal test
 					server_ptr_->send(connection_hdl_,msg, websocketpp::frame::opcode::text);
 				}
@@ -271,8 +264,7 @@ namespace bumo{
 		else
 			result["session_id"] = random_key_;		
 
-		switch (current_condition_ & 0x3ff)
-		{
+		switch (current_condition_ & 0x3ff){
 		case GENERAL_CASE_RESPONSE_ERRCODE_0:
 			errcode = 0;
 			break;
@@ -304,19 +296,16 @@ namespace bumo{
 	
 	}
 	//no matter it is a request or response
-	bool MsgProcessor::ProcessRcvMessages(const std::string& msg)
-	{
+	bool MsgProcessor::ProcessRcvMessages(const std::string& msg){
 		Json::Value receive;
 		receive.fromString(msg);
-		if (receive["method"].asString() == "hello")
-		{			
+		if (receive["method"].asString() == "hello"){			
 			//check the content
 			if (CheckHello(msg))
 				test_output_ |= HELLO_VALID;
 			else
 				test_output_ &= ~HELLO_VALID;
-			if (!(test_input_&HELLO_RESP))
-			{
+			if (!(test_input_&HELLO_RESP)){
 				//dont response to hello
 				return false;
 			}
@@ -401,16 +390,14 @@ namespace bumo{
 			else
 				SendResponseMessage("hello", false, 0, result);			
 		}
-		else if (receive["method"].asString() == "register")
-		{
+		else if (receive["method"].asString() == "register"){
 			//check the content
 			if (CheckReg(msg))
 				test_output_ |= REG_VALID;
 			else
 				test_output_ &= ~REG_VALID;
 
-			if (!(test_input_&REG_RESP))
-			{
+			if (!(test_input_&REG_RESP)){
 				//dont response to register
 				return false;
 			}
@@ -432,16 +419,14 @@ namespace bumo{
 			else
 				SendResponseMessage("register", false, 0, result);
 		}
-		else if (receive["method"].asString() == "heartbeat")
-		{
+		else if (receive["method"].asString() == "heartbeat"){
 			//check the content
 			if (CheckHB(msg))
 				test_output_ |= HB_VALID;
 			else
 				test_output_ &= ~HB_VALID;
 
-			if (!(test_input_&HB_RESP))
-			{
+			if (!(test_input_&HB_RESP)){
 				//dont response to heartbeat
 				return false;
 			}
@@ -463,22 +448,19 @@ namespace bumo{
 				SendResponseMessage("heartbeat", false, 0, result);
 
 		}
-		else if (receive["method"].asString() == "logout")
-		{
+		else if (receive["method"].asString() == "logout"){
 			if (CheckLogout(msg))
 				test_output_ |= LOGOUT_VALID;
 			else
 				test_output_ &= ~LOGOUT_VALID;
 		}
-		else if (receive["method"].asString() == "warning")
-		{
+		else if (receive["method"].asString() == "warning"){
 			//result field
 			Json::Value result;
 			result["session_id"] = random_key_;			
 			SendResponseMessage("warning", false, 0, result);
 		}
-		else if (receive["method"].asString() == "bumo")
-		{
+		else if (receive["method"].asString() == "bumo"){
 			if (current_request_test_ != BUMO)
 				return true;
 			if (CheckBumo(msg))
@@ -486,55 +468,48 @@ namespace bumo{
 			
 			DetermineResponse("bumo");		
 		}
-		else if (receive["method"].asString() == "system")
-		{
+		else if (receive["method"].asString() == "system"){
 			if (current_request_test_ != SYSTEM)
 				return true;
 			if (CheckSystem(msg))
 				request_test_result_ = true;
 			DetermineResponse("system");
 		}
-		else if (receive["method"].asString() == "ledger")
-		{
+		else if (receive["method"].asString() == "ledger"){
 			if (current_request_test_ != LEDGER)
 				return true;
 			if (CheckLedger(msg))
 				request_test_result_ = true;
 			DetermineResponse("ledger");
 		}
-		else if (receive["method"].asString() == "account_exception")
-		{
+		else if (receive["method"].asString() == "account_exception"){
 			if (current_request_test_ != ACCTEXCP)
 				return true;
 			if (CheckAcctExcp(msg))
 				request_test_result_ = true;
 			DetermineResponse("account_exception");
 		}
-		else if (receive["method"].asString() == "error")
-		{
+		else if (receive["method"].asString() == "error"){
 			if (CheckError(msg))
 				test_output_ |= ERROR_VALID;
 			else
 				test_output_ &= ~ERROR_VALID;
 		}
-		else if (receive["method"].asString() == "upgrade")
-		{
+		else if (receive["method"].asString() == "upgrade"){
 			if (current_request_test_ != UPGRADE)
 				return true;
 			if (CheckUpgrade(msg))
 				request_test_result_ = true;
 			DetermineResponse("upgrade");
 		}
-		else if (receive["method"].asString() == "set_configure")
-		{
+		else if (receive["method"].asString() == "set_configure"){
 			if (current_request_test_ != SETCONFG)
 				return true;
 			if (CheckSetconfig(msg))
 				request_test_result_ = true;
 			DetermineResponse("set_configure");
 		}
-		else if (receive["method"].asString() == "get_configure")
-		{
+		else if (receive["method"].asString() == "get_configure"){
 			if (current_request_test_ != GETCONFG)
 				return true;
 			if (CheckGetconfig(msg))
@@ -544,15 +519,13 @@ namespace bumo{
 		return true;
 	}
 	//check logout content
-	bool MsgProcessor::CheckLogout(const std::string& msg)
-	{
+	bool MsgProcessor::CheckLogout(const std::string& msg){
 		Json::Value receive;
 		receive.fromString(msg);
 
 		Json::Value parameter = receive["result"];
 
-		if (parameter["session_id"] != random_key_)
-		{
+		if (parameter["session_id"] != random_key_){
 			//id error
 			return false;
 		}
@@ -564,8 +537,7 @@ namespace bumo{
 
 	}
 	//check request content
-	bool MsgProcessor::CheckHello(const std::string& msg)
-	{
+	bool MsgProcessor::CheckHello(const std::string& msg){
 		bool flag(false);
 
 		bool ret(true);
@@ -575,21 +547,18 @@ namespace bumo{
 		Json::Value parameter = receive["parameter"];
 
 #ifdef WIN32
-		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_.c_str(), monitor_id_.length()))
-		{
+		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_.c_str(), monitor_id_.length())){
 			//id error
 			current_monitor_id_ = monitor_id_;
 			flag = true;
 		}
 #else
-		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_1.c_str(), monitor_id_1.length()))
-		{
+		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_1.c_str(), monitor_id_1.length())){
 			//id error
 			current_monitor_id_= monitor_id_1;
 			flag = true;
 		}
-		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_2.c_str(), monitor_id_2.length()))
-		{
+		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_2.c_str(), monitor_id_2.length())){
 			//id error
 			current_monitor_id_ = monitor_id_2;
 			flag = true;
@@ -603,8 +572,7 @@ namespace bumo{
 			ret =  false;
 		return ret;
 	}
-	bool MsgProcessor::CheckReg(const std::string& msg)
-	{
+	bool MsgProcessor::CheckReg(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -612,8 +580,7 @@ namespace bumo{
 		Json::Value parameter = receive["parameter"];
 
 		EXPECT_STREQ(random_key_.c_str(), parameter["session_id"].asString().c_str()) << "reg request with bad session id\n";
-		if (parameter["session_id"].asString() != random_key_)
-		{
+		if (parameter["session_id"].asString() != random_key_){
 			//session id error
 			ret = false;
 		}
@@ -622,8 +589,7 @@ namespace bumo{
 			ret = false;
 		return ret;
 	}
-	bool MsgProcessor::CheckHB(const std::string& msg)
-	{
+	bool MsgProcessor::CheckHB(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -631,8 +597,7 @@ namespace bumo{
 		Json::Value parameter = receive["parameter"];
 
 		EXPECT_STREQ(random_key_.c_str(), parameter["session_id"].asString().c_str()) << "heartbeat request with bad session id\n";
-		if (parameter["session_id"].asString() != random_key_)
-		{
+		if (parameter["session_id"].asString() != random_key_){
 			//session id error
 			ret = false;
 		}
@@ -641,8 +606,7 @@ namespace bumo{
 		return ret;
 
 	}
-	bool MsgProcessor::CheckLedger(const std::string& msg)
-	{
+	bool MsgProcessor::CheckLedger(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -653,14 +617,12 @@ namespace bumo{
 		int seq = result["ledger_seq"].asInt();
 	
 
-		switch (current_condition_&(~0x3ff))
-		{
+		switch (current_condition_&(~0x3ff)){
 			case LEDGER_LATEST_20_LEDGER:
 				EXPECT_EQ(receive["error_code"].asInt(), 0);
 				{
 					Json::Value blocks = result["blocks"];
-					for (int k = 0; k < 20; ++k)
-					{
+					for (int k = 0; k < 20; ++k){
 						result_from_bumo = latest_ledger[k]["result"];
 						EXPECT_EQ(blocks[k]["ledger_seq"].asInt(), (result_from_bumo["ledger_seq"].asInt()));
 						EXPECT_STREQ(blocks[k]["hash"].asCString(), result_from_bumo["hash"].asCString())<<"index = "<<k;
@@ -699,8 +661,7 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckSystem(const std::string& msg)
-	{
+	bool MsgProcessor::CheckSystem(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -716,8 +677,7 @@ namespace bumo{
 		ret = CheckCommonResponse(msg);
 		return ret;
 	}
-	bool MsgProcessor::CheckAcctExcp(const std::string& msg)
-	{
+	bool MsgProcessor::CheckAcctExcp(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -728,16 +688,14 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckError(const std::string& msg)
-	{
+	bool MsgProcessor::CheckError(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
 
 		Json::Value result = receive["result"];
 
-		if (test_input_&ERR_ERRCODE_4)
-		{
+		if (test_input_&ERR_ERRCODE_4){
 			EXPECT_EQ(receive["error_code"].asInt(), 4) << "system response error code is not 4";
 			if (receive["error_code"].asInt() != 4)
 				ret = false;
@@ -756,8 +714,7 @@ namespace bumo{
 		return ret;
 	}
 
-	bool MsgProcessor::CheckUpgrade(const std::string& msg)
-	{
+	bool MsgProcessor::CheckUpgrade(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -765,8 +722,7 @@ namespace bumo{
 		int expected_errorcode;
 		static int errcode_last_time;
 
-		switch (current_condition_&(~0x3ff))
-		{
+		switch (current_condition_&(~0x3ff)){
 		case UPGRADE_NO_FILENAME:
 		case UPGRADE_NO_ITEM:			
 		case UPGRADE_NO_MD5:
@@ -798,14 +754,12 @@ namespace bumo{
 			break;
 
 		}
-		if ((current_condition_&(~0x3ff)) != UPGRADE_UPGRADING)
-		{
+		if ((current_condition_&(~0x3ff)) != UPGRADE_UPGRADING){
 			EXPECT_EQ(receive["error_code"].asInt(), expected_errorcode);
 			if (receive["error_code"].asInt() == expected_errorcode)
 				ret = true;
 		}		
-		else
-		{
+		else{
 			if (errcode_last_time != 12)
 				errcode_last_time = receive["error_code"].asInt();
 			if (errcode_last_time == expected_errorcode)
@@ -814,8 +768,7 @@ namespace bumo{
 		return ret;
 	}
 	
-	bool MsgProcessor::CheckGetconfig(const std::string& msg)
-	{
+	bool MsgProcessor::CheckGetconfig(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -827,8 +780,7 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckSetconfig(const std::string& msg)
-	{
+	bool MsgProcessor::CheckSetconfig(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -839,8 +791,7 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckBumo(const std::string& msg)
-	{
+	bool MsgProcessor::CheckBumo(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -851,8 +802,7 @@ namespace bumo{
 
 		
 #if 0
-		if (result.isMember("api server"))
-		{
+		if (result.isMember("api server")){
 			Json::Value apiserver = result["api server"];
 			if (apiserver["web server"]["context"].asBool() != false)
 				ret = false;
@@ -863,8 +813,7 @@ namespace bumo{
 			if (apiserver["websocket server"]["listener_count"].asInt() != 0)
 				ret =  false;
 		}
-		if (result.isMember("glue manager"))
-		{
+		if (result.isMember("glue manager")){
 			Json::Value gluemanager = result["glue manager"];
 			if (gluemanager["consensus.slot.ballot.envSize"].asInt() != 5)
 				ret =  false;
@@ -874,8 +823,7 @@ namespace bumo{
 
 	}
 
-	bool MsgProcessor::CheckCommonResponse(const std::string& msg)
-	{
+	bool MsgProcessor::CheckCommonResponse(const std::string& msg){
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -899,25 +847,19 @@ namespace bumo{
 	}
 	
 
-	void WebSocketServer::Cleanoutput(void)
-	{
+	void WebSocketServer::Cleanoutput(void){
 		printf("clean all output!\n");
 		msg_processor_.SetTestOutput(0);		
 	}
 
-	 void WebSocketServer::IncompleteRequestGenerator(bool rqst_or_resp,uint32_t missing_part,Json::Value& msg)
-	{
-		 if (rqst_or_resp == IS_REQUEST)
-		 {
-			 if (!(missing_part&NO_PARAMETER))
-			 {
+	 void WebSocketServer::IncompleteRequestGenerator(bool rqst_or_resp,uint32_t missing_part,Json::Value& msg){
+		 if (rqst_or_resp == IS_REQUEST){
+			 if (!(missing_part&NO_PARAMETER)){
 				 if (missing_part&EMPTY_PARAM)
 					 msg["parameter"] = "";
-				 else
-				 {
+				 else{
 					 Json::Value parameter;
-					 if (!(missing_part&NO_SESSIONID))
-					 {
+					 if (!(missing_part&NO_SESSIONID)){
 						 if (missing_part&EMPTY_SESSIONID)
 							parameter["session_id"] = "";
 						 else
@@ -931,15 +873,13 @@ namespace bumo{
 				
 
 			 }
-			 if (!(missing_part&NO_METHOD))
-			 {
+			 if (!(missing_part&NO_METHOD)){
 				 if (missing_part&EMPTY_METHOD)
 					 msg["method"] = "";
 				 else
 					msg["method"] = "bumo";
 			 }
-			 if (!(missing_part&NO_REQUEST))
-			 {
+			 if (!(missing_part&NO_REQUEST)) {
 				 if (missing_part&EMPTY_REQUEST)
 					 msg["request"] = "";
 				 else
@@ -947,16 +887,13 @@ namespace bumo{
 			 }
 			 
 		 }
-		 else
-		 {
-			 if (!(missing_part&NO_RESULT))
-			 {
+		 else {
+			 if (!(missing_part&NO_RESULT)){
 				 if (missing_part&EMPTY_RESULT)
 					 msg["result"] = "";
 				 else{
 					 Json::Value result;
-					 if (!(missing_part&NO_SESSIONID))
-					 {
+					 if (!(missing_part&NO_SESSIONID)){
 						 if (missing_part&EMPTY_SESSIONID)
 							 result["session_id"] = "";
 						 else
@@ -965,22 +902,19 @@ namespace bumo{
 					 msg["result"] = result;						 
 				 }				
 			 }
-			 if (!(missing_part&NO_ERRORCODE))
-			 {
+			 if (!(missing_part&NO_ERRORCODE)){
 				 if (missing_part&EMPTY_ERRORCODE)
 					 msg["error_code"] = "";
 				 else
 					 msg["error_code"] = 0;
 			 }
-			 if (!(missing_part&NO_METHOD))
-			 {
+			 if (!(missing_part&NO_METHOD)){
 				 if (missing_part&EMPTY_METHOD)
 					 msg["method"] = "";
 				 else
 					msg["method"] = "register";
 			 }
-			 if (!(missing_part&NO_REQUEST))
-			 {
+			 if (!(missing_part&NO_REQUEST)){
 				 if (missing_part&EMPTY_REQUEST)
 					 msg["request"] = "";
 				 else
@@ -992,16 +926,13 @@ namespace bumo{
 
 	}
 	 
-	 void WebSocketServer::UpgradeLayout(Json::Value& param)
-	 {
+	 void WebSocketServer::UpgradeLayout(Json::Value& param) {
 		 uint32_t current_condition = msg_processor_.GetCurrentCondition()&(~0x3ff);
 		 Json::Value item;
-		 if (current_condition&UPGRADE_NO_ITEM)
-		 {
+		 if (current_condition&UPGRADE_NO_ITEM){
 			 return;//no item, directly return
 		 }
-		 switch (current_condition)
-		 {
+		 switch (current_condition) {
 		 case UPGRADE_NO_FILENAME:			 
 			 break;
 		 case UPGRADE_FILENAME_BUMO:
@@ -1039,10 +970,8 @@ namespace bumo{
 			 break;
 
 		 }
-		 if (!(current_condition&UPGRADE_NO_MD5))
-		 {
-			 if (current_condition&UPGRADE_WRONG_MD5)
-			 {
+		 if (!(current_condition&UPGRADE_NO_MD5)) {
+			 if (current_condition&UPGRADE_WRONG_MD5){
 				item["md5"] = "11111111111111111111111111";
 			 }
 
@@ -1050,8 +979,7 @@ namespace bumo{
 				 item["md5"] = "2885cdb57f913ed832df4a0731bdc765";
 		 }
 		 
-		 if (!(current_condition&UPGRADE_NO_URL))
-		 {
+		 if (!(current_condition&UPGRADE_NO_URL)){
 			 if (!(current_condition&UPGRADE_WRONG_URL))
 				 item["url"] = "https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png";
 			 else
@@ -1061,11 +989,9 @@ namespace bumo{
 
 		 param["items"].append(item);		
 	 }
-	 void WebSocketServer::SetConfigLayout(Json::Value& param)
-	 {
+	 void WebSocketServer::SetConfigLayout(Json::Value& param){
 		 uint32_t current_condition = msg_processor_.GetCurrentCondition()&(~0x3ff);
-		 switch (current_condition)
-		 {
+		 switch (current_condition){
 		 case SETCONFG_NORMAL:
 			 param["config_file"] = "";
 			 break;
@@ -1076,8 +1002,7 @@ namespace bumo{
 		 }	
 		
 	 }
-	 void WebSocketServer::LedgerLayout(Json::Value& param)
-	 {
+	 void WebSocketServer::LedgerLayout(Json::Value& param){
 		 //get the latest seq
 		 bumo::HttpClient::RecvMessage rcv = msg_processor_.http_.http_request(bumo::HttpClient::HTTP_GET, "/getLedger", "");;
 		
@@ -1086,8 +1011,7 @@ namespace bumo{
 
 		 uint32_t current_condition = msg_processor_.GetCurrentCondition()&(~0x3ff);
 
-		 switch (current_condition)
-		 {
+		 switch (current_condition) {
 		 case LEDGER_LATEST_LEDGER:
 			 if (rcv.context.size() == 0)
 			 {
