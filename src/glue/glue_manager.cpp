@@ -272,6 +272,10 @@ namespace bumo {
 		consensus_->UpdateValidators(validators, proof);
 	}
 
+	const protocol::ValidatorSet& GlueManager::GetCurrentValidatorSet(){
+		return LedgerManager::Instance().Validators();
+	}
+
 	void GlueManager::LedgerHasUpgrade() {
 		ledger_upgrade_.LedgerHasUpgrade();
 	}

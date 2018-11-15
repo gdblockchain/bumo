@@ -77,6 +77,8 @@ namespace bumo {
 		void UpdateValidators(const protocol::ValidatorSet &validators, const std::string &proof);
 		void LedgerHasUpgrade();
 
+		const protocol::ValidatorSet& GetCurrentValidatorSet();
+
 		//Ledger upgrade
 		void OnRecvLedgerUpMsg(const protocol::LedgerUpgradeNotify &msg);
 		protocol::Signature SignConsensusData(const std::string &data);
