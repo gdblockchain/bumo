@@ -94,6 +94,7 @@ namespace bumo {
 
 	const char *General::CONTRACT_VALIDATOR_ADDRESS = "buQtxgoaDrVJGtoPT66YnA2S84yE8FbBqQDJ";
 	const char *General::CONTRACT_FEE_ADDRESS = "buQiQgRerQM1fUM3GkqUftpNxGzNg2AdJBpe";
+	const char *General::CONTRACT_ELECTION_CONFIG_ADDRESS = "buQaKdLQn767iFXvy1FMaocVaEK4hrvrfAgp";
 	const char *General::ABNORMAL_RECORDS = "abnormal_records";
 	const char *General::ELECTION_CONFIG = "election_config";
 

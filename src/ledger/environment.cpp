@@ -94,7 +94,7 @@ namespace bumo{
 		return true;
 	}
 
-	bool Environment::GetVotedFee(const protocol::FeeConfig &old_fee, protocol::FeeConfig& new_fee) {
+	bool Environment::GetVotedFee(const protocol::FeeConfig& old_fee, protocol::FeeConfig& new_fee) {
 		bool change = false;
 		new_fee = old_fee;
 
@@ -127,6 +127,71 @@ namespace bumo{
 				break;
 			}
 
+		}
+
+		return change;
+	}
+
+	bool Environment::UpdateElectionConfig(const Json::Value& electionConfig) {
+		std::shared_ptr<Json::Value> ecfg;
+		settings_.Get(electionKey, ecfg);
+
+		if (!ecfg){
+			ecfg = std::make_shared<Json::Value>(electionConfig);
+			settings_.Set(electionKey, ecfg);
+		}
+		else{
+			for (auto it = electionConfig.begin(); it != electionConfig.end(); it++) {
+				(*ecfg)[it.memberName()] = electionConfig[it.memberName()];
+			}
+		}
+
+		return true;
+	}
+
+	bool Environment::GetVotedElectionConfig(const protocol::ElectionConfig& old_cfg, protocol::ElectionConfig& new_cfg) {
+		bool change = false;
+		new_cfg = old_cfg;
+
+		std::shared_ptr<Json::Value> election_cfg;
+		settings_.Get(electionKey, election_cfg);
+		if (!election_cfg) return false;
+
+		for (auto it = election_cfg->begin(); it != election_cfg->end(); it++) {
+			std::string key = it.memberName();
+			std::string value = (*election_cfg)[key].asString();
+
+			if (key == "fee_distribution_rate" && old_cfg.fee_distribution_rate() != value) {
+				change = true;
+				std::string value = (*election_cfg)[key].asString();
+				new_cfg.set_fee_distribution_rate(value);
+			}
+			else {
+				int64_t value = (*election_cfg)[key].asInt64();
+				if (key == "pledge_amount" && old_cfg.pledge_amount() != value) {
+					change = true;
+					new_cfg.set_pledge_amount(value);
+				}
+				else if (key == "validators_refresh_interval" && old_cfg.validators_refresh_interval() != value) {
+					change = true;
+					new_cfg.set_validators_refresh_interval(value);
+				}
+				else if (key == "coin_to_vote_rate" && old_cfg.coin_to_vote_rate() != value) {
+					change = true;
+					new_cfg.set_coin_to_vote_rate(value);
+				}
+				else if (key == "fee_to_vote_rate" && old_cfg.fee_to_vote_rate() != value) {
+					change = true;
+					new_cfg.set_fee_to_vote_rate(value);
+				}
+				else if (key == "penalty_rate" && old_cfg.penalty_rate() != value) {
+					change = true;
+					new_cfg.set_penalty_rate(value);
+				}
+				else {
+					LOG_ERROR("No such election configuration parameter %s", key.c_str());
+				}
+			}
 		}
 
 		return change;

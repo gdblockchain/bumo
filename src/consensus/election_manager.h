@@ -54,7 +54,9 @@ namespace bumo {
 		bool Initialize();
 		bool Exit();
 
+		protocol::ElectionConfig& GetProtoElectionCfg();
 		bool ElectionConfigGet(protocol::ElectionConfig& ecfg);
+		int32_t GetCandidatesNumber();
 		static void ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg);
 		
 		int64_t CoinToVotes(int64_t coin);

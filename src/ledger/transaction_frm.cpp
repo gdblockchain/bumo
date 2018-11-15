@@ -312,7 +312,7 @@ namespace bumo {
 			}
 			
 			int64_t return_source = 0;
-			if (DauReward(actual_fee, source_account, total_fee, return_source)) {
+			if (!DauReward(actual_fee, source_account, total_fee, return_source)) {
 				result_.set_desc("Failed to do dau reward");
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;

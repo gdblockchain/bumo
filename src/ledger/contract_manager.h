@@ -188,6 +188,8 @@ namespace bumo{
 		static bool JsValueToCppJson(v8::Handle<v8::Context>& context, v8::Local<v8::Value>& jsvalue, Json::Value& jsonvalue);
 		static bool CppJsonToJsValue(v8::Isolate* isolate, Json::Value& jsonvalue, v8::Local<v8::Value>& jsvalue);
 		static void CallBackConfigFee(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackConfigElectionCfg(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackGetCandidatesNumber(const v8::FunctionCallbackInfo<v8::Value>& args);
 		//Assert an expression.
 		static void CallBackAssert(const v8::FunctionCallbackInfo<v8::Value>& args);
 

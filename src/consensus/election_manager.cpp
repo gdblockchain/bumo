@@ -125,6 +125,10 @@ namespace bumo {
 		batch->Put(General::ELECTION_CONFIG, ecfg.SerializeAsString());
 	}
 
+	protocol::ElectionConfig& ElectionManager::GetProtoElectionCfg() {
+		return election_config_;
+	}
+
 	bool ElectionManager::ElectionConfigGet(protocol::ElectionConfig &ecfg) {
 		auto db = Storage::Instance().account_db();
 		std::string str;
@@ -132,6 +136,10 @@ namespace bumo {
 			return false;
 		}
 		return ecfg.ParseFromString(str);
+	}
+
+	int32_t ElectionManager::GetCandidatesNumber() {
+		return validator_candidates_.size();
 	}
 
 	void ElectionManager::AddAbnormalRecord(const std::string& abnormal_node) {

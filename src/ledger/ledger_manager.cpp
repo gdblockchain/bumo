@@ -529,7 +529,7 @@ namespace bumo {
 		LedgerFrm::pointer closing_ledger = context_manager_.SyncProcess(consensus_value);
 		if (closing_ledger == NULL){
 			return false;
-		} 
+		}
 
 		protocol::Ledger& ledger = closing_ledger->ProtoLedger();
 		auto header = ledger.mutable_header();
@@ -541,7 +541,7 @@ namespace bumo {
 		header->set_version(last_closed_ledger_->GetProtoHeader().version());
 
 		std::string abnormal_node;
-		for (int i = 0; consensus_value.entry().size(); i++) {
+		for (int i = 0; i < consensus_value.entry().size(); i++) {
 			const protocol::KeyPair& kv = consensus_value.entry(i);
 			if (kv.key() == "abnormal_node") {
 				abnormal_node = kv.value();
@@ -557,7 +557,7 @@ namespace bumo {
 		ElectionManager::Instance().UpdateToDB();
 		
 		//for validator upgrade
-		/*int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
+		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
 		if (header->seq() % interval_block == 0) {
 			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", header->seq());
@@ -569,7 +569,7 @@ namespace bumo {
 			else {
 				LOG_ERROR("Failed to do validators dynasty change");
 			}
-		}*/
+		}
 
 		int64_t time0 = utils::Timestamp().HighResolution();
 		int64_t new_count = 0, change_count = 0;
@@ -624,6 +624,14 @@ namespace bumo {
 		}
 		header->set_fees_hash(HashWrapper::Crypto(fees_.SerializeAsString()));
 		
+		//for election configuration
+		protocol::ElectionConfig election_cfg;
+		protocol::ElectionConfig& election_cfg_old = ElectionManager::Instance().GetProtoElectionCfg();
+		if (closing_ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
+			ElectionManager::Instance().ElectionConfigSet(account_db_batch, election_cfg);
+			election_cfg_old = election_cfg;
+		}
+
 		//This header must be for the latest block.
 		header->set_hash(HashWrapper::Crypto(closing_ledger->ProtoLedger().SerializeAsString()));
 

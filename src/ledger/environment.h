@@ -32,6 +32,7 @@ namespace bumo {
 
 		const std::string validatorsKey = "validators";
 		const std::string feesKey = "configFees";
+		const std::string electionKey = "configElection";
 
 		AtomMap<std::string, Json::Value> settings_;
 		AtomMap<std::string, protocol::ValidatorCandidate> candidates_;
@@ -47,6 +48,8 @@ namespace bumo {
 
 		bool UpdateFeeConfig(const Json::Value &fee_config);
 		bool GetVotedFee(const protocol::FeeConfig &old_fee, protocol::FeeConfig& new_fee);
+		bool UpdateElectionConfig(const Json::Value& electionConfig);
+		bool GetVotedElectionConfig(const protocol::ElectionConfig& old_cfg, protocol::ElectionConfig& new_cfg);
 
 		Json::Value& GetValidators();
 		bool UpdateNewValidators(const Json::Value& validators);
