@@ -82,7 +82,6 @@ namespace bumo {
 	const char *General::ASSET_PREFIX = "ast";
 	const char *General::METADATA_PREFIX = "meta";
 	const char *General::VALIDATOR_CANDIDATE_PREFIX = "valc";
-	const char *General::VALIDATOR_LEADER_KEY_PREFIX = "validator_leader";
 
 	const char *General::CHECK_TIME_FUNCTION = "internal_check_time";
 
@@ -97,6 +96,7 @@ namespace bumo {
 	const char *General::CONTRACT_ELECTION_CONFIG_ADDRESS = "buQaKdLQn767iFXvy1FMaocVaEK4hrvrfAgp";
 	const char *General::ABNORMAL_RECORDS = "abnormal_records";
 	const char *General::ELECTION_CONFIG = "election_config";
+	const char *General::VALIDATOR_LEADER = "validator_leader";
 
 	const int32_t General::TRANSACTION_LIMIT_SIZE = utils::BYTES_PER_MEGA;
 	const int32_t General::TXSET_LIMIT_SIZE = 16 * utils::BYTES_PER_MEGA;

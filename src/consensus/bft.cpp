@@ -15,6 +15,7 @@
 
 #include <utils/headers.h>
 #include <common/pb2json.h>
+#include "proto/cpp/chain.pb.h"
 #include "bft.h"
 
 namespace bumo {
@@ -317,7 +318,16 @@ namespace bumo {
 		if (view_number_ % validators_.size() != replica_id_) {
 			return false;
 		}
-		LOG_INFO("Start to request value(%s)", notify_->DescConsensusValue(value).c_str());
+
+		protocol::ConsensusValue proposal;
+		proposal.ParseFromString(value);
+		protocol::KeyPair* leader = proposal.add_entry();
+		leader->set_key(General::VALIDATOR_LEADER);
+		leader->set_value(ValidatorLeader());
+
+		std::string proposal_value = proposal.SerializeAsString();
+
+		LOG_INFO("Start to request value(%s)", notify_->DescConsensusValue(proposal_value).c_str());
 
 		if (!view_active_) {
 			LOG_INFO("The view(view-number:" FMT_I64 ") is not active, so request failed.", view_number_);
@@ -342,7 +352,7 @@ namespace bumo {
 		}
 
 		int64_t sequence = last_exe_seq_ + 1;
-		PbftEnvPointer env = NewPrePrepare(value, sequence);
+		PbftEnvPointer env = NewPrePrepare(proposal_value, sequence);
 
 		//Check the index
 		PbftInstanceIndex index(view_number_, sequence);
@@ -358,7 +368,7 @@ namespace bumo {
 
 		saver.Commit();
 		LOG_INFO("Send pre-prepare message: view number(" FMT_I64 "), sequence(" FMT_I64 "), consensus value(%s)", 
-			view_number_, index.sequence_, notify_->DescConsensusValue(value).c_str());
+			view_number_, index.sequence_, notify_->DescConsensusValue(proposal_value).c_str());
 		//Broadcast the message to other nodes
 		return SendMessage(env);
 	}
@@ -1193,9 +1203,8 @@ namespace bumo {
 		return true;
 	}
 
-	bool Pbft::SaveLeader(const PbftInstanceIndex& index){
-		bool ret = true;
-		int64_t leader_replica_id = index.view_number_ % validators_.size();
+	std::string Pbft::ValidatorLeader(){
+		int64_t leader_replica_id = view_number_ % validators_.size();
 
 		std::string leader_addr;
 		for (auto it = validators_.begin(); it != validators_.end(); it++){
@@ -1205,12 +1214,7 @@ namespace bumo {
 			}
 		}
 
-		if (!leader_addr.empty()){
-			std::string key = ComposePrefix(General::VALIDATOR_LEADER_KEY_PREFIX, index.sequence_);
-			ret = SaveValue(key, leader_addr);
-		}
-
-		return ret;
+		return leader_addr;
 	}
 
 	bool Pbft::TryExecuteValue() {
@@ -1245,8 +1249,6 @@ namespace bumo {
 				index.sequence_,
 				instance.pre_prepare_.value(), 
 				proof.SerializeAsString(),true);
-
-			SaveLeader(index);
 
 			//Delete the old check point
 			for (PbftInstanceMap::iterator iter = instances_.begin(); iter != instances_.end();) {

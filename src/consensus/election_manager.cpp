@@ -14,7 +14,7 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "election_manager.h"
-
+#include "glue/glue_manager.h"
 
 namespace bumo {
 	ElectionManager::ElectionManager(): candidate_mpt_(nullptr){
@@ -302,10 +302,21 @@ namespace bumo {
 		try{
 			std::vector<std::string> entries;
 			candidate_mpt_->GetAll("", entries);
-			for (size_t i = 0; i < entries.size(); i++){
-				CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
-				candidate->ParseFromString(entries[i]);
-				validator_candidates_[candidate->address()] = candidate;
+			if (!entries.empty()){
+				for (size_t i = 0; i < entries.size(); i++){
+					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
+					candidate->ParseFromString(entries[i]);
+					validator_candidates_[candidate->address()] = candidate;
+				}
+			}
+			else{
+				protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
+				for (size_t i = 0; i < set.validators_size(); i++){
+					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
+					candidate->set_address(set.validators(i).address());
+					candidate->set_pledge(set.validators(i).pledge_coin_amount());
+					validator_candidates_[candidate->address()] = candidate;
+				}
 			}
 		}
 		catch (std::exception& e){
