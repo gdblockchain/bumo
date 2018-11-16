@@ -385,8 +385,7 @@ namespace bumo {
 		std::string vote_for = source_account->GetVoteFor();
 		CandidatePtr candidate = nullptr;
 		if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
-			result_.set_desc(utils::String::Format("Failed to get candidate info of %s from transaction environment.", vote_for.c_str()));
-			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+			LOG_WARN("Failed to get vote for candidate: %s , clear it.", vote_for.c_str());
 			vote_for = "";
 			source_account->SetVoteFor(vote_for);
 		}

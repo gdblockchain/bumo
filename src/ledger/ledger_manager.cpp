@@ -554,6 +554,7 @@ namespace bumo {
 
 		if (!abnormal_node.empty()) {
 			ElectionManager::Instance().AddAbnormalRecord(abnormal_node);
+			LOG_INFO("Add abnormal record: %s", abnormal_node.c_str());
 		}
 
 		closing_ledger->environment_->UpdateValidatorCandidate();
@@ -568,7 +569,7 @@ namespace bumo {
 			Json::Value validators_json;
 			if (ElectionManager::Instance().DynastyChange(validators_json)) {
 				closing_ledger->environment_->UpdateNewValidators(validators_json);
-				LOG_INFO("Validators dynasty change done");
+				LOG_INFO("Validators dynasty change done, new validators: %s", validators_json.toFastString().c_str());
 			}
 			else {
 				LOG_ERROR("Failed to do validators dynasty change");
@@ -615,6 +616,7 @@ namespace bumo {
 		account_db_batch->Put(ComposePrefix(General::VALIDATOR_LEADER, ledger_seq), validator_leader);
 		
 		if (new_set.validators_size() > 0 || closing_ledger->environment_->GetVotedValidators(validators_, new_set)) {
+			LOG_INFO("got new validators: %s", new_set.DebugString().c_str());
 			ValidatorsSet(account_db_batch, new_set);
 			validators_ = new_set;
 		}
@@ -635,6 +637,7 @@ namespace bumo {
 		if (closing_ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
 			ElectionManager::Instance().ElectionConfigSet(account_db_batch, election_cfg);
 			election_cfg_old = election_cfg;
+			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
 		}
 
 		//This header must be for the latest block.
