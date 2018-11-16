@@ -159,7 +159,7 @@ void TestStringUtils(){
 	printf("%s\n", upper_string.c_str());
 
 
-	char a[100];
+	//char a[100];
 	//sprintf_s(a, 100, "%s the world", "hello");
 
 	std::string c = "hello";
