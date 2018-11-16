@@ -68,14 +68,14 @@ function applyAsCandidate(){
         assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + minPledgeAmount);
     }
 
-    assert(setValidatorCandidate(sender, thisPayCoinAmount) === true, 'Application to become a validator or an additional deposit failed.');
+    setValidatorCandidate(sender, thisPayCoinAmount);
 }
 
 function voteForCandidate(candidate, tokenAmount){
 	assert(addressCheck(candidate) === true, 'Arg-candidate is not valid address.');
 	assert(getValidatorCandidate(candidate) !== false, 'No such validator candidate');
 	
-	assert(setVoteForCandidate(candidate, tokenAmount));
+	setVoteForCandidate(candidate, tokenAmount);
     return;
 }
 
@@ -86,12 +86,12 @@ function takebackCoin(tokenAmount){
     let left = int64Sub(candidate.pledge, tokenAmount);
     let com = int64Compare(left, minPledgeAmount);
     if(com === -1){
-        assert(setValidatorCandidate(sender, '-'+ candidate.pledge) === true, 'Quit candidate status failed.');
-        assert(transferCoin(sender, candidate.pledge) === true, 'Takeback pledge coin failed.');
+        setValidatorCandidate(sender, '-'+ candidate.pledge);
+        transferCoin(sender, candidate.pledge);
     }
     else{
-        assert(setValidatorCandidate(sender, '-'+ tokenAmount) === true, 'Reduced pledge coin operation failed.');
-        assert(transferCoin(sender, tokenAmount) === true, 'Takeback pledge coin failed.');
+        setValidatorCandidate(sender, '-'+ tokenAmount);
+        transferCoin(sender, tokenAmount);
     }
 
     if(findValidator(sender) === true){
@@ -151,17 +151,17 @@ function voteAbolishValidator(malicious){
     if(award !== '0'){
         if (validators[index][0] === malicious){
             candidate = getValidatorCandidate(malicious);
-            assert(setValidatorCandidate(malicious, '-'+ candidate.pledge) === true, 'Abolish candidate status failed.');
+            setValidatorCandidate(malicious, '-'+ candidate.pledge);
             index += 1;
         }
         candidate = getValidatorCandidate(validators[index][0]);
         newTokenAmount = candidate.pledge + award + average;
-        assert(setVoteForCandidate(candidate, newTokenAmount));
+        setVoteForCandidate(candidate, newTokenAmount);
     }
     while(index < leftValidatorsCnt){
         candidate = getValidatorCandidate(validators[index][0]);
         newTokenAmount = candidate.pledge + average;
-        assert(setVoteForCandidate(validators[index][0], newTokenAmount));
+        setVoteForCandidate(validators[index][0], newTokenAmount);
         index += 1;
     }
 
