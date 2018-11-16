@@ -206,7 +206,7 @@ namespace bumo{
 				content.fromString(msg);
 				if (content.isMember("parameter") || content.isMember("result")){
 					Json::Value parameter_or_result = content.isMember("parameter") ? content["parameter"] : content["result"];
-					if (parameter_or_result.isMember("session_id"){
+					if (parameter_or_result.isMember("session_id")) {
 						if (parameter_or_result["session_id"].asString() == "random_key"){
 							parameter_or_result["session_id"] = random_key_;
 						}
