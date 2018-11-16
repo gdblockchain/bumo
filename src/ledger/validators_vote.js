@@ -95,8 +95,7 @@ function takebackCoin(tokenAmount){
     }
 
     if(findValidator(sender) === true){
-        //to do: triger validator update, com += 1; just for avoid jslint, must be delete later
-        com += 1;
+        updateDpos();
     }
 }
 

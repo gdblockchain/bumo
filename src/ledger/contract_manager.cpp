@@ -223,6 +223,7 @@ namespace bumo{
 		js_func_read_["addressCheck"] = V8Contract::CallBackAddressValidCheck;
 		js_func_read_["getAbnormalRecords"] = V8Contract::CallBackGetAbnormalRecords;
 		js_func_read_["getValidatorCandidate"] = V8Contract::CallBackGetValidatorCandidate;
+		js_func_read_["getCandidatesNumber"] = V8Contract::CallBackGetCandidatesNumber;
 
 		//write func
 		js_func_write_["storageStore"] = V8Contract::CallBackStorageStore;
@@ -235,9 +236,10 @@ namespace bumo{
 		js_func_write_["payAsset"] = V8Contract::CallBackPayAsset;
 		js_func_write_["tlog"] = V8Contract::CallBackTopicLog;
 		js_func_write_["setValidatorCandidate"] = V8Contract::CallBackSetValidatorCandidate;
-		js_func_read_["setVoteForCandidate"] = V8Contract::CallBackSetVoteForCandidate;
-		js_func_read_["configElectionCfg"] = V8Contract::CallBackConfigElectionCfg;
-		js_func_read_["getCandidatesNumber"] = V8Contract::CallBackGetCandidatesNumber;
+		js_func_write_["setVoteForCandidate"] = V8Contract::CallBackSetVoteForCandidate;
+		js_func_write_["configElectionCfg"] = V8Contract::CallBackConfigElectionCfg;
+		js_func_write_["updateDpos"] = V8Contract::CallBackUpdateDpos;
+
 		LoadJsLibSource();
 		LoadJslintGlobalString();
 		v8::V8::InitializeICUDefaultLocation(argv[0]);
@@ -1186,6 +1188,35 @@ namespace bumo{
 		} while (false);
 
 		args.GetReturnValue().Set(obj);
+	}
+
+	void V8Contract::CallBackUpdateDpos(const v8::FunctionCallbackInfo<v8::Value>& args){
+		std::string error_desc;
+
+		do
+		{
+			if (args.Length() != 0)
+			{
+				LOG_TRACE("parameter error");
+				break;
+			}
+			v8::HandleScope handle_scope(args.GetIsolate());
+			V8Contract *v8_contract = GetContractFrom(args.GetIsolate());
+
+			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
+			if (!LedgerManager::Instance().DposUpdate(v8_contract->GetParameter().blocknumber_, ledger_context->GetTopTx()->environment_)){
+				break;
+			}
+
+			args.GetReturnValue().Set(true);
+			return;
+
+		} while (false);
+
+		LOG_ERROR("%s", error_desc.c_str());
+		args.GetIsolate()->ThrowException(
+			v8::String::NewFromUtf8(args.GetIsolate(), error_desc.c_str(),
+			v8::NewStringType::kNormal).ToLocalChecked());
 	}
 
 	void V8Contract::CallBackGetValidatorCandidate(const v8::FunctionCallbackInfo<v8::Value>& args){

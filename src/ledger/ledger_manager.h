@@ -66,6 +66,7 @@ namespace bumo {
 		static bool FeesConfigGet(const std::string& hash, protocol::FeeConfig &fee);
 		bool ConsensusValueFromDB(int64_t seq, protocol::ConsensusValue& request);
 		protocol::FeeConfig GetCurFeeConfig();
+		bool DposUpdate(int64_t ledger_seq, std::shared_ptr<Environment> environment);
 
 		Result DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context); // -1: false, 0 : success, > 0 exception
 		void NotifyLedgerClose(LedgerFrm::pointer closing_ledger, bool has_upgrade);

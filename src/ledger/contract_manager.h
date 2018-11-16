@@ -200,6 +200,8 @@ namespace bumo{
 		//Get the hash of one of the 1024 most recent complete blocks
 		static void CallBackGetBlockHash(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+		static void CallBackUpdateDpos(const v8::FunctionCallbackInfo<v8::Value>& args);
+
 		//Sends a message with arbitrary date to a given address path
 		static void CallBackStorageStore(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackStorageDel(const v8::FunctionCallbackInfo<v8::Value>& args);

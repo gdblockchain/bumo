@@ -511,6 +511,27 @@ namespace bumo {
 		chain_max_ledger_probaly_ : data["ledger_sequence"].asInt64();
 	}
 
+	bool LedgerManager::DposUpdate(int64_t ledger_seq, std::shared_ptr<Environment> environment){
+		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
+		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
+
+		if (ledger_seq % interval_block == 0) {
+			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", ledger_seq);
+			Json::Value validators_json;
+
+			if (ElectionManager::Instance().DynastyChange(validators_json)) {
+				environment->UpdateNewValidators(validators_json);
+				LOG_INFO("Validators dynasty change done, new validators: %s", validators_json.toFastString().c_str());
+			}
+			else {
+				LOG_ERROR("Failed to do validators dynasty change");
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	bool LedgerManager::CloseLedger(const protocol::ConsensusValue& consensus_value, const std::string& proof) {
 		if (!GlueManager::Instance().CheckValueAndProof(consensus_value.SerializeAsString(), proof)) {
 
@@ -560,20 +581,9 @@ namespace bumo {
 		closing_ledger->environment_->UpdateValidatorCandidate();
 		ElectionManager::Instance().ValidatorCandidatesStorage();
 		ElectionManager::Instance().UpdateToDB();
-		
-		//for validator upgrade
-		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
-		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
-		if (header->seq() % interval_block == 0) {
-			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", header->seq());
-			Json::Value validators_json;
-			if (ElectionManager::Instance().DynastyChange(validators_json)) {
-				closing_ledger->environment_->UpdateNewValidators(validators_json);
-				LOG_INFO("Validators dynasty change done, new validators: %s", validators_json.toFastString().c_str());
-			}
-			else {
-				LOG_ERROR("Failed to do validators dynasty change");
-			}
+
+		if (!DposUpdate(header->seq(), closing_ledger->environment_)){
+			return false;
 		}
 
 		int64_t time0 = utils::Timestamp().HighResolution();
