@@ -345,12 +345,7 @@ namespace bumo {
 
 	bool TransactionFrm::DauReward(int64_t actual_fee, AccountFrm::pointer& source_account, int64_t& total_fee, int64_t& return_source) {
 		// return creator's share of fee 
-		uint32_t creator_share = 0;
-		if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::CREATOR, creator_share)) {
-			result_.set_desc(utils::String::Format("Failed to get creator's share of fee"));
-			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-			return false;
-		}
+		uint32_t creator_share = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_CREATOR);
 
 		std::string creator = source_account->GetCreator();
 		uint32_t validator_share = 0;
@@ -368,12 +363,7 @@ namespace bumo {
 		}
 
 		// get validator share
-		uint32_t validator_share_tmp = 0;
-		if (!ElectionManager::Instance().GetFeesShareByOwner(ElectionManager::VALIDATOR, validator_share_tmp)) {
-			result_.set_desc("Failed to get validator's share of fee");
-			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-			return false;
-		}
+		uint32_t validator_share_tmp = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_BLOCK_REWARD);
 		validator_share += validator_share_tmp;
 
 		// return the share of fee to application and source address             

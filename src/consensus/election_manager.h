@@ -37,6 +37,14 @@ namespace bumo {
 		public bumo::StatusModule  {
 		friend class utils::Singleton<bumo::ElectionManager>;
 
+	public:
+		enum FeeSharerType {
+			SHARER_USER = 0,
+			SHARER_CREATOR = 1,
+			SHARER_BLOCK_REWARD = 2,
+			SHARER_MAX = 3
+		};
+
 	private:
 		ElectionManager();
 		~ElectionManager();
@@ -50,10 +58,13 @@ namespace bumo {
 		std::unordered_map<std::string, CandidatePtr> validator_candidates_;
 		KVTrie* candidate_mpt_;
 
+		std::vector<int64_t> fee_sharer_rate;
+
 	public:
 		bool Initialize();
 		bool Exit();
 
+		bool ReadSharerRate();
 		protocol::ElectionConfig& GetProtoElectionCfg();
 		bool ElectionConfigGet(protocol::ElectionConfig& ecfg);
 		int32_t GetCandidatesNumber();
@@ -62,13 +73,8 @@ namespace bumo {
 		int64_t CoinToVotes(int64_t coin);
 		int64_t FeeToVotes(int64_t fee);
 		int64_t GetValidatorsRefreshInterval();
-		enum FeesOwner {
-			SELF = 0,
-			CREATOR = 1,
-			APP = 2,
-			VALIDATOR = 3
-		};
-		bool GetFeesShareByOwner(FeesOwner owner, uint32_t& rate);
+
+		uint32_t GetFeesSharerRate(FeeSharerType owner);
 
 		void GetAbnormalRecords(Json::Value& record);
 		void AddAbnormalRecord(const std::string& abnormal_node);

@@ -18,7 +18,6 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace bumo {
 	ElectionManager::ElectionManager(): candidate_mpt_(nullptr){
-
 	}
 
 	ElectionManager::~ElectionManager(){
@@ -132,10 +131,16 @@ namespace bumo {
 	bool ElectionManager::ElectionConfigGet(protocol::ElectionConfig &ecfg) {
 		auto db = Storage::Instance().account_db();
 		std::string str;
+
 		if (!db->Get(General::ELECTION_CONFIG, str)) {
 			return false;
 		}
-		return ecfg.ParseFromString(str);
+		
+		if (!ecfg.ParseFromString(str)){
+			return false;
+		}
+
+		ReadSharerRate();
 	}
 
 	int32_t ElectionManager::GetCandidatesNumber() {
@@ -204,34 +209,28 @@ namespace bumo {
 		return election_config_.validators_refresh_interval();
 	}
 
-	bool ElectionManager::GetFeesShareByOwner(FeesOwner owner, uint32_t& rate) {
+	bool ElectionManager::ReadSharerRate(){
 		std::vector<std::string> vec = utils::String::split(election_config_.fee_distribution_rate(), ":");
-		if (vec.size() != 4) {
-			LOG_ERROR("Failed to get fees share, owner type:" FMT_I64"", owner);
+		if (vec.size() != SHARER_MAX) {
+			LOG_ERROR("Failed to read fees sharer rate.");
 			return false;
 		}
-		uint32_t count = 0;
-		uint32_t owner_value = 0;
-		for (int i = 0; i < 4; i++) {
+
+		for (int i = 0; i < SHARER_MAX; i++) {
 			uint32_t value = 0;
-			if (vec[i].empty() || vec[i] == "0") {
-				value = 0;
-			} 
-			else {
-				if (!utils::String::SafeStoui(vec[i], value)) {
-					LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
-					return false;
-				}
-			}
-			if (!utils::SafeIntAdd(count, value, count)){
-				LOG_ERROR("Overflowed when get fees share.");
+			if (!utils::String::SafeStoui(vec[i], value)) {
+				LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
 				return false;
 			}
-			if (i == owner) owner_value = value;
+			
+			fee_sharer_rate[i] = value;
 		}
-		rate = owner_value * 100 / count; // multiply by 100 to avoid float number convert
 
 		return true;
+	}
+
+	uint32_t ElectionManager::GetFeesSharerRate(FeeSharerType owner) {
+		return fee_sharer_rate[owner];
 	}
 
 	CandidatePtr ElectionManager::GetValidatorCandidate(const std::string& key){

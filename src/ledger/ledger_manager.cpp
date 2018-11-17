@@ -647,6 +647,7 @@ namespace bumo {
 		if (closing_ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
 			ElectionManager::Instance().ElectionConfigSet(account_db_batch, election_cfg);
 			election_cfg_old = election_cfg;
+			ElectionManager::Instance().ReadSharerRate();
 			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
 		}
 
