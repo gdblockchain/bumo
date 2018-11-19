@@ -301,6 +301,7 @@ namespace bumo {
 		if (GetResult().code() != 0 || fee <= 0) {
 			return false;
 		}
+
 		std::string str_address = transaction_env_.transaction().source_address();
 		AccountFrm::pointer source_account;
 
@@ -311,20 +312,13 @@ namespace bumo {
 				break;
 			}
 			
-			int64_t return_source = 0;
-			if (!DauReward(actual_fee, source_account, total_fee, return_source)) {
+			if (!DauReward(actual_fee, source_account)) {
 				result_.set_desc("Failed to do dau reward");
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
 			}
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
 			int64_t new_balance =0;
-			if (!utils::SafeIntAdd(fee, return_source, fee)){
-				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s return fee:(" FMT_I64 ") + DAU reward(" FMT_I64 ") of return.",
-					str_address.c_str(), fee, return_source));
-				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				break;
-			}
 			if (!utils::SafeIntAdd(proto_source_account.balance(), fee, new_balance)){
 				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s balance:(" FMT_I64 ") + extra fee(" FMT_I64 ") of return.",
 					str_address.c_str(), proto_source_account.balance(), fee));
@@ -343,121 +337,92 @@ namespace bumo {
 		return false;
 	}
 
-	bool TransactionFrm::DauReward(int64_t actual_fee, AccountFrm::pointer& source_account, int64_t& total_fee, int64_t& return_source) {
-		// return creator's share of fee 
-		uint32_t creator_share = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_CREATOR);
+	bool TransactionFrm::ParseDappMark(const std::string& metadata, std::string& dappAddr, int64_t& rate){
+		Json::Value json;
+		if (!json.fromString(metadata)){
+			return false;
+		}
 
+		if (json.isMember("from_account")){
+			LOG_TRACE("Metadata(%s) of transaction has no dapp mark.", metadata.c_str());
+			return false;
+		}
+
+		std::string dapp_address = json["from_account"].asString();
+		if (PublicKey::IsAddressValid(dapp_address)){
+			dappAddr = dapp_address;
+		}
+
+		uint32_t dapp_rate = 0;
+		if (json.isMember("share")){
+			dapp_rate = (int64_t)json["share"].asUInt();
+			uint32_t user_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_USER);
+
+			if (dapp_rate > user_rate){
+				LOG_TRACE("Dapp share rate("FMT_I64") exceed the user's share rate("FMT_I64").", dapp_rate, user_rate);
+				return false;
+			}
+
+			rate = dapp_rate;
+		}
+
+		return true;
+	}
+
+	bool TransactionFrm::DauReward(int64_t actual_fee, AccountFrm::pointer& source_account) {
+		uint32_t creator_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_CREATOR);
 		std::string creator = source_account->GetCreator();
-		uint32_t validator_share = 0;
-		int64_t return_validator = 0;
-		if (!creator.empty()) { // the share of fee will be include in the block reward
-			if (!AllocateFeesByShare(creator, actual_fee, creator_share)) {
+		if (!creator.empty()) {
+			if (!AllocateFeesByShare(creator, actual_fee, creator_rate)) {
 				result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", creator.c_str()));
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				return false;
 			}
-			LOG_TRACE("Return fee to creator done, create share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)creator_share, actual_fee);
-		}
-		else {
-			validator_share = creator_share;
+			LOG_TRACE("Return fee to creator done, create share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)creator_rate, actual_fee);
 		}
 
-		// get validator share
-		uint32_t validator_share_tmp = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_BLOCK_REWARD);
-		validator_share += validator_share_tmp;
-
-		// return the share of fee to application and source address             
-		std::string metadata = transaction_env_.transaction().metadata();
-		uint32_t source_share = 0;
-		uint32_t dapp_share = 0;
-		int64_t return_dapp = 0;
-		
+		const std::string& src_addr = source_account->GetAccountAddress();
 		std::string vote_for = source_account->GetVoteFor();
+		if (vote_for.empty()){
+			LOG_TRACE("Account(%s) has no vote for candidate.", src_addr.c_str());
+			return true;
+		}
+
 		CandidatePtr candidate = nullptr;
 		if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
-			LOG_WARN("Failed to get vote for candidate: %s , clear it.", vote_for.c_str());
-			vote_for = "";
-			source_account->SetVoteFor(vote_for);
-		}
-		if (vote_for.empty()) {
-			// validator got all the rest share if no vote_for set
-			validator_share = 100 - creator_share;
-		} else {
-			LOG_TRACE("metadata string is :%s", metadata.c_str());
-			Json::Value meta_json;
-			bool is_json = meta_json.fromString(metadata);
-			bool has_account = meta_json.isMember("from_account");
-			if (metadata.empty() || !is_json || !has_account) {
-				// source account got all the rest share if no metadata set
-				source_share = 100 - validator_share - creator_share;
-				if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
-					result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source account share(" FMT_I64 ").",
-						actual_fee, source_share));
-					result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-					result_.set_desc(utils::String::Format(result_.desc().c_str()));
-					return false;
-				}
-			} else {
-				std::string dapp_address;
-				std::string dapp_rate;
-				dapp_address = meta_json["from_account"].asString();
-				if (meta_json.isMember("share")) dapp_share = meta_json["share"].asUInt();
-				uint32_t tmp_share = validator_share + creator_share;
-				dapp_share = (dapp_share > 100 - tmp_share) ? 100 - tmp_share : dapp_share;
-				source_share = 100 - creator_share - dapp_share - validator_share;
-
-				// DAU reward of application
-				if (!AllocateFeesByShare(dapp_address, actual_fee, dapp_share)) {
-					result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", dapp_address.c_str()));
-					result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-					return false;
-				}
-				LOG_TRACE("Return fee to dapp done, share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)dapp_share, actual_fee);
-
-				// DAU reward of source address
-				if (!utils::SafeIntMul(actual_fee, (int64_t)source_share, return_source)) {
-					result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * source share(" FMT_I64 ").",
-						actual_fee, creator_share));
-					result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-					return false;
-				}
-				LOG_TRACE("Return fee to source done, share: " FMT_I64 ", amount: " FMT_I64 "", (int64_t)dapp_share, return_source);
-			}
-			return_source /= 100;
+			LOG_ERROR("Get candidate by vote for address(%s) failed.", vote_for.c_str());
+			return true;
 		}
 
-		if (!utils::SafeIntMul(actual_fee, (int64_t)validator_share, return_validator)) {
-			result_.set_desc(utils::String::Format("Calculation overflowed when actual fee:(" FMT_I64 ") * validator share(" FMT_I64 ").",
-				actual_fee, creator_share));
-			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-			result_.set_desc(utils::String::Format(result_.desc().c_str()));
-			return false;
-		}
-		return_validator /= 100;
-
-		// total_fee - fee_limit + return_validator = total_fee + (return_validator - fee_limit)
-		int64_t tmp_fee = 0;
-		if (!utils::SafeIntSub(return_validator, GetFeeLimit(), tmp_fee)) {
-			result_.set_desc(utils::String::Format("Calculation overflowed when DAU reward of validator(" FMT_I64 ") - fee limit(" FMT_I64 ").",
-				actual_fee, creator_share));
-			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-			return false;
-		}
-
-		if (!utils::SafeIntAdd(total_fee, tmp_fee, total_fee)){
-			result_.set_desc(utils::String::Format("Calculation overflowed when total fee(" FMT_I64 ") + extra fee(" FMT_I64 ").", total_fee, tmp_fee));
-			result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-			return false;
-		}
-		LOG_TRACE("Return fee to validator done, share: " FMT_I64 ", amount: "FMT_I64", actual fee: " FMT_I64 "", (int64_t)validator_share, return_validator, actual_fee);
-
-		if (!vote_for.empty() && candidate) {
+		if (candidate) {
 			if (!UpdateFeeVoting(candidate, actual_fee)) {
 				result_.set_desc(utils::String::Format("Failed to update fee votes for candidate %s", vote_for.c_str()));
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				return false;
 			}
 		}
+
+		uint32_t user_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_USER);
+
+		std::string dapp_addr;
+		int64_t dapp_rate = 0;
+		if (ParseDappMark(transaction_env_.transaction().metadata(), dapp_addr, dapp_rate)){
+			if (AllocateFeesByShare(dapp_addr, actual_fee, dapp_rate)) {
+				user_rate -= dapp_rate;
+			}
+			else{
+				result_.set_desc(utils::String::Format("Failed to return the share of fee to dapp address(%s)", dapp_addr.c_str()));
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+				return false;
+			}
+		}
+
+		if (!AllocateFeesByShare(src_addr, actual_fee, user_rate)) {
+			result_.set_desc(utils::String::Format("Failed to return the share of fee to transaction source address(%s)", src_addr.c_str()));
+			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+			return false;
+		}
+
 		return true;
 	}
 
@@ -474,7 +439,7 @@ namespace bumo {
 		return true;
 	}
 
-	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t total, uint32_t share) {
+	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t& total, uint32_t share) {
 		AccountFrm::pointer account;
 		if (!environment_->GetEntry(address, account)) {
 			LOG_ERROR("Account(%s) does not exist", address.c_str());
@@ -488,12 +453,18 @@ namespace bumo {
 			LOG_ERROR("Calculation overflowed when total:(" FMT_I64 ") * share(" FMT_I64 ") of return.", total, share);
 			return false;
 		}
-		// the share already multiply by 100
+		// the share rate already multiply by 100
 		amount /= 100;
 		if (!account->AddBalance(amount)) {
 			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
 			return false;
 		}
+
+		if (!utils::SafeIntSub(total, (int64_t)amount, total)){
+			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
+			return false;
+		}
+
 		return true;
 	}
 

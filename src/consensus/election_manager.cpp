@@ -18,6 +18,7 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace bumo {
 	ElectionManager::ElectionManager(): candidate_mpt_(nullptr){
+		memset(&(fee_sharer_rate_[0]), 0, sizeof(fee_sharer_rate_));
 	}
 
 	ElectionManager::~ElectionManager(){
@@ -54,6 +55,9 @@ namespace bumo {
 				return false;
 			}
 		}
+
+		ReadSharerRate();
+
 		LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
 
 		// Validator abnormal records
@@ -139,8 +143,6 @@ namespace bumo {
 		if (!ecfg.ParseFromString(str)){
 			return false;
 		}
-
-		ReadSharerRate();
 	}
 
 	int32_t ElectionManager::GetCandidatesNumber() {
@@ -223,14 +225,14 @@ namespace bumo {
 				return false;
 			}
 			
-			fee_sharer_rate[i] = value;
+			fee_sharer_rate_[i] = value;
 		}
 
 		return true;
 	}
 
 	uint32_t ElectionManager::GetFeesSharerRate(FeeSharerType owner) {
-		return fee_sharer_rate[owner];
+		return fee_sharer_rate_[owner];
 	}
 
 	CandidatePtr ElectionManager::GetValidatorCandidate(const std::string& key){
