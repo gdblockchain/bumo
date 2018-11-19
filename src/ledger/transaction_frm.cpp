@@ -453,7 +453,7 @@ namespace bumo {
 			LOG_ERROR("Calculation overflowed when total:(" FMT_I64 ") * share(" FMT_I64 ") of return.", total, share);
 			return false;
 		}
-		// the share rate already multiply by 100
+		// the share rate already multiply by 100, to avoid float
 		amount /= 100;
 		if (!account->AddBalance(amount)) {
 			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());

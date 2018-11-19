@@ -206,7 +206,7 @@ namespace bumo {
 		coin_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
 		fee_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
 		penalty_rate_ = 1000; // 1000 means miss one block penalty 1000 BU
-		fee_distribution_rate_ = "2:7:1"; // 2:7:1 means block_reward:source_address:creator
+		fee_distribution_rate_ = "20:70:10"; // means block_reward:20%, source_address:70%, creator:10%
 	}
 
 	ElectionConfigure::~ElectionConfigure() {
