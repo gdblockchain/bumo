@@ -2043,8 +2043,7 @@ namespace bumo{
 		EXPECT_EQ(connet_clients_.size(), 1);
 		
 	}
-	void WebSocketServer::RequestIncompleteTest()
-	{
+	void WebSocketServer::RequestIncompleteTest(){
 		printf("**Test Start**this is a test to verify the incomplete message does not influence the monitor!\n");
 		if (connet_clients_.size() != 0)
 			connet_clients_.clear();
