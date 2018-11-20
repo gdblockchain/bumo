@@ -428,10 +428,11 @@ namespace bumo {
 			value.append(utils::String::ToString(vit->second->pledge()));
 			validators_json.append(value);
 		}
-
+		vit--;
+		std::string top_address = vit->second->address();
 		int64_t reward = total_penalty / validator_candidates_.size();
 		int64_t reward_left = total_penalty % validator_candidates_.size();
-		std::string top_address = new_validators.end()->second->address();
+
 		// add pledge coin and clear fee_votes
 		for (it = validator_candidates_.begin(); it != validator_candidates_.end(); it++) {
 			int64_t new_pledge = 0;
