@@ -91,14 +91,6 @@ return:
 ********************************************************************************/
 BUMO_TOOLS_API int SignData(const char *input_privkey, const char *input_rawdata, char *output_data, int *output_len) DEFAULT_VISIBILITY;
 
-/********************************************************************************
-description:
-	sign data with keystore
-
-return:
-	0：OK，-1: data is null, or data len is error, -2: parameter invalid, other: ERR
-********************************************************************************/
-BUMO_TOOLS_API int SignDataWithKeystore(const char *input_keystore, const char *input_password, const char *input_blob, char *output_data, int *output_len) DEFAULT_VISIBILITY;
 
 /********************************************************************************
 description:
@@ -125,6 +117,12 @@ return:
 ********************************************************************************/
 BUMO_TOOLS_API int GetAddressFromPubkey(const char *input_pubkey, char *output_data, int *output_len) DEFAULT_VISIBILITY;
 
-
+/********************************************************************************
+description:
+	GetPrivatekeyFromKeystore
+return:
+	0：OK，-1: data is null, or data len is error, -2: parameter invalid, other: ERR
+********************************************************************************/
+BUMO_TOOLS_API int GetPrivatekeyFromKeystore(const char *input_keystore, const char *input_password, char *output_data, int *output_len) DEFAULT_VISIBILITY;
 
 #endif

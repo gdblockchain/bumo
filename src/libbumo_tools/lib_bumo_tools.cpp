@@ -328,3 +328,41 @@ int GetAddressFromPubkey(const char *input_pubkey, char *output_data, int *outpu
 	*output_len = result.toStyledString().size();
 	return 0;
 }
+
+BUMO_TOOLS_API int GetPrivatekeyFromKeystore(const char *input_keystore, const char *input_password, char *output_data, int *output_len) {
+	if (input_keystore == NULL || strlen(input_keystore) == 0) {
+		printf("Failed to get private key from keystore, input keystore data or length is error\n");
+		return -1;
+	}
+
+	if (input_password == NULL || strlen(input_password) == 0) {
+		printf("Failed to get private key from keystore, input password data or length is error\n");
+		return -1;
+	}
+
+	if (output_data == NULL || output_len == nullptr || (*output_len <= 0)) {
+		printf("Failed to get private key from keystore, output data or length is error\n");
+		return -1;
+	}
+
+	std::string str_keystore(input_keystore);
+	std::string str_password(input_password);
+
+	bumo::KeyStore key_store;
+	Json::Value key_store_json;
+	key_store_json.fromString(str_keystore);
+	std::string private_key;
+	bool ret = key_store.From(key_store_json, str_password, private_key);
+	if (!ret) {
+		printf("Failed to get private key from keystore, invalid keystore parameter");
+		return -2;
+	}
+
+	if (*output_len <= (int)private_key.size()){
+		return -1;
+	}
+
+	sprintf(output_data, "%s", private_key.c_str());
+	*output_len = private_key.size();
+	return 0;
+}
