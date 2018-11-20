@@ -54,6 +54,7 @@ namespace bumo {
 				return false;
 			}
 		}
+
 		if (!ReadSharerRate()) {
 			LOG_ERROR("Failed to read fees share rate(%s)", election_config_.DebugString().c_str());
 			return false;
@@ -61,6 +62,8 @@ namespace bumo {
 		else {
 			LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
 		}
+
+		LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
 
 		// Validator abnormal records
 		auto db = Storage::Instance().account_db();
@@ -145,7 +148,6 @@ namespace bumo {
 		if (!ecfg.ParseFromString(str)){
 			return false;
 		}
-		
 		return true;
 	}
 
@@ -228,7 +230,6 @@ namespace bumo {
 				LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
 				return false;
 			}
-			
 			fee_sharer_rate_.push_back(value);
 		}
 

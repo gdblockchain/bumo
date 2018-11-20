@@ -97,8 +97,9 @@ namespace bumo {
 
 		bool PayFee(std::shared_ptr<Environment> environment,int64_t& total_fee);
 		bool ReturnFee(int64_t& total_fee);
-		bool DauReward(int64_t actual_fee, AccountFrm::pointer& source_account, int64_t& total_fee, int64_t& return_source);
-		bool AllocateFeesByShare(const std::string& address, int64_t total, uint32_t share);
+		bool ParseDappMark(const std::string& metadata, std::string& dappAddr, int64_t& rate);
+		bool DauReward(int64_t actual_fee, AccountFrm::pointer& source_account);
+		bool AllocateFeesByShare(const std::string& address, int64_t& total, uint32_t share);
 		bool UpdateFeeVoting(CandidatePtr& candidate, int64_t fee);
 		int64_t GetFeeLimit() const;
 		int64_t GetGasPrice() const;
