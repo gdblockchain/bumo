@@ -58,7 +58,7 @@ namespace bumo {
 		std::unordered_map<std::string, CandidatePtr> validator_candidates_;
 		KVTrie* candidate_mpt_;
 
-		std::vector<int64_t> fee_sharer_rate_;
+		std::vector<uint32_t> fee_sharer_rate_;
 
 	public:
 		bool Initialize();
