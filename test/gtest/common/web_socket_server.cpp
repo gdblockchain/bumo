@@ -1997,8 +1997,7 @@ namespace bumo{
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestUndefTest()
-	{
+	void WebSocketServer::RequestUndefTest(){
 		printf("**Test Start**this is a test to verify the response of an undefined request!\n");
 		Cleanoutput();
 		msg_processor_.ResetTestInput();
