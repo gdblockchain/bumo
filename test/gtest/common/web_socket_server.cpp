@@ -2098,8 +2098,7 @@ namespace bumo{
 		
 
 	}
-	void WebSocketServer::ResponseErrorTest()
-	{
+	void WebSocketServer::ResponseErrorTest(){
 		printf("**Test Start**this is a test to verify the err log by sending all error code!\n");
 		if (connet_clients_.size() != 0)
 			connet_clients_.clear();
