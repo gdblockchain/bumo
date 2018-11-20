@@ -2120,8 +2120,7 @@ namespace bumo{
 
 		int errcode[] = {0, 1, 3, 4, 6,8, 9, 10, 11, 12, 13, 14, 17, 18, 19 ,90};
 		bool ret = true;
-		for (int i = 0; i < (sizeof(errcode)/sizeof(errcode[0])); i++)
-		{
+		for (int i = 0; i < (sizeof(errcode)/sizeof(errcode[0])); i++){
 			RecordErrorLogLatestTime();
 			msg_processor_.SendResponseMessage("error", false, errcode[i], result);
 			utils::Sleep(1000);
