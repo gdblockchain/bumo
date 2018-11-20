@@ -2130,8 +2130,7 @@ namespace bumo{
 		}
 		
 	}
-	void WebSocketServer::WarningTest()
-	{
+	void WebSocketServer::WarningTest(){
 		printf("**Test Start**this is a test to verify the warning!\n");
 
 		if (connet_clients_.size() != 0)
