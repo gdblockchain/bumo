@@ -140,6 +140,47 @@ BUMO_TOOLS_API int CheckKeystoreValid(const char *input_keystore, const char *in
 	return 0;
 }
 
+BUMO_TOOLS_API int SignData(const char *input_privkey, const char *input_rawdata, char *output_data, int *output_len) {
+	if (input_privkey == NULL || strlen(input_privkey) == 0) {
+		printf("Failed to sign data, input privkey data or length is error\n");
+		return -1;
+	}
+
+	if (input_rawdata == NULL || strlen(input_rawdata) == 0) {
+		printf("Failed to sign data, input raw data or length is error\n");
+		return -1;
+	}
+
+	if (output_data == NULL || output_len == nullptr || (*output_len <= 0)) {
+		printf("Failed to sign data, output data or length is error\n");
+		return -1;
+	}
+
+	std::string str_priv_key(input_privkey);
+	std::string str_rawdata(input_rawdata);
+
+	bumo::PrivateKey priv_key(str_priv_key);
+	std::string public_key = priv_key.GetEncPublicKey();
+	std::string raw_data = utils::String::HexStringToBin(str_rawdata);
+	Json::Value result = Json::Value(Json::objectValue);
+
+	result["data"] = str_rawdata;
+	result["public_key"] = public_key;
+	result["sign_data"] = utils::String::BinToHexString(priv_key.Sign(raw_data));
+	//printf("%s\n", result.toStyledString().c_str());
+
+	if (*output_len <= (int)result.toStyledString().size()) {
+		return -1;
+	}
+
+	if (result["sign_data"].asString().size() == 0) {
+		return -2;
+	}
+
+	sprintf(output_data, "%s", result.toStyledString().c_str());
+	*output_len = result.toStyledString().size();
+	return 0;
+}
 
 BUMO_TOOLS_API int SignDataWithKeystore(const char *input_keystore, const char *input_password, const char *input_blob, char *output_data, int *output_len) {
 	if (input_keystore == NULL || strlen(input_keystore) == 0) {
@@ -323,48 +364,5 @@ BUMO_TOOLS_API int GetPrivatekeyFromKeystore(const char *input_keystore, const c
 
 	sprintf(output_data, "%s", private_key.c_str());
 	*output_len = private_key.size();
-	return 0;
-}
-
-
-BUMO_TOOLS_API int SignData(const char *input_privkey, const char *input_rawdata, char *output_data, int *output_len) {
-	if (input_privkey == NULL || strlen(input_privkey) == 0) {
-		printf("Failed to sign data, input privkey data or length is error\n");
-		return -1;
-	}
-
-	if (input_rawdata == NULL || strlen(input_rawdata) == 0) {
-		printf("Failed to sign data, input raw data or length is error\n");
-		return -1;
-	}
-
-	if (output_data == NULL || output_len == nullptr || (*output_len <= 0)) {
-		printf("Failed to sign data, output data or length is error\n");
-		return -1;
-	}
-
-	std::string str_priv_key(input_privkey);
-	std::string str_rawdata(input_rawdata);
-
-	bumo::PrivateKey priv_key(str_priv_key);
-	std::string public_key = priv_key.GetEncPublicKey();
-	std::string raw_data = utils::String::HexStringToBin(str_rawdata);
-	Json::Value result = Json::Value(Json::objectValue);
-
-	result["data"] = str_rawdata;
-	result["public_key"] = public_key;
-	result["sign_data"] = utils::String::BinToHexString(priv_key.Sign(raw_data));
-	//printf("%s\n", result.toStyledString().c_str());
-
-	if (*output_len <= (int)result.toStyledString().size()) {
-		return -1;
-	}
-
-	if (result["sign_data"].asString().size() == 0) {
-		return -2;
-	}
-
-	sprintf(output_data, "%s", result.toStyledString().c_str());
-	*output_len = result.toStyledString().size();
 	return 0;
 }
