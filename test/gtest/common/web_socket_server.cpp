@@ -2074,8 +2074,7 @@ namespace bumo{
 
 		}
 
-		for (int i = 0; i < sizeof(testresp) / 4; i++)
-		{
+		for (int i = 0; i < sizeof(testresp) / 4; i++){
 			Json::Value msg;
 			IncompleteRequestGenerator(IS_RESPONSE, testresp[i], msg);
 			{
