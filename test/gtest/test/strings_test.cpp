@@ -3,14 +3,9 @@
 
 class UtilsStringsTest : public testing::Test{
 protected:
-
-	// Sets up the test fixture.
 	virtual void SetUp(){
 	}
-
-	// Tears down the test fixture.
 	virtual void TearDown(){
-
 	}
 
 protected:
