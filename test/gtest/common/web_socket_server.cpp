@@ -1585,8 +1585,7 @@ namespace bumo{
 		}
 		EXPECT_EQ(connet_clients_.size(), 0);
 	}
-	void WebSocketServer::NormalResponseTest()
-	{
+	void WebSocketServer::NormalResponseTest(){
 		printf("**Test Start**this is a test for normal condition!\n");
 		if (connet_clients_.size() != 0)
 			connet_clients_.clear();
