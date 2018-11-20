@@ -3,7 +3,7 @@
 
 /*
 total reward is five hundred million, decreasing 1/4 each year.
-the reward for first periord: 1.25 hundred million£¬ 125,000,000 BU COIN
+the reward for first periord: 1.25 hundred million 125,000,000 BU COIN
 a block per 10 seconds, 3153600 blocks per year, five years: 3153600 * 5 = 15768000 block
 
 reward per block: 125,000,000  / 15768000 = 7.927447995941147
