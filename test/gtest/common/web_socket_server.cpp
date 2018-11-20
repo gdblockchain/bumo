@@ -2150,8 +2150,7 @@ namespace bumo{
 		
 		uint32_t warning[] = { WARNING_CUP_LOW, WARNING_CPU_HIGH };
 		
-		for (int i = 0; i < (sizeof(warning) / sizeof(warning[0])); i++)
-		{
+		for (int i = 0; i < (sizeof(warning) / sizeof(warning[0])); i++){
 			Json::Value parameter;
 			parameter["session_id"] = "random_key";
 			msg_processor_.SendRequestMessage("logout", true, parameter);
