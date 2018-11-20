@@ -338,72 +338,9 @@ namespace bumo {
 		}
 	}
 
-	bool ElectionManager::CheckAbnormalRecord(int64_t& total_penalty) {
-		std::unordered_map<std::string, int64_t>::iterator ait = abnormal_records_.begin();
-		
-		bool error = false;
-		for (; ait != abnormal_records_.end(); ait++) {
-			if (ait->second > General::MAX_ABNORMAL_RECORD) {
-				// penalty_amount = pledge * penalty_rate * (num_abnormal - 10) / 100
-				int64_t penalty_100 = 0;
-				if (!utils::SafeIntMul(ait->second - General::MAX_ABNORMAL_RECORD, election_config_.penalty_rate(), penalty_100)) {
-					LOG_ERROR("Calculation overflowed when abnormal records:(" FMT_I64 ") * penalty rate(" FMT_I64 ") of return.", ait->second, election_config_.penalty_rate());
-					error = false;
-					break;
-				}
-
-				CandidatePtr candidate = GetValidatorCandidate(ait->first);
-				if (!candidate) {
-					LOG_ERROR("Failed to get candidate info of %s", ait->first.c_str());
-					continue;
-				}
-
-				int64_t penalty_amount = 0;
-				if (penalty_100 > 100) {
-					penalty_amount = candidate->pledge();
-					LOG_WARN("No enough pledge coin, try to penalty %s of pledge coin%", penalty_amount);
-				}
-				else {
-					if (!utils::SafeIntMul(candidate->pledge(), penalty_100, penalty_amount)) {
-						LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") * penalty_100 (" FMT_I64 ") of return.", candidate->pledge(), penalty_100);
-						error = false;
-						break;
-					}
-					penalty_amount /= 100;
-				}
-				
-				if (!utils::SafeIntAdd(total_penalty, penalty_amount, total_penalty)) {
-					LOG_ERROR("Calculation overflowed when total penalty:(" FMT_I64 ") + pledge(" FMT_I64 ") of return.", total_penalty, penalty_amount);
-					error = false;
-					break;
-				}
-				int64_t new_pledge = 0;
-				if (!utils::SafeIntSub(candidate->pledge(), penalty_amount, new_pledge)) {
-					LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") * penalty_100 (" FMT_I64 ") of return.", candidate->pledge(), penalty_100);
-					error = false;
-					break;
-				}
-				candidate->set_pledge(new_pledge);
-			} else if (ait->second > 0){
-				LOG_ERROR("Candidate %s has " FMT_I64 " times abnormal records", ait->first.c_str(), ait->second);
-			}
-		}
-		abnormal_records_.clear(); // clear all abnormal records
-		if (error) return false;
-
-		return true;
-	}
-
 	bool ElectionManager::DynastyChange(Json::Value& validators_json) {
 
 		if (validator_candidates_.size() == 0) return false;
-
-		// check abnormal records and make punishment
-		int64_t total_penalty = 0;
-		if (!CheckAbnormalRecord(total_penalty)) {
-			LOG_ERROR("Failed to check and handle abnormal records");
-			return false;
-		}
 
 		// sort candidate and update validators
 		std::multimap<int64_t, CandidatePtr> new_validators;
@@ -421,6 +358,7 @@ namespace bumo {
 			}
 		}
 
+		// convert new validators to json object
 		std::multimap<int64_t, CandidatePtr>::iterator vit = new_validators.begin();
 		for (; vit != new_validators.end(); vit++) 
 		{
@@ -429,20 +367,9 @@ namespace bumo {
 			value.append(utils::String::ToString(vit->second->pledge()));
 			validators_json.append(value);
 		}
-		vit--;
-		std::string top_address = vit->second->address();
-		int64_t reward = total_penalty / validator_candidates_.size();
-		int64_t reward_left = total_penalty % validator_candidates_.size();
 
-		// add pledge coin and clear fee_votes
+		// clear fee_votes
 		for (it = validator_candidates_.begin(); it != validator_candidates_.end(); it++) {
-			int64_t new_pledge = 0;
-			if (it->second->address() == top_address) reward += reward_left;
-			if (!utils::SafeIntAdd(it->second->pledge(), reward, new_pledge)) {
-				LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") + reward(" FMT_I64 ") of return.", it->second->pledge(), reward);
-				return false;
-			}
-			it->second->set_pledge(new_pledge);
 			it->second->clear_fee_vote();
 		}
 		return true;

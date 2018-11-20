@@ -88,7 +88,6 @@ namespace bumo {
 		bool ValidatorCandidatesStorage();
 		bool ValidatorCandidatesLoad();
 		bool DynastyChange(Json::Value& validators_json);
-		bool CheckAbnormalRecord(int64_t& total_penalty);
 
 		void UpdateToDB();
 

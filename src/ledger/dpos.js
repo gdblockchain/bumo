@@ -113,7 +113,6 @@ function voteAbolishValidator(malicious){
     assert(candidate !== false, 'Sender(' + sender + ') is not validator candidate.');
     assert(validators !== false, 'Get validators failed.');
     assert(validators.length > 1, 'The number of validators must > 1.');
-    assert(findValidator(sender) !== false, sender + ' has no permission to vote.'); 
 
     let abolishProposal = JSON.parse(abolishStr);
     if(blockTimestamp >abolishProposal[expiredTimeVar]){

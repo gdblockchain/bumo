@@ -312,7 +312,7 @@ namespace bumo {
 				break;
 			}
 			
-			if (!DauReward(actual_fee, total_fee, source_account)) {
+			if (!DauReward(actual_fee, source_account, total_fee)) {
 				result_.set_desc("Failed to do dau reward");
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
@@ -377,11 +377,12 @@ namespace bumo {
 		return true;
 	}
 
-	bool TransactionFrm::DauReward(int64_t actual_fee, int64_t& total_fee, AccountFrm::pointer& source_account) {
+	bool TransactionFrm::DauReward(int64_t actual_fee, AccountFrm::pointer& source_account, int64_t& total_fee) {
+		// return fee to creator if creator exist
 		uint32_t creator_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_CREATOR);
 		std::string creator = source_account->GetCreator();
 		if (!creator.empty()) {
-			if (!AllocateFeesByShare(creator, actual_fee, total_fee, creator_rate)) {
+			if (!AllocateFeesByShare(creator, actual_fee, creator_rate, total_fee)) {
 				result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", creator.c_str()));
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				return false;
@@ -396,12 +397,13 @@ namespace bumo {
 			return true;
 		}
 
+		// all rest of share will be put in block reward if vote for not exist
+		// update fee votes by actual fee and allocate the fee share of user's part if vote for exist
 		CandidatePtr candidate = nullptr;
 		if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
-			LOG_ERROR("Get candidate by vote for address(%s) failed.", vote_for.c_str());
+			LOG_ERROR("Failed to get candidate by vote for address(%s).", vote_for.c_str());
 			return true;
 		}
-
 		if (candidate) {
 			if (!UpdateFeeVoting(candidate, actual_fee)) {
 				result_.set_desc(utils::String::Format("Failed to update fee votes for candidate %s", vote_for.c_str()));
@@ -410,12 +412,13 @@ namespace bumo {
 			}
 		}
 
+		// source account get all the share of user's part if no dapp share has been set
 		uint32_t user_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_USER);
 
 		std::string dapp_addr;
 		uint32_t dapp_rate = 0;
 		if (ParseDappMark(transaction_env_.transaction().metadata(), dapp_addr, dapp_rate)){
-			if (AllocateFeesByShare(dapp_addr, actual_fee, total_fee, dapp_rate)) {
+			if (AllocateFeesByShare(dapp_addr, actual_fee, dapp_rate, total_fee)) {
 				user_rate -= dapp_rate;
 			}
 			else{
@@ -425,7 +428,7 @@ namespace bumo {
 			}
 		}
 
-		if (!AllocateFeesByShare(src_addr, actual_fee, total_fee, user_rate)) {
+		if (!AllocateFeesByShare(src_addr, actual_fee, user_rate, total_fee)) {
 			result_.set_desc(utils::String::Format("Failed to return the share of fee to transaction source address(%s)", src_addr.c_str()));
 			result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 			return false;
@@ -447,7 +450,7 @@ namespace bumo {
 		return true;
 	}
 
-	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t actual_fee, int64_t& total_fee, uint32_t share) {
+	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t actual_fee, uint32_t share, int64_t& total_fee) {
 		AccountFrm::pointer account;
 		if (!environment_->GetEntry(address, account)) {
 			LOG_ERROR("Account(%s) does not exist", address.c_str());
@@ -468,7 +471,7 @@ namespace bumo {
 			return false;
 		}
 
-		if (!utils::SafeIntSub(total_fee, (int64_t)amount, total_fee)){
+		if (!utils::SafeIntSub(total_fee, amount, total_fee)){
 			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
 			return false;
 		}
