@@ -317,6 +317,14 @@ namespace bumo {
 				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
 			}
+
+			if (!utils::SafeIntSub(total_fee, fee, total_fee)){
+				result_.set_desc(utils::String::Format("Calculation overflowed when total fee(" FMT_I64 ") - extra fee(" FMT_I64 ") paid by source account(%s).", total_fee, fee, str_address.c_str()));
+				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
+				LOG_ERROR(result_.desc().c_str());
+				break;
+			}
+
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
 			int64_t new_balance =0;
 			if (!utils::SafeIntAdd(proto_source_account.balance(), fee, new_balance)){
