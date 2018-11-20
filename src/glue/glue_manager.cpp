@@ -116,9 +116,11 @@ namespace bumo {
 			if (CheckValue(last_consavlue) == Consensus::CHECK_VALUE_VALID) {
 				protocol::ConsensusValue propose_value;
 				propose_value.ParseFromString(last_consavlue);
-				protocol::KeyPair* kv = propose_value.add_entry();
-				kv->set_key("abnormal_node");
-				kv->set_value(abnormal_node);
+				if (!abnormal_node.empty()) {
+					protocol::KeyPair* kv = propose_value.add_entry();
+					kv->set_key("abnormal_node");
+					kv->set_value(abnormal_node);
+				}
 
 				LOG_INFO("Take the last consensus value as the proposal. The number of transactions in consensus value is %d, and the last closed ledger's hash is %s.", propose_value.txset().txs_size(),
 					utils::String::Bin4ToHexString(lcl.hash()).c_str());
@@ -135,6 +137,13 @@ namespace bumo {
 			propose_value.set_ledger_seq(lcl.seq() + 1);
 			propose_value.set_previous_ledger_hash(lcl.hash());
 			propose_value.set_previous_proof(proof);
+
+			// add abnormal record
+			if (!abnormal_node.empty()) {
+				protocol::KeyPair* kv = propose_value.add_entry();
+				kv->set_key("abnormal_node");
+				kv->set_value(abnormal_node);
+			}
 
 			//Check whether we need to upgrade the ledger.
 			protocol::ValidatorSet validator_set;

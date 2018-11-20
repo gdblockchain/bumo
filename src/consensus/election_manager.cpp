@@ -54,7 +54,13 @@ namespace bumo {
 				return false;
 			}
 		}
-		LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
+		if (!ReadSharerRate()) {
+			LOG_ERROR("Failed to read fees share rate(%s)", election_config_.DebugString().c_str());
+			return false;
+		}
+		else {
+			LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
+		}
 
 		// Validator abnormal records
 		auto db = Storage::Instance().account_db();
@@ -139,8 +145,8 @@ namespace bumo {
 		if (!ecfg.ParseFromString(str)){
 			return false;
 		}
-
-		ReadSharerRate();
+		
+		return true;
 	}
 
 	int32_t ElectionManager::GetCandidatesNumber() {
@@ -223,14 +229,14 @@ namespace bumo {
 				return false;
 			}
 			
-			fee_sharer_rate[i] = value;
+			fee_sharer_rate_.push_back(value);
 		}
 
 		return true;
 	}
 
 	uint32_t ElectionManager::GetFeesSharerRate(FeeSharerType owner) {
-		return fee_sharer_rate[owner];
+		return fee_sharer_rate_[owner];
 	}
 
 	CandidatePtr ElectionManager::GetValidatorCandidate(const std::string& key){
@@ -336,10 +342,10 @@ namespace bumo {
 		
 		bool error = false;
 		for (; ait != abnormal_records_.end(); ait++) {
-			if (ait->second > 10) {
+			if (ait->second > General::MAX_ABNORMAL_RECORD) {
 				// penalty_amount = pledge * penalty_rate * (num_abnormal - 10) / 100
 				int64_t penalty_100 = 0;
-				if (!utils::SafeIntMul(ait->second - 10, election_config_.penalty_rate(), penalty_100)) {
+				if (!utils::SafeIntMul(ait->second - General::MAX_ABNORMAL_RECORD, election_config_.penalty_rate(), penalty_100)) {
 					LOG_ERROR("Calculation overflowed when abnormal records:(" FMT_I64 ") * penalty rate(" FMT_I64 ") of return.", ait->second, election_config_.penalty_rate());
 					error = false;
 					break;
@@ -354,6 +360,7 @@ namespace bumo {
 				int64_t penalty_amount = 0;
 				if (penalty_100 > 100) {
 					penalty_amount = candidate->pledge();
+					LOG_WARN("No enough pledge coin, try to penalty %s of pledge coin%", penalty_amount);
 				}
 				else {
 					if (!utils::SafeIntMul(candidate->pledge(), penalty_100, penalty_amount)) {
@@ -364,8 +371,8 @@ namespace bumo {
 					penalty_amount /= 100;
 				}
 				
-				if (!utils::SafeIntAdd(total_penalty, candidate->pledge(), total_penalty)) {
-					LOG_ERROR("Calculation overflowed when total penalty:(" FMT_I64 ") + pledge(" FMT_I64 ") of return.", total_penalty, candidate->pledge());
+				if (!utils::SafeIntAdd(total_penalty, penalty_amount, total_penalty)) {
+					LOG_ERROR("Calculation overflowed when total penalty:(" FMT_I64 ") + pledge(" FMT_I64 ") of return.", total_penalty, penalty_amount);
 					error = false;
 					break;
 				}
@@ -424,9 +431,11 @@ namespace bumo {
 
 		int64_t reward = total_penalty / validator_candidates_.size();
 		int64_t reward_left = total_penalty % validator_candidates_.size();
+		std::string top_address = new_validators.end()->second->address();
 		// add pledge coin and clear fee_votes
-		for (; it != validator_candidates_.end(); it++) {
+		for (it = validator_candidates_.begin(); it != validator_candidates_.end(); it++) {
 			int64_t new_pledge = 0;
+			if (it->second->address() == top_address) reward += reward_left;
 			if (!utils::SafeIntAdd(it->second->pledge(), reward, new_pledge)) {
 				LOG_ERROR("Calculation overflowed when old pledge:(" FMT_I64 ") + reward(" FMT_I64 ") of return.", it->second->pledge(), reward);
 				return false;
