@@ -345,7 +345,7 @@ namespace bumo {
 		return false;
 	}
 
-	bool TransactionFrm::ParseDappMark(const std::string& metadata, std::string& dappAddr, int64_t& rate){
+	bool TransactionFrm::ParseDappMark(const std::string& metadata, std::string& dappAddr, uint32_t& rate){
 		Json::Value json;
 		if (!json.fromString(metadata)){
 			return false;
@@ -363,7 +363,7 @@ namespace bumo {
 
 		uint32_t dapp_rate = 0;
 		if (json.isMember("share")){
-			dapp_rate = (int64_t)json["share"].asUInt();
+			dapp_rate = json["share"].asUInt();
 			uint32_t user_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_USER);
 
 			if (dapp_rate > user_rate){
@@ -413,7 +413,7 @@ namespace bumo {
 		uint32_t user_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_USER);
 
 		std::string dapp_addr;
-		int64_t dapp_rate = 0;
+		uint32_t dapp_rate = 0;
 		if (ParseDappMark(transaction_env_.transaction().metadata(), dapp_addr, dapp_rate)){
 			if (AllocateFeesByShare(dapp_addr, actual_fee, dapp_rate)) {
 				user_rate -= dapp_rate;

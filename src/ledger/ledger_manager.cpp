@@ -580,11 +580,10 @@ namespace bumo {
 
 		closing_ledger->environment_->UpdateValidatorCandidate();
 		ElectionManager::Instance().ValidatorCandidatesStorage();
-		ElectionManager::Instance().UpdateToDB();
-
 		if (!DposUpdate(header->seq(), closing_ledger->environment_)){
 			return false;
 		}
+		ElectionManager::Instance().UpdateToDB();
 
 		int64_t time0 = utils::Timestamp().HighResolution();
 		int64_t new_count = 0, change_count = 0;
@@ -646,7 +645,6 @@ namespace bumo {
 		protocol::ElectionConfig& election_cfg_old = ElectionManager::Instance().GetProtoElectionCfg();
 		if (closing_ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
 			ElectionManager::Instance().ElectionConfigSet(account_db_batch, election_cfg);
-			election_cfg_old = election_cfg;
 			ElectionManager::Instance().ReadSharerRate();
 			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
 		}

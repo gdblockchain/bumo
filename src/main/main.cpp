@@ -285,6 +285,7 @@ int main(int argc, char *argv[]){
 	bumo::ContractManager::ExitInstance();
 	bumo::SlowTimer::ExitInstance();
 	bumo::GlueManager::ExitInstance();
+	bumo::ElectionManager::ExitInstance();
 	bumo::LedgerManager::ExitInstance();
 	bumo::PeerManager::ExitInstance();
 	bumo::WebSocketServer::ExitInstance();

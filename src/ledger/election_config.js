@@ -93,8 +93,7 @@ function voteCfg(proposalId) {
 	
 	let thredhold = parseInt(candidatesNum * passRate + 0.5);
 	if(proposalRecords[proposalId].voteCount >= thredhold) {
-		let output = {};
-		output[proposalRecords[proposalId].feeType] = proposalRecords[proposalId].price;
+		let output = proposalRecords[proposalId].configuration;
 		delete proposalRecords[proposalId];
 		storageDel(key);   
 		configElectionCfg(JSON.stringify(output));

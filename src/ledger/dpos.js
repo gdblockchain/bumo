@@ -99,7 +99,6 @@ function takebackCoin(tokenAmount){
     }
 }
 
-
 function voteAbolishValidator(malicious){
 
     assert(addressCheck(malicious) === true, 'Arg-malicious is not valid adress.');
@@ -115,7 +114,6 @@ function voteAbolishValidator(malicious){
     assert(validators !== false, 'Get validators failed.');
     assert(validators.length > 1, 'The number of validators must > 1.');
     assert(findValidator(sender) !== false, sender + ' has no permission to vote.'); 
-    assert(findValidator(malicious) !== false, malicious + ' is not validator.'); 
 
     let abolishProposal = JSON.parse(abolishStr);
     if(blockTimestamp >abolishProposal[expiredTimeVar]){
@@ -168,6 +166,7 @@ function voteAbolishValidator(malicious){
     setMetaData(abolishKey);
     return true;
 }
+
 function abolishValidator(malicious, proof){
     assert(addressCheck(malicious) === true, 'Arg-malicious is not valid adress.');
     assert(typeof proof === 'string', 'Args type error, arg-proof must be string.'); 
