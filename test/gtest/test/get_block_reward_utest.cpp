@@ -20,7 +20,6 @@ protected:
 
     // Tears down the test fixture.
     virtual void TearDown(){
-
     }
 
 protected:
