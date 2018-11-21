@@ -1204,7 +1204,7 @@ namespace bumo{
 			V8Contract *v8_contract = GetContractFrom(args.GetIsolate());
 
 			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
-			if (!LedgerManager::Instance().DposUpdate(v8_contract->GetParameter().blocknumber_, ledger_context->GetTopTx()->environment_)){
+			if (!LedgerManager::Instance().DposUpdate(v8_contract->GetParameter().blocknumber_, ledger_context->GetTopTx()->environment_, true)){
 				break;
 			}
 

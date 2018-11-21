@@ -205,7 +205,7 @@ namespace bumo {
 		validators_refresh_interval_ = 24 * 60 * 60; // in seconds
 		coin_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
 		fee_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
-		fee_distribution_rate_ = "70:10:20"; // means source_address:20%, creator:70%, block_reward:10%
+		fee_distribution_rate_ = "70:10:20"; // means source_address:70%, creator:10%, block_reward:20%
 	}
 
 	ElectionConfigure::~ElectionConfigure() {
