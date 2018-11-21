@@ -351,7 +351,7 @@ namespace bumo {
 			return false;
 		}
 
-		if (json.isMember("from_account")){
+		if (!json.isMember("from_account")){
 			LOG_TRACE("Metadata(%s) of transaction has no dapp mark.", metadata.c_str());
 			return false;
 		}

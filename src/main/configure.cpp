@@ -205,8 +205,7 @@ namespace bumo {
 		validators_refresh_interval_ = 24 * 60 * 60; // in seconds
 		coin_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
 		fee_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
-		penalty_rate_ = 1000; // 1000 means miss one block penalty 1000 BU
-		fee_distribution_rate_ = "20:70:10"; // means block_reward:20%, source_address:70%, creator:10%
+		fee_distribution_rate_ = "70:10:20"; // means source_address:20%, creator:70%, block_reward:10%
 	}
 
 	ElectionConfigure::~ElectionConfigure() {
@@ -218,7 +217,6 @@ namespace bumo {
 		Configure::GetValue(value, "coin_to_vote_rate", coin_to_vote_rate_);
 		Configure::GetValue(value, "fee_to_vote_rate", fee_to_vote_rate_);
 		Configure::GetValue(value, "fee_distribution_rate", fee_distribution_rate_);
-		Configure::GetValue(value, "penalty_rate", penalty_rate_);
 		return true;
 	}
 
