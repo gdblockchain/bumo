@@ -45,7 +45,6 @@ namespace bumo {
 			election_config_.set_coin_to_vote_rate(ecfg.coin_to_vote_rate_);
 			election_config_.set_fee_to_vote_rate(ecfg.fee_to_vote_rate_);
 			election_config_.set_fee_distribution_rate(ecfg.fee_distribution_rate_);
-			election_config_.set_penalty_rate(ecfg.penalty_rate_);
 
 			ElectionConfigSet(batch, election_config_);
 			KeyValueDb *db = Storage::Instance().account_db();

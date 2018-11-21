@@ -131,7 +131,6 @@ namespace bumo {
 		int64_t validators_refresh_interval_; // in seconds
 		int64_t coin_to_vote_rate_; // 1000 means 1000MO = 1 vote
 		int64_t fee_to_vote_rate_; // 1000 means 1000 MO = 1 vote
-		int64_t penalty_rate_; // 1000 means miss one block penalty 1000 BU
 		std::string fee_distribution_rate_; // // means block_reward:20%, source_address:70%, creator:10%
 		
 		bool Load(const Json::Value &value);
