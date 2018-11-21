@@ -511,11 +511,11 @@ namespace bumo {
 		chain_max_ledger_probaly_ : data["ledger_sequence"].asInt64();
 	}
 
-	bool LedgerManager::DposUpdate(int64_t ledger_seq, std::shared_ptr<Environment> environment){
+	bool LedgerManager::DposUpdate(int64_t ledger_seq, std::shared_ptr<Environment> environment, bool contractTrigger){
 		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
 
-		if (ledger_seq % interval_block == 0) {
+		if ((ledger_seq % interval_block == 0) || contractTrigger) {
 			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", ledger_seq);
 			Json::Value validators_json;
 
