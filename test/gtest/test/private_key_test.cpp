@@ -59,8 +59,6 @@ TEST_F(PrivateKeyTest, Verify){
 	EXPECT_TRUE(bubi::PublicKey::Verify(data, signature, publicKey));
 	EXPECT_FALSE(bubi::PublicKey::Verify(data + "1", signature, publicKey));
 	EXPECT_FALSE(bubi::PublicKey::Verify(data, signature + "1", publicKey));
-//	EXPECT_FALSE(bubi::PublicKey::Verify(data, signature, publicKey + "1"));
-	//EXPECT_FALSE(bubi::PublicKey::Verify(data, signature,""));
 	EXPECT_FALSE(bubi::PublicKey::Verify(data, "", publicKey));
 	EXPECT_FALSE(bubi::PublicKey::Verify("", signature, publicKey));
 	std::string data2 = "hello";
