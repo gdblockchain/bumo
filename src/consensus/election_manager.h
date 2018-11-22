@@ -56,6 +56,7 @@ namespace bumo {
 		utils::ReadWriteLock candidates_mutex_;
 		std::vector<std::string> to_delete_candidates_;
 		std::unordered_map<std::string, CandidatePtr> validator_candidates_;
+		bool update_votes_;
 		KVTrie* candidate_mpt_;
 
 		std::vector<uint32_t> fee_sharer_rate_;
@@ -63,6 +64,14 @@ namespace bumo {
 	public:
 		bool Initialize();
 		bool Exit();
+
+		bool GetUpdateVotesFlag(){
+			return update_votes_;
+		}
+
+		KVTrie* GetCandidateMpt(){
+			return candidate_mpt_;
+		}
 
 		bool ReadSharerRate();
 		protocol::ElectionConfig& GetProtoElectionCfg();
@@ -78,6 +87,7 @@ namespace bumo {
 
 		void GetAbnormalRecords(Json::Value& record);
 		void AddAbnormalRecord(const std::string& abnormal_node);
+		void DelAbnormalRecord(const std::string& abnormal_node);
 		void UpdateAbnormalRecords();
 
 		bool SetValidatorCandidate(const std::string& key, CandidatePtr value);

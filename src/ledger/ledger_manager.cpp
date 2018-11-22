@@ -511,22 +511,58 @@ namespace bumo {
 		chain_max_ledger_probaly_ : data["ledger_sequence"].asInt64();
 	}
 
-	bool LedgerManager::DposUpdate(int64_t ledger_seq, std::shared_ptr<Environment> environment, bool contractTrigger){
-		int64_t refresh_interval = ElectionManager::Instance().GetValidatorsRefreshInterval();
+	bool LedgerManager::DposUpdate(const protocol::ConsensusValue& consensus, LedgerFrm::pointer ledger){
+
+		std::string abnormal_node;
+		std::string validator_leader;
+
+		for (int i = 0; i < consensus.entry().size(); i++) {
+			const protocol::KeyPair& kv = consensus.entry(i);
+			if (kv.key() == "abnormal_node") {
+				abnormal_node = kv.value();
+			}
+			else if (kv.key() == General::VALIDATOR_LEADER){
+				validator_leader = kv.value();
+			}
+		}
+
+		if (!abnormal_node.empty()) {
+			ElectionManager::Instance().AddAbnormalRecord(abnormal_node);
+			LOG_INFO("Add abnormal record: %s", abnormal_node.c_str());
+		}
+
+		ElectionManager& election = ElectionManager::Instance();
+		election.GetCandidateMpt()->batch_->Put(ComposePrefix(General::VALIDATOR_LEADER, consensus.ledger_seq()), validator_leader);
+
+		ledger->environment_->UpdateValidatorCandidate();
+		election.ValidatorCandidatesStorage();
+
+		int64_t refresh_interval = election.GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
 
-		if ((ledger_seq % interval_block == 0) || contractTrigger) {
-			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", ledger_seq);
+		if ((consensus.ledger_seq() % interval_block == 0) || (election.GetUpdateVotesFlag())) {
+			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", consensus.ledger_seq());
 			Json::Value validators_json;
 
-			if (ElectionManager::Instance().DynastyChange(validators_json)) {
-				environment->UpdateNewValidators(validators_json);
+			if (election.DynastyChange(validators_json)) {
+				ledger->environment_->UpdateNewValidators(validators_json);
 				LOG_INFO("Validators dynasty change done, new validators: %s", validators_json.toFastString().c_str());
 			}
 			else {
 				LOG_ERROR("Failed to do validators dynasty change");
 				return false;
 			}
+		}
+
+		election.UpdateToDB();
+
+		//for election configuration
+		protocol::ElectionConfig election_cfg;
+		protocol::ElectionConfig& election_cfg_old = ElectionManager::Instance().GetProtoElectionCfg();
+		if (ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
+			election.ElectionConfigSet(election.GetCandidateMpt()->batch_, election_cfg);
+			election.ReadSharerRate();
+			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
 		}
 
 		return true;
@@ -561,29 +597,9 @@ namespace bumo {
 		//LOG_INFO("set_consensus_value_hash:%s,%s", utils::String::BinToHexString(con_str).c_str(), utils::String::BinToHexString(chash).c_str());
 		header->set_version(last_closed_ledger_->GetProtoHeader().version());
 
-		std::string abnormal_node;
-		std::string validator_leader;
-		for (int i = 0; i < consensus_value.entry().size(); i++) {
-			const protocol::KeyPair& kv = consensus_value.entry(i);
-			if (kv.key() == "abnormal_node") {
-				abnormal_node = kv.value();
-			}
-			else if(kv.key() == General::VALIDATOR_LEADER){
-				validator_leader = kv.value();
-			}
-		}
-
-		if (!abnormal_node.empty()) {
-			ElectionManager::Instance().AddAbnormalRecord(abnormal_node);
-			LOG_INFO("Add abnormal record: %s", abnormal_node.c_str());
-		}
-
-		closing_ledger->environment_->UpdateValidatorCandidate();
-		ElectionManager::Instance().ValidatorCandidatesStorage();
-		if (!DposUpdate(header->seq(), closing_ledger->environment_)){
+		if (!DposUpdate(consensus_value, closing_ledger)){
 			return false;
 		}
-		ElectionManager::Instance().UpdateToDB();
 
 		int64_t time0 = utils::Timestamp().HighResolution();
 		int64_t new_count = 0, change_count = 0;
@@ -622,7 +638,6 @@ namespace bumo {
 		int64_t ledger_seq = closing_ledger->GetProtoHeader().seq();
 		std::shared_ptr<WRITE_BATCH> account_db_batch = tree_->batch_;
 		account_db_batch->Put(General::KEY_LEDGER_SEQ, utils::String::Format(FMT_I64, ledger_seq));
-		account_db_batch->Put(ComposePrefix(General::VALIDATOR_LEADER, ledger_seq), validator_leader);
 		
 		if (new_set.validators_size() > 0 || closing_ledger->environment_->GetVotedValidators(validators_, new_set)) {
 			LOG_INFO("got new validators: %s", new_set.DebugString().c_str());
@@ -639,17 +654,6 @@ namespace bumo {
 			fees_ = new_fees;
 		}
 		header->set_fees_hash(HashWrapper::Crypto(fees_.SerializeAsString()));
-		
-		//for election configuration
-		protocol::ElectionConfig election_cfg;
-		protocol::ElectionConfig& election_cfg_old = ElectionManager::Instance().GetProtoElectionCfg();
-		if (closing_ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
-			ElectionManager::Instance().ElectionConfigSet(account_db_batch, election_cfg);
-			ElectionManager::Instance().ReadSharerRate();
-			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
-		}
-
-		//This header must be for the latest block.
 		header->set_hash(HashWrapper::Crypto(closing_ledger->ProtoLedger().SerializeAsString()));
 
 		//proof

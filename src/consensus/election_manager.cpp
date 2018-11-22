@@ -17,7 +17,7 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 #include "glue/glue_manager.h"
 
 namespace bumo {
-	ElectionManager::ElectionManager(): candidate_mpt_(nullptr){
+	ElectionManager::ElectionManager() : candidate_mpt_(nullptr), update_votes_(false){
 	}
 
 	ElectionManager::~ElectionManager(){
@@ -165,6 +165,14 @@ namespace bumo {
 		UpdateAbnormalRecords();
 	}
 
+	void ElectionManager::DelAbnormalRecord(const std::string& abnormal_node){
+		auto it = abnormal_records_.find(abnormal_node);
+		if (it != abnormal_records_.end()) {
+			abnormal_records_.erase(abnormal_node);
+			UpdateAbnormalRecords();
+		}
+	}
+
 	void ElectionManager::GetAbnormalRecords(Json::Value& records) {
 		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
 			it != abnormal_records_.end();
@@ -280,6 +288,9 @@ namespace bumo {
 	void ElectionManager::DelValidatorCandidate(const std::string& key){
 		validator_candidates_.erase(key);
 		to_delete_candidates_.push_back(key);
+		update_votes_ = true;
+
+		DelAbnormalRecord(key);
 	}
 
 	bool ElectionManager::ValidatorCandidatesStorage() {
@@ -371,6 +382,8 @@ namespace bumo {
 		for (it = validator_candidates_.begin(); it != validator_candidates_.end(); it++) {
 			it->second->clear_fee_vote();
 		}
+
+		update_votes_ = false;
 		return true;
 	}
 }

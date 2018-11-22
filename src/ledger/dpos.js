@@ -89,10 +89,7 @@ function takebackCoin(tokenAmount){
         setValidatorCandidate(sender, '-'+ tokenAmount);
         transferCoin(sender, tokenAmount);
     }
-
-    if(findValidator(sender) === true){
-        updateDpos();
-    }
+    //bumo will update validator
 }
 
 function voteAbolishValidator(malicious){
@@ -138,7 +135,6 @@ function voteAbolishValidator(malicious){
 	
 	setValidatorCandidate(malicious, '-'+ candidate.pledge);
 	if(findValidator(malicious) === true){
-		updateDpos();
 		validators = getValidators();
 	}
 	
