@@ -1,15 +1,11 @@
 'use strict';
 
-let effectiveVoteInterval = 24 * 60 * 60 * 1000 * 1000;
-let effectiveAbolishVoteInterval = 15 * effectiveVoteInterval;
-let minPledgeAmount       = 100000 * 100000000;
-const candidateSetSize    = 1000;
-const passRate            = 0.7;
+let effectiveAbolishVoteInterval = 15 * 24 * 60 * 60 * 1000 * 1000;
+const passRate        = 0.7;
 const abolishVar      = 'abolish_';
 const proposerVar     = 'proposer';
 const reasonVar       = 'reason';
 const ballotVar       = 'ballot';
-const candidatesVar   = 'validator_candidates';
 const expiredTimeVar  = 'voting_expired_time';
 
 function getObjectMetaData(key){
@@ -64,8 +60,8 @@ function applyAsCandidate(){
     let candidate = getValidatorCandidate(sender);
 
     if(candidate === false){
-        let com = int64Compare(thisPayCoinAmount, minPledgeAmount);
-        assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + minPledgeAmount);
+        let com = int64Compare(thisPayCoinAmount, validatorMinPledge);
+        assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + validatorMinPledge);
     }
 
     setValidatorCandidate(sender, thisPayCoinAmount);
@@ -84,7 +80,7 @@ function takebackCoin(tokenAmount){
     assert(candidate !== false, 'Sender(' + sender + ') is not validator candidate.');
 
     let left = int64Sub(candidate.pledge, tokenAmount);
-    let com = int64Compare(left, minPledgeAmount);
+    let com = int64Compare(left, validatorMinPledge);
     if(com === -1){
         setValidatorCandidate(sender, '-'+ candidate.pledge);
         transferCoin(sender, candidate.pledge);

@@ -131,6 +131,8 @@ namespace bumo{
 	const std::string V8Contract::pay_asset_amount_name_ = "thisPayAsset";
 	const std::string V8Contract::block_timestamp_name_ = "blockTimestamp";
 	const std::string V8Contract::block_number_name_ = "blockNumber";
+	const std::string V8Contract::validator_min_pledge_name_ = "validatorMinPledge";
+
 	utils::Mutex V8Contract::isolate_to_contract_mutex_;
 	std::unordered_map<v8::Isolate*, V8Contract *> V8Contract::isolate_to_contract_;
 
@@ -187,6 +189,7 @@ namespace bumo{
 		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", pay_asset_amount_name_.c_str());
 		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", block_timestamp_name_.c_str());
 		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", block_number_name_.c_str());
+		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", validator_min_pledge_name_.c_str());
 		std::map<std::string, v8::FunctionCallback>::iterator itr = js_func_read_.begin();
 		for ( ; itr != js_func_read_.end(); itr++)
 		{
@@ -310,6 +313,14 @@ namespace bumo{
 		context->Global()->Set(context,
 			v8::String::NewFromUtf8(isolate_, block_timestamp_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
 			timestamp_v8);
+
+		//Cannot be obtained from the Environment, 
+		//If the minimum pledge is modified by voting, results will take effect in next block
+		int64_t min_pledge = ElectionManager::Instance().GetProtoElectionCfg().pledge_amount();
+		auto min_pledge_v8 = v8::Number::New(isolate_, (double)min_pledge);
+		context->Global()->Set(context,
+			v8::String::NewFromUtf8(isolate_, validator_min_pledge_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+			min_pledge_v8);
 
 		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str());
 		v8::Local<v8::Script> compiled_script;
@@ -518,6 +529,13 @@ namespace bumo{
 			v8::String::NewFromUtf8(isolate_, block_timestamp_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
 			timestamp_v8);
 
+		//Cannot be obtained from the Environment, 
+		//If the minimum pledge is modified by voting, results will take effect in next block
+		int64_t min_pledge = ElectionManager::Instance().GetProtoElectionCfg().pledge_amount();
+		auto min_pledge_v8 = v8::Number::New(isolate_, (double)min_pledge);
+		context->Global()->Set(context,
+			v8::String::NewFromUtf8(isolate_, validator_min_pledge_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+			min_pledge_v8);
 
 		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str());
 		v8::Local<v8::Script> compiled_script;
