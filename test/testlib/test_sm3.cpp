@@ -118,10 +118,6 @@ static void sm3_process(sm3_context *ctx, unsigned char data[64]){
 	int i;
 #endif
 
-	//  for(j=0; j < 68; j++)
-	//      W[j] = 0;
-	//  for(j=0; j < 64; j++)
-	//      W1[j] = 0;
 
 	for (j = 0; j < 16; j++)
 		T[j] = 0x79CC4519;
