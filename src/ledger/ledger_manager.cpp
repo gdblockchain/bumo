@@ -513,6 +513,7 @@ namespace bumo {
 
 	bool LedgerManager::DposUpdate(const protocol::ConsensusValue& consensus, LedgerFrm::pointer ledger){
 
+		//for abmormal record and validator leader
 		std::string abnormal_node;
 		std::string validator_leader;
 
@@ -534,6 +535,7 @@ namespace bumo {
 		ElectionManager& election = ElectionManager::Instance();
 		election.GetCandidateMpt()->batch_->Put(ComposePrefix(General::VALIDATOR_LEADER, consensus.ledger_seq()), validator_leader);
 
+		//for validator candidate
 		ledger->environment_->UpdateValidatorCandidate();
 		election.ValidatorCandidatesStorage();
 
@@ -554,8 +556,6 @@ namespace bumo {
 			}
 		}
 
-		election.UpdateToDB();
-
 		//for election configuration
 		protocol::ElectionConfig election_cfg;
 		protocol::ElectionConfig& election_cfg_old = ElectionManager::Instance().GetProtoElectionCfg();
@@ -564,6 +564,8 @@ namespace bumo {
 			election.ReadSharerRate();
 			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
 		}
+
+		election.UpdateToDB();
 
 		return true;
 	}
