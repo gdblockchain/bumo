@@ -98,7 +98,7 @@ public:
 	ApiTestWorker(){}
 	~ApiTestWorker(){}
 	ApiTestWorker(const ApiTestWorker& s) = delete;
-	//ÏûÏ¢´¦Àí
+	
 	virtual void Run(utils::Thread *thread) override;
 };
 
@@ -155,7 +155,7 @@ public:
 	CheckTxWorker(int64_t tx_start_count){  tx_start_count_ = tx_start_count; count = 0; }
 	~CheckTxWorker(){}
 	CheckTxWorker(const CheckTxWorker& s) = delete;
-	//ÏûÏ¢´¦Àí
+	
 	virtual void Run(utils::Thread *thread) override;
 
 private:
