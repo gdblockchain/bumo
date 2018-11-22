@@ -40,7 +40,7 @@ void tt(){
 	leveldb::Status status = leveldb::DB::Open(options, "c:/tmp/testdb", &db);
 	assert(status.ok());
 
-	//
+	
 	char buffer_1[] = {0x00,0x00,0x11,0x12};
 	char key[] = "key1";
 
