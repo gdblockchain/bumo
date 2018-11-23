@@ -17,7 +17,7 @@ function loadProposalRecords() {
 }
 
 function queryVote(proposalId) {
-	let key =voteRecordKeyPrefix+proposalId;
+	let key = voteRecordKeyPrefix+proposalId;
 	let result = storageLoad(key);
 	if (result === false){
 		result ='vote records of proposal(' + proposalId + ')not exist';
