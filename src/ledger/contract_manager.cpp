@@ -1391,6 +1391,9 @@ namespace bumo{
 					}
 					candidate_old->set_coin_vote(frozen_votes_old);
 				}
+
+				args.GetReturnValue().Set(true);
+				return;
 			}
 
 			CandidatePtr candidate_new;
