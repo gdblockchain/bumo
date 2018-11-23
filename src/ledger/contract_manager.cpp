@@ -1376,6 +1376,22 @@ namespace bumo{
 				break;
 			}
 			std::string vote_for_old = account_frm->GetVoteFor();
+			if (vote_for_new.empty()){
+				account_frm->SetVoteFor(vote_for_new);
+				int64_t frozen_coin = account_frm->GetFrozenCoin();
+				account_frm->UnfrozenCoin(frozen_coin);
+				
+				CandidatePtr candidate_old;
+				if (env->GetValidatorCandidate(vote_for_old, candidate_old)) {
+					int64_t votes = ElectionManager::Instance().CoinToVotes(frozen_coin);
+					int64_t frozen_votes_old = 0;
+					if (!utils::SafeIntSub(candidate_old->coin_vote(), votes, frozen_votes_old)) {
+						error_desc = utils::String::Format("The result overflowed when decrease votes for %s", vote_for_old.c_str());
+						break;
+					}
+					candidate_old->set_coin_vote(frozen_votes_old);
+				}
+			}
 
 			CandidatePtr candidate_new;
 			if (!env->GetValidatorCandidate(vote_for_new, candidate_new)) {
