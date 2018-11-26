@@ -72,6 +72,7 @@ function voteForCandidate(candidate, tokenAmount){
 	assert(getValidatorCandidate(candidate) !== false, 'No such validator candidate');
 	
 	setVoteForCandidate(candidate, tokenAmount);
+	log(sender + ' vote for ' + candidate.address + ', with token amount ' + tokenAmount);
     return;
 }
 
@@ -125,17 +126,16 @@ function voteAbolishValidator(malicious){
         }
         i += 1;
     }
-	log('halfVotes is: ' + halfVotes + ', ballot length: ' + abolishProposal[ballotVar].length);
+	
     let validVotes = abolishProposal[ballotVar].length - parseInt(halfVotes * 0.5);
-
+	log('Total ballot is ' + abolishProposal[ballotVar].length + ', halfVotes is ' + halfVotes);
+	
 	let validators = getValidators();
     if(validVotes < parseInt(validators.length * passRate + 0.5)){
-		log('validVotes ' + validVotes + ' less than ' + parseInt(validators.length * passRate + 0.5));
+		log('ValidVotes ' + validVotes + ' less than ' + parseInt(validators.length * passRate + 0.5));
         setMetaData(abolishKey, abolishProposal);
         return true;
     }
-	
-	setValidatorCandidate(malicious, '-' + candidate.pledge);
 	
     let forfeit = candidate.pledge;
     let left = int64Mod(forfeit, validators.length - 1);
@@ -158,7 +158,7 @@ function voteAbolishValidator(malicious){
 		}
         index += 1;
     }
-
+	setValidatorCandidate(malicious, '-' + candidate.pledge);
     setMetaData(abolishKey);
     return true;
 }
@@ -195,6 +195,7 @@ function abolishValidator(malicious, proof){
     newProposal[ballotVar]      = [sender];
 
     setMetaData(abolishKey, newProposal);
+	log(sender + ' submit a new proposal, ' + JSON.stringify(newProposal));
     return true;
 }
 
