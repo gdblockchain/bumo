@@ -8,3 +8,13 @@ function init(input_str){
     storageStore('global', JSON.stringify(attribute));
     storageStore(sender, attribute.supply);
 }
+
+function main(input_str){
+    let input = JSON.parse(input_str);
+    if(input.method === 'transfer'){
+        transfer(input.params.to, input.params.value);
+        return;
+    }
+
+    throw '<Main interface passes an invalid operation type>';
+}
