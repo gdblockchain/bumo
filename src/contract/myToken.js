@@ -1,4 +1,14 @@
 'use strict';
+
+function balanceOf(address){
+    assert(addressCheck(address) === true, 'Arg-address is not a valid address.');
+
+    let value = storageLoad(address);
+    assert(value !== false, 'Failed to get the balance of ' + address + ' from metadata.');
+    return value;
+}
+
+
 function init(input_str){
     let params = JSON.parse(input_str).params;
     assert(stoI64Check(params.supply) === true, 'Args check failed.');
