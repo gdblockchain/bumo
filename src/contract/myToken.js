@@ -1,5 +1,30 @@
 'use strict';
 
+function transfer(to, value){
+    assert(addressCheck(to) === true, 'Arg-to is not a valid address.');
+    assert(stoI64Check(value) === true, 'Arg-value must be alphanumeric.');
+    assert(int64Compare(value, '0') > 0, 'Arg-value must be greater than 0.');
+    if(sender === to) {
+        tlog('transfer', sender, to, value);  
+        return true;
+    }
+    
+    let senderValue = storageLoad(sender);
+    assert(senderValue !== false, 'Failed to get the balance of ' + sender + ' from metadata.');
+    assert(int64Compare(senderValue, value) >= 0, 'Balance:' + senderValue + ' of sender:' + sender + ' < transfer value:' + value + '.');
+
+    let toValue = storageLoad(to);
+    toValue = (toValue === false) ? value : int64Add(toValue, value); 
+    storageStore(to, toValue);
+
+    senderValue = int64Sub(senderValue, value);
+    storageStore(sender, senderValue);
+
+    tlog('transfer', sender, to, value);
+
+    return true;
+}
+
 function balanceOf(address){
     assert(addressCheck(address) === true, 'Arg-address is not a valid address.');
 
