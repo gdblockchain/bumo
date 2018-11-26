@@ -18,3 +18,15 @@ function main(input_str){
 
     throw '<Main interface passes an invalid operation type>';
 }
+
+function query(input_str){
+    let result = {};
+    let input  = JSON.parse(input_str);
+
+    if(input.method === 'balanceOf'){
+        result.balance = balanceOf(input.params.address);
+        return JSON.stringify(result);
+    }
+
+    throw '<Query interface passes an invalid operation type>';
+}
