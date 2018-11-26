@@ -33,7 +33,6 @@ function balanceOf(address){
     return value;
 }
 
-
 function init(input_str){
     let params = JSON.parse(input_str).params;
     assert(stoI64Check(params.supply) === true, 'Args check failed.');
