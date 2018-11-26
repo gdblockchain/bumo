@@ -288,9 +288,14 @@ namespace bumo {
 	void ElectionManager::DelValidatorCandidate(const std::string& key){
 		validator_candidates_.erase(key);
 		to_delete_candidates_.push_back(key);
-		update_votes_ = true;
-
 		DelAbnormalRecord(key);
+
+		protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
+		for (size_t i = 0; i < set.validators_size(); i++){
+			if (set.validators(i).address() == key){
+				update_votes_ = true;
+			}
+		}
 	}
 
 	bool ElectionManager::ValidatorCandidatesStorage() {
