@@ -90,7 +90,7 @@ function takebackCoin(tokenAmount){
         setValidatorCandidate(sender, '-' + tokenAmount);
         transferCoin(sender, tokenAmount);
     }
-    //bumo will update validator
+    // bumo will update validator
 }
 
 function voteAbolishValidator(malicious){
@@ -117,7 +117,7 @@ function voteAbolishValidator(malicious){
     assert(abolishProposal[ballotVar].includes(sender) !== true, sender + ' already voted.');
     abolishProposal[ballotVar].push(sender);
 
-	/*The votes of non-validators will discount 50%*/
+	// The votes of non-validators will discount 50%
     let halfVotes = 0;
     let i = 0;
     while(i < abolishProposal[ballotVar].length){
@@ -141,16 +141,16 @@ function voteAbolishValidator(malicious){
     let left = int64Mod(forfeit, validators.length - 1);
     let average = int64Div(forfeit, validators.length - 1);
     let index = 0;
-	let reward_index = 0;
+	let left_reward_index = 0;
 	
     while(index < validators.length){
         candidate = getValidatorCandidate(validators[index][0]);
 		if(candidate !== false && candidate.address === malicious) {
 			if(index === 0) {
-				reward_index = validators.length - 1;
+				left_reward_index = validators.length - 1; // left reward assign to the last one
 			}
 		} else if(candidate !== false) {
-			if (index === reward_index) {
+			if (index === left_reward_index) {
 				setValidatorCandidate(validators[index][0], int64Add(left, average));
 			} else {
 				setValidatorCandidate(validators[index][0], average);

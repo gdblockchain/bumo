@@ -153,21 +153,33 @@ namespace bumo{
 		bool change = false;
 		new_cfg = old_cfg;
 
-		std::shared_ptr<Json::Value> election_cfg;
-		settings_.Get(electionKey, election_cfg);
-		if (!election_cfg) return false;
+		Json::Value election_cfg;
+		AccountFrm::pointer election_config_contract;
+		if (!GetEntry(General::CONTRACT_ELECTION_CONFIG_ADDRESS, election_config_contract)) {
+			return false;
+		}
+		protocol::KeyPair pair;
+		if (!election_config_contract->GetMetaData(electionKey, pair)) {
+			return false;
+		}
+		else {
+			if (!election_cfg.fromString(pair.value())) {
+				LOG_ERROR("Failed to parse election configuration from metadata data, %s", pair.value().c_str());
+				return false;
+			}
+		}
 
-		for (auto it = election_cfg->begin(); it != election_cfg->end(); it++) {
+		for (auto it = election_cfg.begin(); it != election_cfg.end(); it++) {
 			std::string key = it.memberName();
-			std::string value = (*election_cfg)[key].asString();
+			std::string value = election_cfg[key].asString();
 
 			if (key == "fee_distribution_rate" && old_cfg.fee_distribution_rate() != value) {
 				change = true;
-				std::string value = (*election_cfg)[key].asString();
+				std::string value = election_cfg[key].asString();
 				new_cfg.set_fee_distribution_rate(value);
 			}
 			else {
-				int64_t value = (*election_cfg)[key].asInt64();
+				int64_t value = election_cfg[key].asInt64();
 				if (key == "pledge_amount" && old_cfg.pledge_amount() != value) {
 					change = true;
 					new_cfg.set_pledge_amount(value);

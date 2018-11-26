@@ -2,6 +2,7 @@
 const proposalRecordsKey = 'proposalRecordsKey';
 const voteRecordKeyPrefix = 'voteRecords_';
 const nonceKey = 'nonce';
+const electionConfigKey = 'configElection';
 const passRate = 0.7;
 const effectiveProposalInterval = 15 * 24 * 60 * 60 * 1000000;
 let proposalRecords = {};
@@ -96,7 +97,8 @@ function voteCfg(proposalId) {
 		let output = proposalRecords[proposalId].configuration;
 		delete proposalRecords[proposalId];
 		storageDel(key);   
-		configElectionCfg(JSON.stringify(output));
+		storageStore(electionConfigKey, JSON.stringify(output));
+		log('Election configuration has been update, new configuration: ' + JSON.stringify(output));
 	}
 	else {
 		storageStore(key,JSON.stringify(proposalRecordBody));

@@ -561,6 +561,7 @@ namespace bumo {
 		protocol::ElectionConfig& election_cfg_old = ElectionManager::Instance().GetProtoElectionCfg();
 		if (ledger->environment_->GetVotedElectionConfig(election_cfg_old, election_cfg)) {
 			election.ElectionConfigSet(election.GetCandidateMpt()->batch_, election_cfg);
+			election_cfg_old = election_cfg;
 			election.ReadSharerRate();
 			LOG_INFO("Update election configuration from %s to %s", election_cfg_old.DebugString().c_str(), election_cfg.DebugString().c_str());
 		}
