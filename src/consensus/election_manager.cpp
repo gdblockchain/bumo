@@ -216,7 +216,7 @@ namespace bumo {
 			return 0;
 		}
 		else {
-			return fee / election_config_.coin_to_vote_rate();
+			return fee / election_config_.fee_to_vote_rate();
 		}
 	}
 

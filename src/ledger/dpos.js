@@ -82,11 +82,11 @@ function takebackCoin(tokenAmount){
     let left = int64Sub(candidate.pledge, tokenAmount);
     let com = int64Compare(left, validatorMinPledge);
     if(com === -1){
-        setValidatorCandidate(sender, '-'+ candidate.pledge);
-        transferCoin(sender, candidate.pledge);
+        setValidatorCandidate(sender, '-' + candidate.pledge);
+        transferCoin(sender, String(candidate.pledge));
     }
     else{
-        setValidatorCandidate(sender, '-'+ tokenAmount);
+        setValidatorCandidate(sender, '-' + tokenAmount);
         transferCoin(sender, tokenAmount);
     }
     //bumo will update validator
@@ -120,38 +120,42 @@ function voteAbolishValidator(malicious){
     let halfVotes = 0;
     let i = 0;
     while(i < abolishProposal[ballotVar].length){
-        if(findValidator(abolishProposal[ballotVar]) === false){
+        if(findValidator(abolishProposal[ballotVar][i]) === false){
             halfVotes += 1;
         }
         i += 1;
     }
-    let validVotes = Object.keys(abolishProposal[ballotVar]).length - parseInt(halfVotes * 0.5);
+	log('halfVotes is: ' + halfVotes + ', ballot length: ' + abolishProposal[ballotVar].length);
+    let validVotes = abolishProposal[ballotVar].length - parseInt(halfVotes * 0.5);
 
 	let validators = getValidators();
     if(validVotes < parseInt(validators.length * passRate + 0.5)){
+		log('validVotes ' + validVotes + ' less than ' + parseInt(validators.length * passRate + 0.5));
         setMetaData(abolishKey, abolishProposal);
         return true;
     }
 	
-	setValidatorCandidate(malicious, '-'+ candidate.pledge);
-	if(findValidator(malicious) === true){
-		validators = getValidators();
-	}
+	setValidatorCandidate(malicious, '-' + candidate.pledge);
 	
     let forfeit = candidate.pledge;
-    let award   = int64Mod(forfeit, validators.length);
-    let average = int64Div(forfeit, validators.length);
+    let left = int64Mod(forfeit, validators.length - 1);
+    let average = int64Div(forfeit, validators.length - 1);
     let index = 0;
-    let newTokenAmount = 0;
+	let reward_index = 0;
 	
     while(index < validators.length){
         candidate = getValidatorCandidate(validators[index][0]);
-		if (index === 0) {
-			newTokenAmount = candidate.pledge + average + award;
-		} else {
-			newTokenAmount = candidate.pledge + average;
+		if(candidate !== false && candidate.address === malicious) {
+			if(index === 0) {
+				reward_index = validators.length - 1;
+			}
+		} else if(candidate !== false) {
+			if (index === reward_index) {
+				setValidatorCandidate(validators[index][0], int64Add(left, average));
+			} else {
+				setValidatorCandidate(validators[index][0], average);
+			}
 		}
-        setVoteForCandidate(validators[index][0], newTokenAmount);
         index += 1;
     }
 
@@ -174,7 +178,8 @@ function abolishValidator(malicious, proof){
         let abolishProposal = JSON.parse(abolishStr);
         if(blockTimestamp >= abolishProposal[expiredTimeVar]){
             log('Update expired time of abolishing validator(' + malicious + ').'); 
-            voteAbolishValidator(malicious);
+            abolishProposal[expiredTimeVar] = blockTimestamp;
+            setMetaData(abolishKey, abolishProposal);
         }
         else{
             log('Already abolished validator(' + malicious + ').'); 
@@ -183,13 +188,24 @@ function abolishValidator(malicious, proof){
     }
 
     let newProposal = {};
-    newProposal[abolishVar]     = malicious;
+    newProposal[abolishVar.slice(0, -1)]     = malicious;
     newProposal[reasonVar]      = proof;
     newProposal[proposerVar]    = sender;
     newProposal[expiredTimeVar] = blockTimestamp + effectiveAbolishVoteInterval;
     newProposal[ballotVar]      = [sender];
 
     setMetaData(abolishKey, newProposal);
+    return true;
+}
+
+function quitAbolishValidator(malicious){
+    assert(addressCheck(malicious) === true, 'Invalid malicious address.');
+
+    let abolishKey = abolishVar + malicious;
+    let abolishProposal = getObjectMetaData(abolishKey);
+    assert(sender === abolishProposal[proposerVar], sender + ' is not proposer, has no permission to quit the abolishProposal.');
+
+    setMetaData(abolishKey);
     return true;
 }
 
@@ -236,6 +252,9 @@ function main(input_str){
     }
     else if(input.method === 'voteForAbolish'){
     	voteAbolishValidator(input.params.address);
+    }
+	else if(input.method === 'quitAbolish'){
+    	quitAbolishValidator(input.params.address);
     }
     else{
         throw '<undidentified operation type>';
