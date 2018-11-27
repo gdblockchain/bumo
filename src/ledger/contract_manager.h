@@ -132,14 +132,22 @@ namespace bumo{
 		virtual bool Cancel();
 		virtual bool Query(Json::Value& jsResult);
 		virtual bool SourceCodeCheck();
-
 		static bool Initialize(int argc, char** argv);
+
+	private:
+		static bool LoadJsFuncList();
 		static bool LoadJsLibSource();
 		static bool LoadJslintGlobalString();
-		static std::map<std::string, std::string> jslib_sources;
+		static std::string GetGlobalString();
+		static std::map<std::string, std::string> jslib_sources_;
 		static std::map<std::string, v8::FunctionCallback> js_func_read_;
 		static std::map<std::string, v8::FunctionCallback> js_func_write_;
+
+		static std::map<std::string, v8::FunctionCallback> js_func_read_gt1001_;
+		static std::map<std::string, v8::FunctionCallback> js_func_write_gt1001_;
+
 		static std::string user_global_string_;
+		static std::string user_global_string_gt1001_;
 
 		static const std::string sender_name_;
 		static const std::string this_address_;
@@ -163,12 +171,14 @@ namespace bumo{
 
 		static bool RemoveRandom(v8::Isolate* isolate, Json::Value &error_msg);
 		static v8::Local<v8::Context> CreateContext(v8::Isolate* isolate, bool readonly);
+		static void InitFuncTemplateGt1001(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> global, bool readonly);
 		static V8Contract *GetContractFrom(v8::Isolate* isolate);
 		static Json::Value ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
 		static const char* ToCString(const v8::String::Utf8Value& value);
 		static void CallBackLog(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackTopicLog(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackGetAccountAsset(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackGetAccountMetadata(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackSetValidators(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackGetValidators(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackAddressValidCheck(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -194,6 +204,9 @@ namespace bumo{
 		static void CallBackGetBalance(const v8::FunctionCallbackInfo<v8::Value>& args);
 		//Get the hash of one of the 1024 most recent complete blocks
 		static void CallBackGetBlockHash(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackSha256(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackVerify(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackToAddress(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 		//Sends a message with arbitrary date to a given address path
 		static void CallBackStorageStore(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -227,22 +240,15 @@ namespace bumo{
 
     private:
         bool ExecuteCode(const char* fname);
-	};
 
-	class QueryContract : public utils::Thread{
-		Contract *contract_;
-		ContractParameter parameter_;
-		Json::Value result_;
-		bool ret_;
-		utils::Mutex mutex_;
-	public:
-		QueryContract();
-		~QueryContract();
+		typedef enum tagDataEncodeType {
+			BASE16 = 0,
+			RAW_DATA = 1,
+			BASE64 = 2
+		}DataEncodeType;
 
-		bool Init(int32_t type, const ContractParameter &paramter);
-		virtual void Run();
-		void Cancel();
-		bool GetResult(Json::Value &result);
+		static bool TransEncodeType(const v8::Local<v8::Value> &arg, DataEncodeType &data_type);
+		static bool TransEncodeData(const v8::Local<v8::Value> &raw_data, const DataEncodeType &encode_type, std::string &result_data);
 	};
 
 	typedef std::map<int64_t, Contract *> ContractMap;
