@@ -570,7 +570,7 @@ namespace bumo {
 				std::string err_msg;
 				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, true);
 
-				if (CHECK_VERSION_GT_1000 && result_.code() == 0){
+				if (result_.code() == 0){
 					Json::Value contract_result;
 					contract_result["contract_address"] = dest_address;
 					contract_result["operation_index"] = index_;
