@@ -74,7 +74,8 @@ namespace bumo {
 		}
 
 		bool ReadSharerRate();
-		protocol::ElectionConfig& GetProtoElectionCfg();
+		const protocol::ElectionConfig& GetProtoElectionCfg();
+		void SetProtoElectionCfg(const protocol::ElectionConfig& ecfg);
 		bool ElectionConfigGet(protocol::ElectionConfig& ecfg);
 		int32_t GetCandidatesNumber();
 		static void ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg);

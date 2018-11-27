@@ -132,8 +132,12 @@ namespace bumo {
 		batch->Put(General::ELECTION_CONFIG, ecfg.SerializeAsString());
 	}
 
-	protocol::ElectionConfig& ElectionManager::GetProtoElectionCfg() {
+	const protocol::ElectionConfig& ElectionManager::GetProtoElectionCfg() {
 		return election_config_;
+	}
+
+	void ElectionManager::SetProtoElectionCfg(const protocol::ElectionConfig& ecfg) {
+		election_config_ = ecfg;
 	}
 
 	bool ElectionManager::ElectionConfigGet(protocol::ElectionConfig &ecfg) {
