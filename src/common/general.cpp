@@ -29,10 +29,11 @@ namespace bumo {
 		3.Create a contract account without destination address, and it will be created automatically.
 	*/
 	const uint32_t General::LEDGER_VERSION_HISTORY_1000 = 1000;
-	const uint32_t General::LEDGER_VERSION = 1001;
+	const uint32_t General::LEDGER_VERSION_HISTORY_1001 = 1001;
+	const uint32_t General::LEDGER_VERSION = 1002;
 	const uint32_t General::LEDGER_MIN_VERSION = 1000;
 	const uint32_t General::MONITOR_VERSION = 1000;
-	const char *General::BUMO_VERSION = "1.0.0.8";
+	const char *General::BUMO_VERSION = "1.1.0";
 
 #ifdef WIN32
 	const char *General::DEFAULT_KEYVALUE_DB_PATH = "data/keyvalue.db";
@@ -96,6 +97,7 @@ namespace bumo {
 	const int32_t General::TRANSACTION_LIMIT_SIZE = utils::BYTES_PER_MEGA;
 	const int32_t General::TXSET_LIMIT_SIZE = 16 * utils::BYTES_PER_MEGA;
 
+	int64_t General::chain_id_ = 0;
 
 	Result::Result(){
 		code_ = protocol::ERRCODE_SUCCESS;
