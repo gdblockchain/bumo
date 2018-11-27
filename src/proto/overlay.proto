@@ -24,13 +24,13 @@ message Hello {
     int64 listening_port = 5;
     string node_address = 6;
     string node_rand = 7;
+    int64 chain_id = 8;
 }
 
 message HelloResponse {
 	 ERRORCODE error_code = 1;
 	 string error_desc = 2;
 }
-
 
 //for peers message
 message Peer {
