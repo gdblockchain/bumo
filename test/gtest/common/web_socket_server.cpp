@@ -1894,8 +1894,7 @@ namespace bumo{
 
 		
 	}
-	void WebSocketServer::RequestAccountExceptionTest()
-	{
+	void WebSocketServer::RequestAccountExceptionTest(){
 		printf("**Test Start**this is a test to verify the response of request \"account_exception\"!\n");
 		uint32_t testconditions[] = { 
 			GENERAL_CASE_RESPONSE_ERRCODE_0, 
