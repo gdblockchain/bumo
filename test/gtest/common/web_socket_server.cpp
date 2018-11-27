@@ -254,8 +254,7 @@ namespace bumo{
 			send_message_lists_.push_back(message.toFastString());
 		} while (false);
 	}
-	void MsgProcessor::DetermineResponse(std::string method)
-	{
+	void MsgProcessor::DetermineResponse(std::string method){
 		Json::Value result;
 		int errcode;
 
