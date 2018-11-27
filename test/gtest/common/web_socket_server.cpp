@@ -231,8 +231,7 @@ namespace bumo{
 		return bret;
 
 	}
-	void MsgProcessor::SendRequestMessage(const std::string& method, const bool& request, const Json::Value& parameter) 
-	{
+	void MsgProcessor::SendRequestMessage(const std::string& method, const bool& request, const Json::Value& parameter){
 		do {
 			Json::Value message;
 			message["method"] = method;
