@@ -1917,8 +1917,7 @@ namespace bumo{
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestUpgradeTest()
-	{
+	void WebSocketServer::RequestUpgradeTest(){
 		printf("**Test Start**this is a test to verify the response of request \"upgrade\"!\n");
 		
 		uint32_t testconditions[] = { 
