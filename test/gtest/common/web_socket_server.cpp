@@ -1911,8 +1911,7 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(ACCTEXCP);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
-		{
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
