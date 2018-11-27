@@ -38,8 +38,9 @@
 		}
     },
     "genesis": {
+        "chain_id": 0,
         "account": "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3",
-	"slogan" : "a new era of value",
+        "slogan" : "a new era of value",
         "fees": {
             "base_reserve": 10000000,
             "gas_price": 1000
