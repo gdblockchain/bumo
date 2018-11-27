@@ -108,6 +108,8 @@ namespace bumo {
 
 		std::string account_;
 		utils::StringList validators_;
+
+		int64_t chain_id_;
 		bool Load(const Json::Value &value);
 	};
 
