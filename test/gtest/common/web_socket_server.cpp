@@ -1951,8 +1951,7 @@ namespace bumo{
 
 
 	}
-	void WebSocketServer::RequestSetConfigTest()
-	{
+	void WebSocketServer::RequestSetConfigTest(){
 		printf("**Test Start**this is a test to verify the response of request \"set_configure\"!\n");
 		
 		uint32_t testconditions[] = { 
