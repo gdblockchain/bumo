@@ -240,7 +240,6 @@ namespace bumo{
 		js_func_write_["tlog"] = V8Contract::CallBackTopicLog;
 		js_func_write_["setValidatorCandidate"] = V8Contract::CallBackSetValidatorCandidate;
 		js_func_write_["setVoteForCandidate"] = V8Contract::CallBackSetVoteForCandidate;
-		js_func_write_["configElectionCfg"] = V8Contract::CallBackConfigElectionCfg;
 
 		LoadJsLibSource();
 		LoadJslintGlobalString();
@@ -267,7 +266,7 @@ namespace bumo{
 
 		v8::Context::Scope context_scope(context);
 
-		//block number, timestamp, orginal
+		//block number, timestamp, original
 
 		auto string_sender = v8::String::NewFromUtf8(isolate_, parameter_.sender_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
 		context->Global()->Set(context,
@@ -769,49 +768,6 @@ namespace bumo{
 			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
 			LOG_INFO("UpdateFee: bottom tx(%s), top tx(%s), result(%s)", utils::String::BinToHexString(ledger_context->GetBottomTx()->GetContentHash()).c_str(),utils::String::BinToHexString(ledger_context->GetTopTx()->GetContentHash()).c_str(), json.toFastString().c_str());
 			ledger_context->GetTopTx()->environment_->UpdateFeeConfig(json);
-			args.GetReturnValue().Set(true);
-			return;
-		} while (false);
-		LOG_ERROR("%s", error_desc.c_str());
-		args.GetIsolate()->ThrowException(
-			v8::String::NewFromUtf8(args.GetIsolate(), error_desc.c_str(),
-			v8::NewStringType::kNormal).ToLocalChecked());
-	}
-
-	void V8Contract::CallBackConfigElectionCfg(const v8::FunctionCallbackInfo<v8::Value>& args){
-		std::string error_desc;
-		do{
-			if (args.Length() < 1) {
-				error_desc = "parameter number error";
-				break;
-			}
-			if (!args[0]->IsString()) {
-				error_desc = "parameter should be a string";
-				break;
-			}
-
-			v8::HandleScope scope(args.GetIsolate());
-			V8Contract *v8_contract = GetContractFrom(args.GetIsolate());
-			if (!v8_contract || !v8_contract->parameter_.ledger_context_) {
-				error_desc = "Failed to find contract object by isolate id";
-				break;
-			}
-
-			if (v8_contract->parameter_.this_address_ != General::CONTRACT_ELECTION_CONFIG_ADDRESS) {
-				error_desc = "This address has no priority.";
-				break;
-			}
-
-			v8::String::Utf8Value  utf8(args[0]);
-			Json::Value json;
-			if (!json.fromCString(ToCString(utf8))) {
-				error_desc = "Failed to execute fromCString function, fatal error.";
-				break;
-			}
-
-			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
-			LOG_INFO("UpdateFee: bottom tx(%s), top tx(%s), result(%s)", utils::String::BinToHexString(ledger_context->GetBottomTx()->GetContentHash()).c_str(), utils::String::BinToHexString(ledger_context->GetTopTx()->GetContentHash()).c_str(), json.toFastString().c_str());
-			ledger_context->GetTopTx()->environment_->UpdateElectionConfig(json);
 			args.GetReturnValue().Set(true);
 			return;
 		} while (false);

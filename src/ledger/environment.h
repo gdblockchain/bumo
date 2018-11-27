@@ -48,7 +48,6 @@ namespace bumo {
 
 		bool UpdateFeeConfig(const Json::Value &fee_config);
 		bool GetVotedFee(const protocol::FeeConfig &old_fee, protocol::FeeConfig& new_fee);
-		bool UpdateElectionConfig(const Json::Value& electionConfig);
 		bool GetVotedElectionConfig(const protocol::ElectionConfig& old_cfg, protocol::ElectionConfig& new_cfg);
 
 		Json::Value& GetValidators();

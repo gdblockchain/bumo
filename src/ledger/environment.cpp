@@ -132,23 +132,6 @@ namespace bumo{
 		return change;
 	}
 
-	bool Environment::UpdateElectionConfig(const Json::Value& electionConfig) {
-		std::shared_ptr<Json::Value> ecfg;
-		settings_.Get(electionKey, ecfg);
-
-		if (!ecfg){
-			ecfg = std::make_shared<Json::Value>(electionConfig);
-			settings_.Set(electionKey, ecfg);
-		}
-		else{
-			for (auto it = electionConfig.begin(); it != electionConfig.end(); it++) {
-				(*ecfg)[it.memberName()] = electionConfig[it.memberName()];
-			}
-		}
-
-		return true;
-	}
-
 	bool Environment::GetVotedElectionConfig(const protocol::ElectionConfig& old_cfg, protocol::ElectionConfig& new_cfg) {
 		bool change = false;
 		new_cfg = old_cfg;
