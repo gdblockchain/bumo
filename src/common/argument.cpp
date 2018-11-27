@@ -460,6 +460,67 @@ namespace bumo {
 				}
 				return false;
 			}
+			else if ( s == "--force-ledger-seq") {
+				std::string ledger_db_path = utils::String::Format("%s/data/ledger.db", utils::File::GetBinHome().c_str());
+				std::string account_db_path = utils::String::Format("%s/data/account.db", utils::File::GetBinHome().c_str());
+
+				KeyValueDb* ledger_db = nullptr;
+				KeyValueDb* account_db = nullptr;
+#ifdef WIN32
+				ledger_db = new LevelDbDriver();
+				account_db = new LevelDbDriver();
+#else
+				ledger_db = new RocksDbDriver();
+				account_db = new RocksDbDriver();
+#endif
+				if (!ledger_db->Open(ledger_db_path, -1)) {
+					printf("%s", ledger_db->error_desc().c_str());
+					return true;
+				}
+
+				if (!account_db->Open(account_db_path, -1)) {
+					printf("%s", account_db->error_desc().c_str());
+					return true;
+				}
+
+				std::string ledger_db_seq;
+				std::string account_db_seq;
+				if (!ledger_db->Get(General::KEY_LEDGER_SEQ, ledger_db_seq)) {
+					printf("Failed to get ledger seq from ledger-db\n");
+					return true;
+				}
+
+				if (!account_db->Get(General::KEY_LEDGER_SEQ, account_db_seq)) {
+					printf("Failed to get ledger seq from account-db\n");
+					return true;
+				}
+
+				int64_t int_ledger_db_seq = utils::String::Stoi64(ledger_db_seq);
+				int64_t int_account_db_seq = utils::String::Stoi64(account_db_seq);
+				
+				if (int_account_db_seq != int_ledger_db_seq - 1) {
+					printf("Error, ledger seq (%s) from ledger-db not equal with seq (%s) + 1 from account-db\n",
+						ledger_db_seq.c_str(), account_db_seq.c_str());
+					return true;
+				}
+
+				printf("Input y to continue(ledger db seq(" FMT_I64 "), account db seq(" FMT_I64 "):",
+					int_ledger_db_seq, int_account_db_seq);
+				char ch;
+				std::cin >> ch;
+
+				if (ch != 'y'){
+					return true;
+				}
+
+				if (!ledger_db->Put(General::KEY_LEDGER_SEQ, account_db_seq)) {
+					printf("Failed to get ledger seq from account-db\n");
+					return true;
+				}
+
+				printf("Set ledger seq to " FMT_I64 " successfully", int_account_db_seq);
+				return true;
+			}
 			else if (s == "--dbtool") {
 				printf("input database path:\n");
 				std::string path;
@@ -539,6 +600,7 @@ namespace bumo {
 			"  --sign-data-with-keystore <keystore> <password> <blob data>   sign blob data with keystore\n"
 			"  --check-keystore <keystore> <password>                        check password match the keystore\n"
 			"  --get-privatekey-from-keystore <keystore> <password>          check password match the keystore\n"
+			"  --force-ledger-seq                                            make the ledge-seq equal\n"
 			"  --log-dest <dest>                                             set log dest, LIKE FILE+STDOUT+STDERR\n"
 			"  --help                                                        display this help\n"
 			);

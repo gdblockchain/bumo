@@ -106,6 +106,8 @@ namespace bumo {
 		ConfigureBase::GetValue(value, "query_limit", query_limit_);
 		ConfigureBase::GetValue(value, "multiquery_limit", multiquery_limit_);
 		ConfigureBase::GetValue(value, "thread_count", thread_count_);
+		ConfigureBase::GetValue(value, "allow_origin", allow_origin_);
+		
 		
 		if (ssl_enable_)
 			ssl_configure_.Load(value["ssl"]);
