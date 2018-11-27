@@ -1789,8 +1789,7 @@ namespace bumo{
 		EXPECT_EQ(msg_processor_.GetTestOutput(), HELLO_VALID | REG_VALID| HB_VALID);
 		
 	}
-	void WebSocketServer::BadSessionIDTest()
-	{
+	void WebSocketServer::BadSessionIDTest(){
 		printf("**Test Start**This is a test to verify if a request with bad session id send, it is discard and the system keeps normal !\n");
 		printf("**Test Start**This is a test to verify if a response with bad session id send, it is discard and the system keeps normal !\n");
 		bool ret = true;
