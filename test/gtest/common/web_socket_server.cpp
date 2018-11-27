@@ -1843,8 +1843,7 @@ namespace bumo{
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestSystemTest()
-	{
+	void WebSocketServer::RequestSystemTest(){
 		printf("**Test Start**this is a test to verify the response of request \"system\"!\n");
 		uint32_t testconditions[] = { 
 			GENERAL_CASE_RESPONSE_ERRCODE_0, 
