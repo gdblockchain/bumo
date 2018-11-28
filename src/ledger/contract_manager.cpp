@@ -1046,10 +1046,8 @@ namespace bumo{
 
 			std::shared_ptr<Environment> environment = ledger_context->GetTopTx()->environment_;
 			if (!environment->GetEntry(address, account_frm)) {
-				if (!Environment::AccountFromDB(address, account_frm)) {
-					LOG_TRACE("Failed to find account %s.", address.c_str());
-					break;
-				}
+				LOG_TRACE("Failed to find account %s.", address.c_str());
+				break;
 			}
 
 			protocol::AssetStore asset;
@@ -1092,10 +1090,8 @@ namespace bumo{
 			bumo::AccountFrm::pointer account_frm = nullptr;
 			std::shared_ptr<Environment> environment = ledger_context->GetTopTx()->environment_;
 			if (!environment->GetEntry(address, account_frm)) {
-				if (!Environment::AccountFromDB(address, account_frm)) {
-					LOG_TRACE("Failed to find account %s.", address.c_str());
-					break;
-				}
+				LOG_TRACE("Failed to find account %s.", address.c_str());
+				break;
 			}
 
 			protocol::KeyPair key_pair;
@@ -1145,10 +1141,8 @@ namespace bumo{
 
 			std::shared_ptr<Environment> environment = ledger_context->GetTopTx()->environment_;
 			if (!environment->GetEntry(address, account_frm)) {
-				if (!Environment::AccountFromDB(address, account_frm)) {
-					LOG_TRACE("Failed to find account %s.", address.c_str());
-					break;
-				}
+				LOG_TRACE("Failed to find account %s.", address.c_str());
+				break;
 			}
 
 			if (!account_frm->GetProtoAccount().has_contract()) {
@@ -1850,10 +1844,8 @@ namespace bumo{
 			bumo::AccountFrm::pointer account_frm = nullptr;
 			std::shared_ptr<Environment> environment = ledger_context->GetTopTx()->environment_;
 			if (!environment->GetEntry(v8_contract->parameter_.this_address_, account_frm)) {
-				if (!Environment::AccountFromDB(v8_contract->parameter_.this_address_, account_frm)) {
-					LOG_ERROR("Failed to find account %s.", v8_contract->parameter_.this_address_.c_str());
-					break;
-				}
+				LOG_ERROR("Failed to find account %s.", v8_contract->parameter_.this_address_.c_str());
+				break;
 			}
 
 			protocol::KeyPair kp;
