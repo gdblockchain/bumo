@@ -25,23 +25,33 @@
 #include "consensus/election_manager.h"
 
 namespace bumo {
+	class CandidatesAdaptor : public utils::AtomMap<std::string, protocol::ValidatorCandidate>{
+	public:
+		CandidatesAdaptor() = default;
+		CandidatesAdaptor(CandidatesAdaptor const&) = delete;
+		CandidatesAdaptor& operator=(CandidatesAdaptor const&) = delete;
+		CandidatesAdaptor(Map* candidates);
+
+		virtual bool GetFromDB(const std::string& addr, CandidatePtr& candidate);
+		virtual void updateToDB();
+	};
+
 	class Environment : public utils::AtomMap<std::string, AccountFrm>{
 	public:
 		typedef AtomMap<std::string, Json::Value>::Map SettingMap;
-		typedef AtomMap<std::string, protocol::ValidatorCandidate>::Map CandidateMap;
-
+		
 		const std::string validatorsKey = "validators";
 		const std::string feesKey = "configFees";
 		const std::string electionKey = "configElection";
 
 		AtomMap<std::string, Json::Value> settings_;
-		AtomMap<std::string, protocol::ValidatorCandidate> candidates_;
+		CandidatesAdaptor candidates_;
 
 		Environment() = default;
 		Environment(Environment const&) = delete;
 		Environment& operator=(Environment const&) = delete;
 
-		Environment(Map* data, SettingMap* settings, CandidateMap* candidates);
+		Environment(Map* data, SettingMap* settings, CandidatesAdaptor::Map* candidates);
 
 		bool GetEntry(const std::string& key, AccountFrm::pointer &frm);
 		bool AddEntry(const std::string& key, AccountFrm::pointer frm);
@@ -57,7 +67,7 @@ namespace bumo {
 		bool GetValidatorCandidate(const std::string& addr, CandidatePtr& candidate);
 		bool SetValidatorCandidate(const std::string& addr, CandidatePtr candidate);
 		bool DelValidatorCandidate(const std::string& addr);
-		bool UpdateValidatorCandidate();
+		void UpdateValidatorCandidate();
 
 		bool Commit();
 		void ClearChangeBuf();

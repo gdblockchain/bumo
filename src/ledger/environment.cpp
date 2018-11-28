@@ -19,7 +19,38 @@
 
 namespace bumo{
 
-	Environment::Environment(Map* data, SettingMap* settings, CandidateMap* candidates) :
+	CandidatesAdaptor::CandidatesAdaptor(Map* candidates) : 
+		AtomMap<std::string, protocol::ValidatorCandidate>(candidates)
+	{
+	}
+
+	bool CandidatesAdaptor::GetFromDB(const std::string& addr, CandidatePtr& candidate){
+		CandidatePtr cache = nullptr;
+		cache = ElectionManager::Instance().GetValidatorCandidate(addr);
+		if (cache){
+			candidate = std::make_shared<protocol::ValidatorCandidate>(*cache);
+			return true;
+		}
+		else{
+			candidate = nullptr;
+			return false;
+		}
+	}
+
+	void CandidatesAdaptor::updateToDB(){
+		auto newCandidates = GetData();
+
+		for (auto it : newCandidates){
+			if (it.second.type_ == utils::DEL){
+				ElectionManager::Instance().DelValidatorCandidate(it.first);
+			}
+			else{
+				ElectionManager::Instance().SetValidatorCandidate(it.first, it.second.ptr_);
+			}
+		}
+	}
+
+	Environment::Environment(Map* data, SettingMap* settings, CandidatesAdaptor::Map* candidates) :
 		AtomMap<std::string, AccountFrm>(data), 
 		settings_(settings), 
 		candidates_(candidates)
@@ -71,7 +102,7 @@ namespace bumo{
 	{
 		Map& data	= GetChangeBuf();
 		SettingMap& settings = settings_.GetChangeBuf();
-		CandidateMap& candidates = candidates_.GetChangeBuf();
+		CandidatesAdaptor::Map& candidates = candidates_.GetChangeBuf();
 		std::shared_ptr<Environment> next = std::make_shared<Environment>(&data, &settings, &candidates);
 
 		return next;
@@ -238,23 +269,7 @@ namespace bumo{
 	}
 
 	bool Environment::GetValidatorCandidate(const std::string& addr, CandidatePtr& candidate){
-
-		CandidatePtr cache = nullptr;
-		if (candidates_.Get(addr, cache)){
-			candidate = cache;
-		}
-		else{
-			cache = ElectionManager::Instance().GetValidatorCandidate(addr);
-			if (cache){
-				candidate = std::make_shared<protocol::ValidatorCandidate>(*cache);
-				candidates_.Set(addr, candidate);
-			}
-			else{
-				candidate = nullptr;
-				return false;
-			}
-		}
-		return true;
+		return candidates_.Get(addr, candidate);
 	}
 
 	bool Environment::SetValidatorCandidate(const std::string& addr, CandidatePtr candidate){
@@ -265,20 +280,7 @@ namespace bumo{
 		return candidates_.Del(addr);
 	}
 
-	bool Environment::UpdateValidatorCandidate(){
-		const CandidateMap& newCandidates = candidates_.GetData();
-
-		for (auto it : newCandidates){
-			if (it.second.type_ == utils::DEL){
-				ElectionManager::Instance().DelValidatorCandidate(it.first);
-			}
-			else{
-				if (!ElectionManager::Instance().SetValidatorCandidate(it.first, it.second.ptr_)){
-					return false;
-				}
-			}
-		}
-
-		return true;
+	void Environment::UpdateValidatorCandidate(){
+		candidates_.updateToDB();
 	}
 }
