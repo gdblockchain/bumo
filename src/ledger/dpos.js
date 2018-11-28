@@ -1,12 +1,18 @@
 'use strict';
 
-let effectiveAbolishVoteInterval = 15 * 24 * 60 * 60 * 1000 * 1000;
-const passRate        = 0.7;
-const abolishVar      = 'abolish_';
-const proposerVar     = 'proposer';
-const reasonVar       = 'reason';
-const ballotVar       = 'ballot';
-const expiredTimeVar  = 'voting_expired_time';
+const passRate            = 0.7;
+const abolishVar          = 'abolish_';
+const proposerVar         = 'proposer';
+const reasonVar           = 'reason';
+const ballotVar           = 'ballot';
+const expiredTimeVar      = 'voting_expired_time';
+const proposalRecordsKey  = 'proposalRecordsKey';
+const voteRecordKeyPrefix = 'voteRecords_';
+const nonceKey            = 'nonce';
+const electionConfigKey   = 'configElection';
+
+let effectiveVoteInterval = 15 * 24 * 60 * 60 * 1000 * 1000;
+let proposalRecords = {};
 
 function getObjectMetaData(key){
     assert(typeof key === 'string', 'Args type error, key must be a string.');
@@ -58,10 +64,11 @@ function findValidator(addr){
 
 function applyAsCandidate(){
     let candidate = getValidatorCandidate(sender);
+    let configure = getObjectMetaData(electionConfigKey);
 
     if(candidate === false){
-        let com = int64Compare(thisPayCoinAmount, validatorMinPledge);
-        assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + validatorMinPledge);
+        let com = int64Compare(thisPayCoinAmount, configure.pledge_amount);
+        assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + configure.pledge_amount);
     }
 
     setValidatorCandidate(sender, thisPayCoinAmount);
@@ -78,10 +85,11 @@ function voteForCandidate(candidate, tokenAmount){
 
 function takebackCoin(tokenAmount){
     let candidate = getValidatorCandidate(sender);
+    let configure = getObjectMetaData(electionConfigKey);
     assert(candidate !== false, 'Sender(' + sender + ') is not validator candidate.');
 
     let left = int64Sub(candidate.pledge, tokenAmount);
-    let com = int64Compare(left, validatorMinPledge);
+    let com = int64Compare(left, configure.pledge_amount);
     if(com === -1){
         setValidatorCandidate(sender, '-' + candidate.pledge);
         transferCoin(sender, String(candidate.pledge));
@@ -191,7 +199,7 @@ function abolishValidator(malicious, proof){
     newProposal[abolishVar.slice(0, -1)]     = malicious;
     newProposal[reasonVar]      = proof;
     newProposal[proposerVar]    = sender;
-    newProposal[expiredTimeVar] = blockTimestamp + effectiveAbolishVoteInterval;
+    newProposal[expiredTimeVar] = blockTimestamp + effectiveVoteInterval;
     newProposal[ballotVar]      = [sender];
 
     setMetaData(abolishKey, newProposal);
@@ -210,6 +218,84 @@ function quitAbolishValidator(malicious){
     return true;
 }
 
+function loadProposalRecords() {
+	let result = storageLoad(proposalRecordsKey);
+	if (result === false) {
+		return false;
+	}
+	
+	proposalRecords = JSON.parse(result);
+	return true;
+}
+
+function proposalCfg(configuration) {
+	let accountId = sender;
+	assert(getValidatorCandidate(accountId) !== false, 'No such validator candidate');
+
+	let result = storageLoad(nonceKey);
+	assert(result !== false, 'Failed to load nonce');
+	let nonce = parseInt(result);
+	nonce+=1;
+	let newProposalId = accountId + nonce;
+	assert(loadProposalRecords() !== false, 'proposal records not exist');
+
+	Object.keys(proposalRecords).forEach(function(proposalId) {
+		if(proposalRecords[proposalId].accountId === accountId) {
+			delete proposalRecords[proposalId];
+			let key =voteRecordKeyPrefix + proposalId;
+			storageDel(key);
+			return false;			
+		} else {
+			return true;
+		}
+	});
+  
+    proposalRecords[newProposalId] = {'accountId':accountId, 'proposalId':newProposalId, 'configuration':configuration, 'voteCount': 1,'expireTime':blockTimestamp+effectiveVoteInterval};
+    storageStore(proposalRecordsKey, JSON.stringify(proposalRecords));
+    let v={};
+    v[accountId] =1;
+    storageStore(voteRecordKeyPrefix + newProposalId,JSON.stringify(v));  
+	storageStore(nonceKey, nonce.toString());
+}
+
+function voteCfg(proposalId) {
+	let accountId = sender;
+	assert(getValidatorCandidate(accountId) !== false, 'No such validator candidate');
+	assert(loadProposalRecords() !== false, 'Proposal records not exist');
+	assert(proposalRecords.hasOwnProperty(proposalId) !== false, 'Vote proposal(' + proposalId + ') not exist');
+
+	let key = voteRecordKeyPrefix + proposalId;
+	if (blockTimestamp > proposalRecords[proposalId].expireTime) {
+		delete proposalRecords[proposalId];
+		storageStore(proposalRecordsKey, JSON.stringify(proposalRecords));
+		storageDel(key);
+		return false;
+	}
+  
+    let proposalRecordBody = getObjectMetaData(key);
+	assert(!proposalRecordBody.hasOwnProperty(accountId), 'Account(' + accountId + ') have voted the proposal(' + proposalId + ')'); 
+
+	proposalRecords[proposalId].voteCount += 1;
+	proposalRecordBody[accountId] = 1;
+	
+	let candidatesNum = Number(getCandidatesNumber());
+	assert(candidatesNum > 0, 'Failed to get candidates number');
+	
+	let thredhold = parseInt(candidatesNum * passRate + 0.5);
+	if(proposalRecords[proposalId].voteCount >= thredhold) {
+		let output = proposalRecords[proposalId].configuration;
+		delete proposalRecords[proposalId];
+		storageDel(key);   
+		storageStore(electionConfigKey, JSON.stringify(output));
+		log('Election configuration has been update, new configuration: ' + JSON.stringify(output));
+	}
+	else {
+		storageStore(key,JSON.stringify(proposalRecordBody));
+	}  
+	storageStore(proposalRecordsKey, JSON.stringify(proposalRecords));
+	return true;
+}
+
 function query(input_str){
     let input  = JSON.parse(input_str);
 
@@ -223,6 +309,13 @@ function query(input_str){
     else if(input.method === 'getAbolishProposal'){
         result.abolish_proposal = storageLoad(abolishVar + input.params.address);
     }
+	else if (input.method === 'queryConfigProposal') {
+		result.config_proposal = storageLoad(proposalRecordsKey);
+	}
+	else if (input.method === 'queryConfigVote') {
+        assert(typeof input.params.proposalId === 'string', 'Arg-comments should be string'); 
+        result.config_vote = storageLoad(voteRecordKeyPrefix + input.params.proposalId);
+	}
     else{
        	throw '<unidentified operation type>';
     }
@@ -254,11 +347,21 @@ function main(input_str){
 	else if(input.method === 'quitAbolish'){
     	quitAbolishValidator(input.params.address);
     }
+    else if (input.method === 'proposalCfg') {
+		assert(typeof input.configuration === 'object' && input.configuration !== null, 'Arg-configuration should be object');
+		proposalCfg(input.params.configuration);
+	}
+	else if (input.method === 'voteCfg') {
+		assert(typeof input.proposalId === 'string', 'Arg-proposalId should be string');
+		voteCfg(input.params.proposalId);  
+	}
     else{
         throw '<undidentified operation type>';
     }
 }
 
 function init(){
+	storageStore(nonceKey,'0');
+	storageStore(proposalRecordsKey, JSON.stringify(proposalRecords));
     return true;
 }
