@@ -154,7 +154,6 @@ namespace bumo{
 		static const std::string pay_asset_amount_name_;
 		static const std::string block_timestamp_name_;
 		static const std::string block_number_name_;
-		static const std::string validator_min_pledge_name_;
 
 		static utils::Mutex isolate_to_contract_mutex_;
 		static std::unordered_map<v8::Isolate*, V8Contract *> isolate_to_contract_;
@@ -211,8 +210,7 @@ namespace bumo{
 		static void CallBackBlockNumber(const v8::FunctionCallbackInfo<v8::Value>& args);
 		//Get block number 
 		static void CallBackGetTxOrigin(const v8::FunctionCallbackInfo<v8::Value>& args);
-		//Get abnormal records
-		static void CallBackGetAbnormalRecords(const v8::FunctionCallbackInfo<v8::Value>& args);
+
 		//Get block timestamp 
 		static void CallBackGetBlockTimestamp(const v8::FunctionCallbackInfo<v8::Value>& args);
 		//str to int64 check

@@ -223,9 +223,6 @@ function query(input_str){
     else if(input.method === 'getAbolishProposal'){
         result.abolish_proposal = storageLoad(abolishVar + input.params.address);
     }
-	else if(input.method === 'getAbnormalRecords') {
-		result.abnormal_records = getAbnormalRecords();
-	}
     else{
        	throw '<unidentified operation type>';
     }
