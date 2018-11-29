@@ -1,6 +1,7 @@
-#include <string>
 #include <stdio.h>
+#include <string>
 #include <json/json.h>
+
 #include "lib_bumo_tools.h"
 #include "common/private_key.h"
 #include "common/key_store.h"
