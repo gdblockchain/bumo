@@ -231,7 +231,7 @@ namespace bumo {
 		value_ = std::make_shared<protocol::ConsensusValue>(request);
 		uint32_t success_count = 0;
 		total_fee_ = 0;
-		environment_ = std::make_shared<Environment>(nullptr);
+		environment_ = std::make_shared<Environment>();
 
 		//init the txs map (transaction map).
 		std::set<int32_t> expire_txs, error_txs;
@@ -315,7 +315,7 @@ namespace bumo {
 		value_ = std::make_shared<protocol::ConsensusValue>(request);
 		uint32_t success_count = 0;
 		total_fee_ = 0;
-		environment_ = std::make_shared<Environment>(nullptr);
+		environment_ = std::make_shared<Environment>();
 
 		//init the txs map (transaction map).
 		std::set<int32_t> expire_txs_check,  error_txs_check;
@@ -400,7 +400,7 @@ namespace bumo {
 		value_ = std::make_shared<protocol::ConsensusValue>(request);
 		uint32_t success_count = 0;
 		total_fee_= 0;
-		environment_ = std::make_shared<Environment>(nullptr);
+		environment_ = std::make_shared<Environment>();
 
 		//Init the txs map (transaction map).
 		std::set<int32_t> expire_txs_check, error_txs_check;
