@@ -1,6 +1,5 @@
 #include <common/private_key.h>
 
-
 void test_bumokey(){
 
 
