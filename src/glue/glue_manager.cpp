@@ -111,7 +111,7 @@ namespace bumo {
 		if (!last_consavlue.empty()) {
 			LOG_INFO("The last PREPARED message value is not empty. Value digest(%s)", 
 				utils::String::BinToHexString(HashWrapper::Crypto(last_consavlue)).c_str());
-			//protocol::TransactionEnvSet txset_raw = tx_pool_->top.GetRaw();
+
 			if (CheckValue(last_consavlue) == Consensus::CHECK_VALUE_VALID) {
 				protocol::ConsensusValue propose_value;
 				propose_value.ParseFromString(last_consavlue);
