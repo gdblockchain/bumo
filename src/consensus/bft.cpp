@@ -317,6 +317,7 @@ namespace bumo {
 		if (view_number_ % validators_.size() != replica_id_) {
 			return false;
 		}
+
 		LOG_INFO("Start to request value(%s)", notify_->DescConsensusValue(value).c_str());
 
 		if (!view_active_) {
@@ -326,7 +327,6 @@ namespace bumo {
 
 		//Lock the instances
 		utils::MutexGuard lock_guad(lock_);
-		ValueSaver saver;
 
 		//Delete the last uncommitted logs
 		for (PbftInstanceMap::iterator iter_inst = instances_.begin();
@@ -354,9 +354,7 @@ namespace bumo {
 		pinstance.pre_prepare_ = env->pbft().pre_prepare();
 		pinstance.msg_buf_[env->pbft().type()].push_back(*env);
 		instances_[index] = pinstance;
-		//SaveInstance(saver);
 
-		saver.Commit();
 		LOG_INFO("Send pre-prepare message: view number(" FMT_I64 "), sequence(" FMT_I64 "), consensus value(%s)", 
 			view_number_, index.sequence_, notify_->DescConsensusValue(value).c_str());
 		//Broadcast the message to other nodes
