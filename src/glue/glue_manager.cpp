@@ -93,9 +93,8 @@ namespace bumo {
 			LOG_INFO("The current node is not a leader node and does not do any processing.");
 			return true;
 		} 
-		else {
-			LOG_INFO("The current node is the leader node and starting consensus processing.");
-		}
+
+		LOG_INFO("The current node is the leader node and starting consensus processing.");
 
 		protocol::LedgerHeader lcl = LedgerManager::Instance().GetLastClosedLedger();
 		protocol::TransactionEnvSet txset_raw = tx_pool_->TopTransaction(Configure::Instance().ledger_configure_.max_trans_per_ledger_);
