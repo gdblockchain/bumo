@@ -29,6 +29,7 @@ namespace bumo {
 		3.Create a contract account without destination address, and it will be created automatically.
 	*/
 	const uint32_t General::LEDGER_VERSION_HISTORY_1000 = 1000;
+	const uint32_t General::LEDGER_VERSION_HISTORY_2000 = 2000;
 	const uint32_t General::LEDGER_VERSION = 1001;
 	const uint32_t General::LEDGER_MIN_VERSION = 1000;
 	const uint32_t General::MONITOR_VERSION = 1000;

@@ -28,6 +28,7 @@ namespace bumo {
 		const static uint32_t OVERLAY_VERSION;
 		const static uint32_t OVERLAY_MIN_VERSION;
 		const static uint32_t LEDGER_VERSION_HISTORY_1000;
+		const static uint32_t LEDGER_VERSION_HISTORY_2000;
 		const static uint32_t LEDGER_VERSION;
 		const static uint32_t LEDGER_MIN_VERSION;
 		const static uint32_t MONITOR_VERSION;
@@ -290,6 +291,7 @@ namespace bumo {
 	int64_t GetBlockReward(const int64_t cur_block_height);
 
 #define CHECK_VERSION_GT_1000 (LedgerManager::Instance().GetLastClosedLedger().version() > General::LEDGER_VERSION_HISTORY_1000)
+#define CHECK_VERSION_GT_2000 (LedgerManager::Instance().GetLastClosedLedger().version() > General::LEDGER_VERSION_HISTORY_2000)
 }
 
 #endif

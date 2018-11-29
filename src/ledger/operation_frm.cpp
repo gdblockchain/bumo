@@ -530,7 +530,10 @@ namespace bumo {
 			account.set_balance(create_account.init_balance());
 			account.mutable_priv()->CopyFrom(create_account.priv());
 			account.set_address(dest_address);
-			account.set_creator(transaction_->GetSourceAddress());
+			if (CHECK_VERSION_GT_2000){
+				account.set_creator(transaction_->GetSourceAddress());
+			}
+			
 			account.mutable_contract()->CopyFrom(create_account.contract());
 			dest_account = std::make_shared<AccountFrm>(account);
 
