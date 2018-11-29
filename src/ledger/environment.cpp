@@ -20,9 +20,7 @@
 namespace bumo{
 
 	Environment::Environment(mapKV* data, settingKV* settings) :
-		AtomMap<std::string, AccountFrm>(data), settings_(settings)
-	{
-	}
+		AtomMap<std::string, AccountFrm>(data), settings_(settings){}
 
 	bool Environment::GetEntry(const std::string &key, AccountFrm::pointer &frm){
 		return Get(key, frm);
