@@ -64,11 +64,11 @@ function findValidator(addr){
 
 function applyAsCandidate(){
     let candidate = getValidatorCandidate(sender);
-    let configure = getObjectMetaData(electionConfigKey);
+    let configuration = getObjectMetaData(electionConfigKey);
 
     if(candidate === false){
-        let com = int64Compare(thisPayCoinAmount, configure.pledge_amount);
-        assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + configure.pledge_amount);
+        let com = int64Compare(thisPayCoinAmount, configuration.pledge_amount);
+        assert(com === 1 || com === 0, 'Pledge coin amount must more than ' + configuration.pledge_amount);
     }
 
     setValidatorCandidate(sender, thisPayCoinAmount);
@@ -85,11 +85,11 @@ function voteForCandidate(candidate, tokenAmount){
 
 function takebackCoin(tokenAmount){
     let candidate = getValidatorCandidate(sender);
-    let configure = getObjectMetaData(electionConfigKey);
+    let configuration = getObjectMetaData(electionConfigKey);
     assert(candidate !== false, 'Sender(' + sender + ') is not validator candidate.');
 
     let left = int64Sub(candidate.pledge, tokenAmount);
-    let com = int64Compare(left, configure.pledge_amount);
+    let com = int64Compare(left, configuration.pledge_amount);
     if(com === -1){
         setValidatorCandidate(sender, '-' + candidate.pledge);
         transferCoin(sender, String(candidate.pledge));
@@ -258,6 +258,18 @@ function proposalCfg(configuration) {
 	storageStore(nonceKey, nonce.toString());
 }
 
+function updateElectionConfiguration(newConfiguration) {
+	let configuration = getObjectMetaData(electionConfigKey);
+	Object.keys(newConfiguration).forEach(function(configItem) {
+		if (configuration.hasOwnProperty(configItem)) {
+			configuration[configItem] = newConfiguration[configItem];
+			log('Update config item ' + configItem + ' to ' + newConfiguration[configItem]);
+		}
+		return true;  
+	});
+	storageStore(electionConfigKey, JSON.stringify(configuration));
+}
+
 function voteCfg(proposalId) {
 	let accountId = sender;
 	assert(getValidatorCandidate(accountId) !== false, 'No such validator candidate');
@@ -283,11 +295,11 @@ function voteCfg(proposalId) {
 	
 	let thredhold = parseInt(candidatesNum * passRate + 0.5);
 	if(proposalRecords[proposalId].voteCount >= thredhold) {
-		let output = proposalRecords[proposalId].configuration;
+		let newConfiguration = proposalRecords[proposalId].configuration;
 		delete proposalRecords[proposalId];
 		storageDel(key);   
-		storageStore(electionConfigKey, JSON.stringify(output));
-		log('Election configuration has been update, new configuration: ' + JSON.stringify(output));
+		updateElectionConfiguration(newConfiguration);
+		log('Election configuration has been update, new configuration: ' + JSON.stringify(newConfiguration));
 	}
 	else {
 		storageStore(key,JSON.stringify(proposalRecordBody));
@@ -309,6 +321,9 @@ function query(input_str){
     else if(input.method === 'getAbolishProposal'){
         result.abolish_proposal = storageLoad(abolishVar + input.params.address);
     }
+	else if (input.method === 'getConfiguration') {
+		result.configuration = getObjectMetaData(electionConfigKey);
+	}
 	else if (input.method === 'queryConfigProposal') {
 		result.config_proposal = storageLoad(proposalRecordsKey);
 	}
@@ -348,11 +363,11 @@ function main(input_str){
     	quitAbolishValidator(input.params.address);
     }
     else if (input.method === 'proposalCfg') {
-		assert(typeof input.configuration === 'object' && input.configuration !== null, 'Arg-configuration should be object');
+		assert(typeof input.params.configuration === 'object' && input.params.configuration !== null, 'Arg-configuration should be object');
 		proposalCfg(input.params.configuration);
 	}
 	else if (input.method === 'voteCfg') {
-		assert(typeof input.proposalId === 'string', 'Arg-proposalId should be string');
+		assert(typeof input.params.proposalId === 'string', 'Arg-proposalId should be string');
 		voteCfg(input.params.proposalId);  
 	}
     else{
@@ -363,5 +378,14 @@ function main(input_str){
 function init(){
 	storageStore(nonceKey,'0');
 	storageStore(proposalRecordsKey, JSON.stringify(proposalRecords));
+	
+	let election_config = {};
+	election_config.pledge_amount = 10000000000000;
+	election_config.validators_refresh_interval = 24 * 60 * 60;
+	election_config.coin_to_vote_rate = 1000;
+	election_config.fee_to_vote_rate = 1000;
+	election_config.fee_distribution_rate = '70:10:20';
+	storageStore(electionConfigKey, JSON.stringify(election_config));
+	
     return true;
 }

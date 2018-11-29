@@ -40,6 +40,7 @@ namespace bumo {
 	public:
 		static const std::string validatorsKey;
 		static const std::string feesKey;
+		static const std::string electionKey;
 
 		settingsAdaptor() = default;
 		settingsAdaptor(settingsAdaptor const&) = delete;
@@ -60,7 +61,6 @@ namespace bumo {
 
 	class Environment{
 	public:
-		const std::string electionKey = "configElection";
 
 		settingsAdaptor settings_;
 		AccountsAdaptor accounts_;

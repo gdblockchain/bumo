@@ -21,6 +21,7 @@ namespace bumo{
 
 	const std::string settingsAdaptor::validatorsKey = "validators";
 	const std::string settingsAdaptor::feesKey = "configFees";
+	const std::string settingsAdaptor::electionKey = "configElection";
 
 	settingsAdaptor::settingsAdaptor(Map* settings) :
 		AtomMap<std::string, Json::Value>(settings)
@@ -180,12 +181,12 @@ namespace bumo{
 		new_cfg = old_cfg;
 
 		Json::Value election_cfg;
-		AccountFrm::pointer election_config_contract;
-		if (!GetEntry(General::CONTRACT_VALIDATOR_ADDRESS, election_config_contract)) {
+		AccountFrm::pointer election_contract;
+		if (!GetEntry(General::CONTRACT_VALIDATOR_ADDRESS, election_contract)) {
 			return false;
 		}
 		protocol::KeyPair pair;
-		if (!election_config_contract->GetMetaData(electionKey, pair)) {
+		if (!election_contract->GetMetaData(settingsAdaptor::electionKey, pair)) {
 			return false;
 		}
 		else {
@@ -198,13 +199,12 @@ namespace bumo{
 		for (auto it = election_cfg.begin(); it != election_cfg.end(); it++) {
 			std::string key = it.memberName();
 			std::string value = election_cfg[key].asString();
-
 			if (key == "fee_distribution_rate" && old_cfg.fee_distribution_rate() != value) {
 				change = true;
-				std::string value = election_cfg[key].asString();
 				new_cfg.set_fee_distribution_rate(value);
 			}
-			else {
+			else if (key == "pledge_amount" || key == "validators_refresh_interval" || 
+					 key == "coin_to_vote_rate" || key == "fee_to_vote_rate") {
 				int64_t value = election_cfg[key].asInt64();
 				if (key == "pledge_amount" && old_cfg.pledge_amount() != value) {
 					change = true;
@@ -222,13 +222,9 @@ namespace bumo{
 					change = true;
 					new_cfg.set_fee_to_vote_rate(value);
 				}
-				else if (key == "penalty_rate" && old_cfg.penalty_rate() != value) {
-					change = true;
-					new_cfg.set_penalty_rate(value);
-				}
-				else {
-					LOG_ERROR("No such election configuration parameter %s", key.c_str());
-				}
+			}
+			else {
+				LOG_TRACE("No such configuration parameter key:%s, value:" FMT_I64 "", key.c_str(), value);
 			}
 		}
 

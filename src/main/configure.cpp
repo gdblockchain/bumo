@@ -201,7 +201,7 @@ namespace bumo {
 	}
 
 	ElectionConfigure::ElectionConfigure() {
-		pledge_amount_ = 100000;
+		pledge_amount_ = 10000000000000;
 		validators_refresh_interval_ = 24 * 60 * 60; // in seconds
 		coin_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
 		fee_to_vote_rate_ = 1000; // 1000 means 1000 MO = 1 vote
