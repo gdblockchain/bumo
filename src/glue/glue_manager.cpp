@@ -283,7 +283,6 @@ namespace bumo {
 		protocol::ConsensusValue request;
 		request.ParseFromString(value);
 
-		
 		//Write to db
 		int64_t time_start = utils::Timestamp::HighResolution();
 		
@@ -295,7 +294,6 @@ namespace bumo {
 		int64_t time_use = utils::Timestamp::HighResolution() - time_start;
 
 		//Delete the cache 
-		//size_t ret1 = RemoveTxset(txset_frm);
 		tx_pool_->RemoveTxs(request.txset(),true);
 
 		//Start calculating the time to start the next block.
