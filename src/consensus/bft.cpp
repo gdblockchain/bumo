@@ -297,16 +297,6 @@ namespace bumo {
 			LOG_INFO("Send new view message again actively: view number(" FMT_I64 "), round number(%u)",
 				lastvc_instance->view_number_, lastvc_instance->new_view_round_);
 		}
-
-		//Check the view change object that should be teminated
-		//for (PbftVcInstanceMap::iterator iter_vc = vc_instances_.begin(); iter_vc != vc_instances_.end(); ){
-		//	if (iter_vc->second.ShouldTeminated(current_time, g_pbft_vcinstance_terminatedtime_)){
-		//		vc_instances_.erase(iter_vc++);
-		//	}
-		//	else{
-		//		iter_vc++;
-		//	}
-		//}
 	}
 
 	bool Pbft::InWaterMark(int64_t seq) {
@@ -733,7 +723,6 @@ namespace bumo {
 			return false;
 		}
 
-
 		bool doret = false;
 		switch (pbft.type()) {
 		case protocol::PBFT_TYPE_PREPREPARE:
@@ -833,7 +822,7 @@ namespace bumo {
 
 		LOG_INFO("Send prepare message: view number(" FMT_I64 "), replica id(" FMT_I64 "), sequence(" FMT_I64 "), round number(1), value(%s)",
 			pre_prepare.view_number(), replica_id_, pre_prepare.sequence(), notify_->DescConsensusValue(pre_prepare.value()).c_str());
-		//NewPrepare();
+
 		PbftEnvPointer prepare_msg = NewPrepare(pre_prepare, 1);
 		if (!SendMessage(prepare_msg)) {
 			return false;
@@ -951,8 +940,6 @@ namespace bumo {
 
 		//Insert into the msg need to be sent again for timeout
 		if (view_change.replica_id() == replica_id_ && !vc_instance.view_change_msg_.has_pbft()) {
-			//PbftEnvPointer msg = NewViewChange(view_number_ + 1);
-			//*((protocol::PbftEnv *)msg->data_) = pbft_env;
 			vc_instance.view_change_msg_ = pbft_env;
 		}
 
