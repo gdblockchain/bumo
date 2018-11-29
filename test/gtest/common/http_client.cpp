@@ -1,4 +1,3 @@
-
 #include "http_client.h"
 
 bumo::HttpClient::HttpClient(){

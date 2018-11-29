@@ -17,7 +17,6 @@
 
 namespace bumo{
 
-
 	MsgProcessor::MsgProcessor(){
 		
 		rcv_message_lists_.clear();
