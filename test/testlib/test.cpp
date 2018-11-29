@@ -271,10 +271,6 @@ void TestBase64(){
 	strbuffer = "hello the world";
 	std::string str = utils::encode_b64(strbuffer);
 	LOG_INFO("Base64:%s", str.c_str());
-
-	std::string result_base64;
-	utils::decode_b64(str, result_base64);
-	LOG_INFO("Result decode base64:%s\n", result_base64.c_str());
 }
 
 #if 0
