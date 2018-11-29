@@ -51,7 +51,7 @@ void Base64Test::UT_BASE64_ENCODE(){
 	}
 	
 	{
-		std::string input_str("布比");
+		std::string input_str("你好");
 		std::string decode_str;
 		EXPECT_EQ(utils::Base64Decode(input_str, decode_str), false);
 	}
