@@ -17,20 +17,20 @@ ATP1.0(Account based Tokenization Protocol) 指基于 BuChain的账号结构对�
 ## Token属性参数
 发行的Token需要通过设置Token源账户的metadata来记录Token的相关属性。用于应用程序方便去管理和查询Token数据信息。  
 
-| 变量        | 描述                    |  
+| 变量        | 描述                    |
 | :----------- | --------------------------- |
 |name          | Token 名称                 |
 |code          | Token 代码                  |
 |description   | Token 描述                  |
 |decimals      | Token 小数位数              |
-|totalSupply   | Token 总量                  |
+|totalSupply   | Token 总量(**其值等于10 ^ decimals * 发行量**) |
 |icon          | Token 图标(optional)                  |
-|version       | ATP 版本                |  
+|version       | ATP 版本                |
 
 注意：
 - code-推荐使用大写简拼
 - decimals-小数位在0~8的范围，0表示无小数位
-- totalSupply-范围是0~2^63-1。0表示不固定Token的上限
+- totalSupply-范围是0~2^63-1。0表示不固定Token的上限。**假如发行一笔数量是10000, 精度为8的ATP1.0 Token，此时totalSupply = 10 ^ 8 * 10000, 结果是1000000000000**。
 - icon-base64位编码，图标文件大小是32k以内,推荐200*200像素。
 
 
@@ -58,7 +58,7 @@ ATP1.0(Account based Tokenization Protocol) 指基于 BuChain的账号结构对�
 
 ### 发行Token  
 客户端通过发起一笔操作类型是`Issuing Assets`的交易。设置参数amount(发行的数量)、code(Token代码)。  
-例如：发行一笔数量是10000,精度为8的的DT Token。
+例如：发行一笔数量是10000,精度为8的DT Token, **此时参数amount是10 ^ 8 * 10000**。
 
 - json格式
 
@@ -75,13 +75,15 @@ ATP1.0(Account based Tokenization Protocol) 指基于 BuChain的账号结构对�
 ### 转移Token  
 1.设置参数，发送`Transferring Assets`的交易。  
 
-|参数|描述
-|:--- | --- 
-|pay_asset.dest_address |  目标账户地址
-|pay_asset.asset.key.issuer|  Token发行方地址
-|pay_asset.asset.key.code|  Token代码
-|pay_asset.asset.amount|  要转移的数量*精度
-|pay_asset.input|  触发合约调用的入参，如果用户未输入，默认为空字符串  
+| 参数                       | 描述                                               |
+| -------------------------- | -------------------------------------------------- |
+| pay_asset.dest_address     | 目标账户地址                                       |
+| pay_asset.asset.key.issuer | Token发行方地址                                    |
+| pay_asset.asset.key.code   | Token代码                                          |
+| pay_asset.asset.amount     | 10 ^ 精度 * 要转移的数量                           |
+| pay_asset.input            | 触发合约调用的入参，如果用户未输入，默认为空字符串 |
+
+
 
 
 如下例子：给已激活的目标账户buQaHVCwXj9ERtFznDnAuaQgXrwj2J7iViVK转移数量500000000000的DT。  
@@ -100,7 +102,7 @@ json格式：
         }
       }
     }
-  ```  
+```
   转移成功后通过[查询Token](#查询token)可以看到目标账户拥有amount数量的DT。  
 
   注意：给未激活的目标账户转移Token，交易的执行结果是失败的
@@ -154,7 +156,7 @@ HTTP GET /getAccountAssets?address=buQhzVyca8tQhnqKoW5XY1hix2mCt5KTYzcD
    "error_code" : 0,
    "result" : null
 }
-```    
+```
 ### 查询指定metadata
 
 ```text
@@ -191,7 +193,7 @@ HTTP GET /getAccountMetaData?address=buQhzVyca8tQhnqKoW5XY1hix2mCt5KTYzcD&key=as
    "error_code" : 0,
    "result" : null
 }
-```  
+```
 
 
 
