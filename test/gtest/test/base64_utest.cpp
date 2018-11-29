@@ -91,5 +91,15 @@ void Base64Test::UT_BASE64_ENCODE(){
 		EXPECT_EQ(utils::Base64Decode(input_str, decode_str), false);
 	}
 
+	{
+		std::string input_str("把算法水电费第第三方第三方撒个谎很反感和三方士大夫如风发送发送");
+		std::string encode_str;
+		std::string decode_str;
+		EXPECT_EQ(utils::Base64Encode(input_str, encode_str), true);
+		EXPECT_EQ(utils::Base64Decode(encode_str, decode_str), true);
+		EXPECT_EQ(input_str.compare(decode_str), 0);
+	}
+
+
 	printf("\n");
 }
