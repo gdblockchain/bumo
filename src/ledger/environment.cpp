@@ -36,7 +36,7 @@ namespace bumo{
 	}
 
 	bool Environment::AddEntry(const std::string& key, AccountFrm::pointer frm){
-		Set(key, frm);
+		return Set(key, frm);
 	}
 
 	bool Environment::GetFromDB(const std::string &address, AccountFrm::pointer &account_ptr){
