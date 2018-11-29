@@ -21,7 +21,6 @@
 #include <openssl/ecdsa.h>
 #include <openssl/ecdh.h>
 #include <openssl/evp.h>
-#include <openssl/err.h>
 #include <openssl/obj_mac.h>
 #include <openssl/x509.h>
 #include "ecc_sm2.h"
