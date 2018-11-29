@@ -72,10 +72,16 @@
     <ClInclude Include="..\..\src\utils\atom_map.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\utils\scopeGuard.h">
+    <ClInclude Include="..\..\src\utils\random.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\utils\random.h">
+    <ClInclude Include="..\..\src\utils\modp_b64.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utils\modp_b64_data.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\utils\base64.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -114,6 +120,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\utils\random.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utils\modp_b64.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\utils\base64.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
