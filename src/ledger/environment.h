@@ -34,8 +34,6 @@ namespace bumo {
 		AtomMap<std::string, Json::Value> settings_;
 		std::map<std::string, AccountFrm::pointer> entries_;
 
-		bool useAtomMap_;
-
 		Environment() = default;
 		Environment(Environment const&) = delete;
 		Environment& operator=(Environment const&) = delete;
