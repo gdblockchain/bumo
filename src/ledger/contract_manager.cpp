@@ -15,13 +15,13 @@
 
 
 #include <utils/logger.h>
+#include <utils/base64.h>
 #include <common/pb2json.h>
 #include <common/private_key.h>
 #include "ledger_frm.h"
 #include "ledger_manager.h"
 #include "contract_manager.h"
 
-    
 namespace bumo{
 
 	ContractParameter::ContractParameter() : ope_index_(-1), ledger_context_(NULL), pay_coin_amount_(0){}
@@ -2253,7 +2253,7 @@ namespace bumo{
 			break;
 		}
 		case BASE64:{
-			utils::decode_b64(input_raw, result_data);//???
+			utils::Base64Decode(input_raw, result_data);
 			break;
 		}
 		default:
