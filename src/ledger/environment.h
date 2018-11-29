@@ -36,22 +36,41 @@ namespace bumo {
 		virtual void updateToDB();
 	};
 
-	class Environment : public utils::AtomMap<std::string, AccountFrm>{
+	class settingsAdaptor : public utils::AtomMap<std::string, Json::Value>{
 	public:
-		typedef AtomMap<std::string, Json::Value>::Map SettingMap;
-		
-		const std::string validatorsKey = "validators";
-		const std::string feesKey = "configFees";
+		static const std::string validatorsKey;
+		static const std::string feesKey;
+
+		settingsAdaptor() = default;
+		settingsAdaptor(settingsAdaptor const&) = delete;
+		settingsAdaptor& operator=(settingsAdaptor const&) = delete;
+		settingsAdaptor(Map* settings);
+	};
+
+	class AccountsAdaptor : public utils::AtomMap<std::string, AccountFrm>{
+	public:
+		AccountsAdaptor() = default;
+		AccountsAdaptor(AccountsAdaptor const&) = delete;
+		AccountsAdaptor& operator=(AccountsAdaptor const&) = delete;
+		AccountsAdaptor(Map* accounts);
+
+		virtual bool GetFromDB(const std::string &address, AccountFrm::pointer &account_ptr);
+		//virtual void updateToDB();
+	};
+
+	class Environment{
+	public:
 		const std::string electionKey = "configElection";
 
-		AtomMap<std::string, Json::Value> settings_;
+		settingsAdaptor settings_;
+		AccountsAdaptor accounts_;
 		CandidatesAdaptor candidates_;
 
 		Environment() = default;
 		Environment(Environment const&) = delete;
 		Environment& operator=(Environment const&) = delete;
 
-		Environment(Map* data, SettingMap* settings, CandidatesAdaptor::Map* candidates);
+		Environment(AccountsAdaptor::Map* data, settingsAdaptor::Map* settings, CandidatesAdaptor::Map* candidates);
 
 		bool GetEntry(const std::string& key, AccountFrm::pointer &frm);
 		bool AddEntry(const std::string& key, AccountFrm::pointer frm);
@@ -72,7 +91,6 @@ namespace bumo {
 		bool Commit();
 		void ClearChangeBuf();
 
-		virtual bool GetFromDB(const std::string &address, AccountFrm::pointer &account_ptr);
 		static bool AccountFromDB(const std::string &address, AccountFrm::pointer &account_ptr);
 		std::shared_ptr<Environment> NewStackFrameEnv();
 	};

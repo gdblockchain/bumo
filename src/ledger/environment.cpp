@@ -19,6 +19,23 @@
 
 namespace bumo{
 
+	const std::string settingsAdaptor::validatorsKey = "validators";
+	const std::string settingsAdaptor::feesKey = "configFees";
+
+	settingsAdaptor::settingsAdaptor(Map* settings) :
+		AtomMap<std::string, Json::Value>(settings)
+	{
+	}
+
+	AccountsAdaptor::AccountsAdaptor(Map* accounts) :
+		AtomMap<std::string, AccountFrm>(accounts)
+	{
+	}
+
+	bool AccountsAdaptor::GetFromDB(const std::string& address, AccountFrm::pointer &account_ptr){
+		return Environment::AccountFromDB(address, account_ptr);
+	}
+
 	CandidatesAdaptor::CandidatesAdaptor(Map* candidates) : 
 		AtomMap<std::string, protocol::ValidatorCandidate>(candidates)
 	{
@@ -50,35 +67,30 @@ namespace bumo{
 		}
 	}
 
-	Environment::Environment(Map* data, SettingMap* settings, CandidatesAdaptor::Map* candidates) :
-		AtomMap<std::string, AccountFrm>(data), 
+	Environment::Environment(AccountsAdaptor::Map* data, settingsAdaptor::Map* settings, CandidatesAdaptor::Map* candidates) :
+		accounts_(data), 
 		settings_(settings), 
 		candidates_(candidates)
 	{
 	}
 
 	bool Environment::GetEntry(const std::string &key, AccountFrm::pointer &frm){
-		return Get(key, frm);
+		return accounts_.Get(key, frm);
 	}
 
 	bool Environment::Commit(){
-		return settings_.Commit() && candidates_.Commit() && AtomMap<std::string, AccountFrm>::Commit();
+		return settings_.Commit() && candidates_.Commit() && accounts_.Commit();
 	}
 
 	void Environment::ClearChangeBuf()
 	{
 		settings_.ClearChangeBuf();
 		candidates_.ClearChangeBuf();
-		AtomMap<std::string, AccountFrm>::ClearChangeBuf();
+		accounts_.ClearChangeBuf();
 	}
 
 	bool Environment::AddEntry(const std::string& key, AccountFrm::pointer frm){
-		return Set(key, frm);
-	}
-
-	bool Environment::GetFromDB(const std::string &address, AccountFrm::pointer &account_ptr)
-	{
-		return AccountFromDB(address, account_ptr);
+		return accounts_.Set(key, frm);
 	}
 
 	bool Environment::AccountFromDB(const std::string &address, AccountFrm::pointer &account_ptr){
@@ -100,8 +112,8 @@ namespace bumo{
 
 	std::shared_ptr<Environment> Environment::NewStackFrameEnv()
 	{
-		Map& data	= GetChangeBuf();
-		SettingMap& settings = settings_.GetChangeBuf();
+		AccountsAdaptor::Map& data	= accounts_.GetChangeBuf();
+		settingsAdaptor::Map& settings = settings_.GetChangeBuf();
 		CandidatesAdaptor::Map& candidates = candidates_.GetChangeBuf();
 		std::shared_ptr<Environment> next = std::make_shared<Environment>(&data, &settings, &candidates);
 
@@ -110,11 +122,11 @@ namespace bumo{
 
 	bool Environment::UpdateFeeConfig(const Json::Value &feeConfig) {
 		std::shared_ptr<Json::Value> fees;
-		settings_.Get(feesKey, fees);
+		settings_.Get(settingsAdaptor::feesKey, fees);
 
 		if (!fees){
 			fees = std::make_shared<Json::Value>(feeConfig);
-			settings_.Set(feesKey, fees);
+			settings_.Set(settingsAdaptor::feesKey, fees);
 		}
 		else{
 			for (auto it = feeConfig.begin(); it != feeConfig.end(); it++) {
@@ -130,7 +142,7 @@ namespace bumo{
 		new_fee = old_fee;
 
 		std::shared_ptr<Json::Value> fees;
-		settings_.Get(feesKey, fees);
+		settings_.Get(settingsAdaptor::feesKey, fees);
 		if (!fees) return false;
 
 		for (auto it = fees->begin(); it != fees->end(); it++) {
@@ -225,7 +237,7 @@ namespace bumo{
 
 	Json::Value& Environment::GetValidators(){
 		std::shared_ptr<Json::Value> validators;
-		settings_.Get(validatorsKey, validators);
+		settings_.Get(settingsAdaptor::validatorsKey, validators);
 
 		if (!validators){
 			validators = std::make_shared<Json::Value>();
@@ -238,19 +250,19 @@ namespace bumo{
 				value.append(utils::String::ToString(validator->pledge_coin_amount()));
 				validators->append(value);
 			}
-			settings_.Set(validatorsKey, validators);
+			settings_.Set(settingsAdaptor::validatorsKey, validators);
 		}
 
 		return *validators;
 	}
 
 	bool Environment::UpdateNewValidators(const Json::Value& validators) {
-		return settings_.Set(validatorsKey, std::make_shared<Json::Value>(validators));
+		return settings_.Set(settingsAdaptor::validatorsKey, std::make_shared<Json::Value>(validators));
 	}
 
 	bool Environment::GetVotedValidators(const protocol::ValidatorSet &old_validator, protocol::ValidatorSet& new_validator){
 		std::shared_ptr<Json::Value> validators;
-		bool ret = settings_.Get(validatorsKey, validators);
+		bool ret = settings_.Get(settingsAdaptor::validatorsKey, validators);
 		if (!validators){
 			new_validator = old_validator;
 			return false;

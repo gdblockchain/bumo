@@ -484,7 +484,7 @@ namespace bumo {
 
 	bool LedgerFrm::Commit(KVTrie* trie, int64_t& new_count, int64_t& change_count) {
 		auto batch = trie->batch_;
-		auto entries = environment_->GetData();
+		auto entries = environment_->accounts_.GetData();
 
 		for (auto it = entries.begin(); it != entries.end(); it++){
 
