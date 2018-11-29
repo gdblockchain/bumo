@@ -218,7 +218,6 @@ namespace bumo {
 			payAsset->set_input(parameter_.input_);
 
 			TransactionFrm::pointer tx_frm = std::make_shared<TransactionFrm>(env);
-			//tx_frm->SetMaxEndTime(utils::Timestamp::HighResolution() + utils::MICRO_UNITS_PER_SEC);
 			tx_frm->environment_ = environment;
 			int64_t time_now = utils::Timestamp::HighResolution();
 			tx_frm->SetApplyStartTime(time_now);
@@ -236,29 +235,8 @@ namespace bumo {
 			return ret;
 		}
 		else if(ContractTestParameter::QUERY == parameter_.opt_type_){
-			do {
-				if (parameter_.code_.empty()) {
-					break;
-				}
-				bumo::AccountFrm::pointer account_frm = nullptr;
-				if (!Environment::AccountFromDB(parameter_.contract_address_, account_frm)) {
-					LOG_ERROR("not found account");
-					break;
-				}
-				if (!account_frm->GetProtoAccount().has_contract()) {
-					LOG_ERROR("the called address not contract");
-					break;
-				}
-
-				protocol::Contract contract = account_frm->GetProtoAccount().contract();
-				if (contract.payload().size() == 0) {
-					LOG_ERROR("the called address not contract");
-					break;
-				}
-				parameter_.code_ = contract.payload();
-			} while (false);
-
 			if (parameter_.code_.empty() ){
+				LOG_ERROR("Failed to check contract code.");
 				return false;
 			} 
 
