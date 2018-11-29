@@ -32,8 +32,7 @@ namespace bumo{
 		return settings_.Commit() && AtomMap<std::string, AccountFrm>::Commit();
 	}
 
-	void Environment::ClearChangeBuf()
-	{
+	void Environment::ClearChangeBuf(){
 		settings_.ClearChangeBuf();
 		AtomMap<std::string, AccountFrm>::ClearChangeBuf();
 	}
@@ -50,6 +49,7 @@ namespace bumo{
 		auto db = Storage::Instance().account_db();
 		std::string index = DecodeAddress(address);
 		std::string buff;
+
 		{
 			utils::WriteLockGuard guard(LedgerManager::Instance().GetTreeMutex());
 			if (!LedgerManager::Instance().tree_->Get(index, buff)){
@@ -61,9 +61,9 @@ namespace bumo{
 		if (!account.ParseFromString(buff)){
 			PROCESS_EXIT("Failed to parse account(%s) from string, fatal error", address.c_str());
 		}
+
 		account_ptr = std::make_shared<AccountFrm>(account);
 		return true;
-
 	}
 
 	std::shared_ptr<Environment> Environment::NewStackFrameEnv(){
@@ -123,7 +123,6 @@ namespace bumo{
 				LOG_ERROR("Fee config type(%d) error", fee_type);
 				break;
 			}
-
 		}
 
 		return change;
@@ -144,6 +143,7 @@ namespace bumo{
 				value.append(utils::String::ToString(validator->pledge_coin_amount()));
 				validators->append(value);
 			}
+
 			settings_.Set(validatorsKey, validators);
 		}
 

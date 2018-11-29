@@ -37,8 +37,6 @@ namespace bumo {
 		Environment() = default;
 		Environment(Environment const&) = delete;
 		Environment& operator=(Environment const&) = delete;
-
-		Environment(Environment *parent);
 		Environment(mapKV* data, settingKV* settings);
 
 		bool GetEntry(const std::string& key, AccountFrm::pointer &frm);
