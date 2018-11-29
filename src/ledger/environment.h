@@ -34,7 +34,6 @@ namespace bumo {
 		AtomMap<std::string, Json::Value> settings_;
 		std::map<std::string, AccountFrm::pointer> entries_;
 
-		Environment *parent_;
 		bool useAtomMap_;
 
 		Environment() = default;
