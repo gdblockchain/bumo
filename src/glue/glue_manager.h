@@ -90,6 +90,9 @@ namespace bumo {
 		void QueryTransactionCache(const uint32_t& num, std::vector<TransactionFrm::pointer>& txs);
 		bool QueryTransactionCache(const std::string& hash, TransactionFrm::pointer& tx);
 
+		//Version compare
+		bool CheckVersionGt2000();
+
 		virtual void OnTimer(int64_t current_time) override;
 		virtual void OnSlowTimer(int64_t current_time) override {};
 		virtual void GetModuleStatus(Json::Value &data);

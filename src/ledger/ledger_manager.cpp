@@ -599,8 +599,10 @@ namespace bumo {
 		//LOG_INFO("set_consensus_value_hash:%s,%s", utils::String::BinToHexString(con_str).c_str(), utils::String::BinToHexString(chash).c_str());
 		header->set_version(last_closed_ledger_->GetProtoHeader().version());
 
-		if (!DposUpdate(consensus_value, closing_ledger)){
-			return false;
+		if (CHECK_VERSION_GT_2000) {
+			if (!DposUpdate(consensus_value, closing_ledger)){
+				return false;
+			}
 		}
 
 		int64_t time0 = utils::Timestamp().HighResolution();

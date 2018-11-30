@@ -30,7 +30,7 @@ namespace bumo {
 	*/
 	const uint32_t General::LEDGER_VERSION_HISTORY_1000 = 1000;
 	const uint32_t General::LEDGER_VERSION_HISTORY_2000 = 2000;
-	const uint32_t General::LEDGER_VERSION = 1001;
+	const uint32_t General::LEDGER_VERSION = 2001;
 	const uint32_t General::LEDGER_MIN_VERSION = 1000;
 	const uint32_t General::MONITOR_VERSION = 1000;
 	const char *General::BUMO_VERSION = "1.0.0.8";

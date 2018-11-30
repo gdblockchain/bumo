@@ -116,7 +116,7 @@ namespace bumo {
 			if (CheckValue(last_consavlue) == Consensus::CHECK_VALUE_VALID) {
 				protocol::ConsensusValue propose_value;
 				propose_value.ParseFromString(last_consavlue);
-				if (!abnormal_node.empty()) {
+				if (!abnormal_node.empty() && CHECK_VERSION_GT_2000) {
 					protocol::KeyPair* kv = propose_value.add_entry();
 					kv->set_key("abnormal_node");
 					kv->set_value(abnormal_node);
@@ -125,7 +125,7 @@ namespace bumo {
 				LOG_INFO("Take the last consensus value as the proposal. The number of transactions in consensus value is %d, and the last closed ledger's hash is %s.", propose_value.txset().txs_size(),
 					utils::String::Bin4ToHexString(lcl.hash()).c_str());
 
-				return consensus_->Request(propose_value.SerializeAsString());
+				return consensus_->Request(propose_value.SerializeAsString(), CHECK_VERSION_GT_2000);
 			}
 		}
 
@@ -139,7 +139,7 @@ namespace bumo {
 			propose_value.set_previous_proof(proof);
 
 			// add abnormal record
-			if (!abnormal_node.empty()) {
+			if (!abnormal_node.empty() && CHECK_VERSION_GT_2000) {
 				protocol::KeyPair* kv = propose_value.add_entry();
 				kv->set_key("abnormal_node");
 				kv->set_value(abnormal_node);
@@ -207,7 +207,7 @@ namespace bumo {
 
 		LOG_INFO("The number of transactions in the proposal is %d, and the last ledger's hash is %s.", propose_value.txset().txs_size(),
 			utils::String::Bin4ToHexString(lcl.hash()).c_str());
-		consensus_->Request(propose_value.SerializeAsString());
+		consensus_->Request(propose_value.SerializeAsString(), CHECK_VERSION_GT_2000);
 		return true;
 	}
 
@@ -547,6 +547,10 @@ namespace bumo {
 
 	bool GlueManager::QueryTransactionCache(const std::string& hash, TransactionFrm::pointer& tx){
 		return tx_pool_->Query(hash, tx);
+	}
+
+	bool GlueManager::CheckVersionGt2000() {
+		return CHECK_VERSION_GT_2000;
 	}
 
 }

@@ -28,6 +28,8 @@ namespace bumo {
 	}
 
 	bool ElectionManager::Initialize(){
+		if (!GlueManager::Instance().CheckVersionGt2000()) return true;
+
 		candidate_mpt_ = new KVTrie();
 		auto batch = std::make_shared<WRITE_BATCH>();
 		candidate_mpt_->Init(Storage::Instance().account_db(), batch, General::VALIDATOR_CANDIDATE_PREFIX, 1);

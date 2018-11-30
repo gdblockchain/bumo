@@ -231,11 +231,8 @@ namespace bumo {
 	}
 
 	void Pbft::OnTimer(int64_t current_time) {
-
-		
 		utils::MutexGuard guard(lock_);
 
-		
 		PbftInstance *last_prepared_instance = NULL;
 		const PbftInstanceIndex *index = NULL;
 		PbftInstanceMap::iterator last_prepared_iter = instances_.end();
@@ -314,16 +311,18 @@ namespace bumo {
 		return seq >= last_exe_seq_  && seq <= last_exe_seq_ + ckp_interval_;
 	}
 
-	bool Pbft::Request(const std::string &value) {
+	bool Pbft::Request(const std::string &value, bool add_leader) {
 		if (view_number_ % validators_.size() != replica_id_) {
 			return false;
 		}
-
+		
 		protocol::ConsensusValue proposal;
 		proposal.ParseFromString(value);
-		protocol::KeyPair* leader = proposal.add_entry();
-		leader->set_key(General::VALIDATOR_LEADER);
-		leader->set_value(ValidatorLeader());
+		if (add_leader) {
+			protocol::KeyPair* leader = proposal.add_entry();
+			leader->set_key(General::VALIDATOR_LEADER);
+			leader->set_value(ValidatorLeader());
+		}
 
 		std::string proposal_value = proposal.SerializeAsString();
 
