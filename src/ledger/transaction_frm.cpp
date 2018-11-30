@@ -479,7 +479,6 @@ namespace bumo {
 
 		if (tran.metadata().size() > General::METADATA_MAX_VALUE_SIZE) {
 			result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-			//result_.set_desc("Transaction metadata too long");
 			result_.set_desc(utils::String::Format("Length of the metadata from transaction exceeds the limit(%d).",
 				General::METADATA_MAX_VALUE_SIZE));
 
@@ -498,7 +497,6 @@ namespace bumo {
 
 			if (tran.ceil_ledger_seq() < current_ledger_seq) {
 				result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-				//result_.set_desc("Transaction metadata too long");
 				result_.set_desc(utils::String::Format("Limit ledger sequence(" FMT_I64 ") < current ledger sequence(" FMT_I64 ")",
 					tran.ceil_ledger_seq(), current_ledger_seq));
 
@@ -508,7 +506,6 @@ namespace bumo {
 		}
 		else if (tran.ceil_ledger_seq() < 0) {
 			result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-			//result_.set_desc("Transaction metadata too long");
 			result_.set_desc(utils::String::Format("Limit ledger sequence(" FMT_I64 ") < 0",
 				tran.ceil_ledger_seq()));
 			LOG_ERROR("%s", result_.desc().c_str());
@@ -767,9 +764,7 @@ namespace bumo {
 				}
 			}
 
-			//opt->SourceRelationTx();
 			Result result = opt->Apply(environment_);
-
 			if (result.code() != 0) {
 				result_ = opt->GetResult();
 				bSucess = false;
