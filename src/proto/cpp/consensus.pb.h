@@ -1594,15 +1594,9 @@ class ElectionConfig : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int64 fee_to_vote_rate() const;
   void set_fee_to_vote_rate(::google::protobuf::int64 value);
 
-  // optional int64 penalty_rate = 5;
-  void clear_penalty_rate();
-  static const int kPenaltyRateFieldNumber = 5;
-  ::google::protobuf::int64 penalty_rate() const;
-  void set_penalty_rate(::google::protobuf::int64 value);
-
-  // optional string fee_distribution_rate = 6;
+  // optional string fee_distribution_rate = 5;
   void clear_fee_distribution_rate();
-  static const int kFeeDistributionRateFieldNumber = 6;
+  static const int kFeeDistributionRateFieldNumber = 5;
   const ::std::string& fee_distribution_rate() const;
   void set_fee_distribution_rate(const ::std::string& value);
   void set_fee_distribution_rate(const char* value);
@@ -1620,7 +1614,6 @@ class ElectionConfig : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int64 validators_refresh_interval_;
   ::google::protobuf::int64 coin_to_vote_rate_;
   ::google::protobuf::int64 fee_to_vote_rate_;
-  ::google::protobuf::int64 penalty_rate_;
   ::google::protobuf::internal::ArenaStringPtr fee_distribution_rate_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_consensus_2eproto();
@@ -2866,21 +2859,7 @@ inline void ElectionConfig::set_fee_to_vote_rate(::google::protobuf::int64 value
   // @@protoc_insertion_point(field_set:protocol.ElectionConfig.fee_to_vote_rate)
 }
 
-// optional int64 penalty_rate = 5;
-inline void ElectionConfig::clear_penalty_rate() {
-  penalty_rate_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 ElectionConfig::penalty_rate() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.penalty_rate)
-  return penalty_rate_;
-}
-inline void ElectionConfig::set_penalty_rate(::google::protobuf::int64 value) {
-  
-  penalty_rate_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.penalty_rate)
-}
-
-// optional string fee_distribution_rate = 6;
+// optional string fee_distribution_rate = 5;
 inline void ElectionConfig::clear_fee_distribution_rate() {
   fee_distribution_rate_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
