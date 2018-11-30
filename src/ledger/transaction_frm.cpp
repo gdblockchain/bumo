@@ -30,7 +30,6 @@ namespace bumo {
 		result_(),
 		transaction_env_(),
 		hash_(),
-		full_hash_(),
 		data_(),
 		full_data_(),
 		valid_signature_(),
@@ -97,7 +96,6 @@ namespace bumo {
 		data_ = tran.SerializeAsString();
 		hash_ = HashWrapper::Crypto(data_);
 		full_data_ = transaction_env_.SerializeAsString();
-		full_hash_ = HashWrapper::Crypto(full_data_);
 
 		for (int32_t i = 0; i < transaction_env_.signatures_size(); i++) {
 			const protocol::Signature &signature = transaction_env_.signatures(i);
@@ -121,10 +119,6 @@ namespace bumo {
 
 	std::string TransactionFrm::GetContentData() const {
 		return data_;
-	}
-
-	std::string TransactionFrm::GetFullHash() const {
-		return full_hash_;
 	}
 
 	const protocol::TransactionEnv &TransactionFrm::GetTransactionEnv() const {

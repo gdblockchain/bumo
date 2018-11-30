@@ -73,15 +73,6 @@ namespace bumo {
 		});
 	}
 
-	std::string GlueManager::CalculateTxTreeHash(const std::vector<TransactionFrm::pointer> &tx_array) {
-		HashWrapper hash_func;
-		for (std::size_t i = 0; i < tx_array.size(); i++) {
-			TransactionFrm::pointer env = tx_array[i];
-			hash_func.Update(env->GetFullHash());
-		}
-		return hash_func.Final();
-	}
-
 	bool GlueManager::Exit() {
 		return true;
 	}
