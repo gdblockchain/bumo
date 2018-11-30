@@ -547,7 +547,6 @@ namespace bumo {
 		header->set_previous_hash(consensus_value.previous_ledger_hash());
 		header->set_consensus_value_hash(chash);
 		header->set_chain_id(General::GetSelfChainId());
-		//LOG_INFO("set_consensus_value_hash:%s,%s", utils::String::BinToHexString(con_str).c_str(), utils::String::BinToHexString(chash).c_str());
 		header->set_version(last_closed_ledger_->GetProtoHeader().version());
 
 		int64_t time0 = utils::Timestamp().HighResolution();

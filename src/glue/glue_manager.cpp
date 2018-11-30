@@ -297,6 +297,7 @@ namespace bumo {
 		int64_t next_interval = GetIntervalTime(req.txset().txs_size() == 0);
 		int64_t next_timestamp = next_interval + req.close_time();
 		int64_t seq = req.ledger_seq();
+
 		Global::Instance().GetIoService().post([next_timestamp, time_use, seq, this]() {
 			int64_t waiting_time = next_timestamp - utils::Timestamp::Now().timestamp();
 			if (waiting_time <= 0)  waiting_time = 1;
