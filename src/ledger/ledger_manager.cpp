@@ -890,71 +890,55 @@ namespace bumo {
 	Result LedgerManager::DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context) {
 
 		Result result;
-		TransactionFrm::pointer back = ledger_context->transaction_stack_.back();
+		TransactionFrm::pointer top_tx = ledger_context->GetTopTx();
 		std::shared_ptr<AccountFrm> source_account;
-		back->environment_->GetEntry(env.transaction().source_address(), source_account);
+		top_tx->environment_->GetEntry(env.transaction().source_address(), source_account);
 		env.mutable_transaction()->set_nonce(source_account->GetAccountNonce() + 1);
 
 		//auto header = std::make_shared<protocol::LedgerHeader>(LedgerManager::Instance().closing_ledger_->GetProtoHeader());
 		auto header = std::make_shared<protocol::LedgerHeader>(ledger_context->closing_ledger_->GetProtoHeader());
 
-		TransactionFrm::pointer txfrm = std::make_shared<bumo::TransactionFrm >(env);
+		TransactionFrm::pointer new_tx = std::make_shared<bumo::TransactionFrm >(env);
 		TransactionFrm::pointer bottom_tx = ledger_context->GetBottomTx();
 		do {
 			
-
 			if (ledger_context->transaction_stack_.size() > General::CONTRACT_MAX_RECURSIVE_DEPTH) {
-				txfrm->result_.set_code(protocol::ERRCODE_CONTRACT_TOO_MANY_RECURSION);
-				txfrm->result_.set_desc("Too many recursion.");
+				new_tx->result_.set_code(protocol::ERRCODE_CONTRACT_TOO_MANY_RECURSION);
+				new_tx->result_.set_desc("Too many recursion.");
 				//Add byte fee
 				TransactionFrm::pointer bottom_tx = ledger_context->GetBottomTx();
-				bottom_tx->AddActualGas(txfrm->GetSelfGas());
+				bottom_tx->AddActualGas(new_tx->GetSelfGas());
 				break;
 			}
 
-			int64_t top_contract_id = ledger_context->GetTopContractId();
-			if (top_contract_id > 0 ) {
-				Contract *contract = ContractManager::Instance().GetContract(top_contract_id);
-				contract->IncTxDoCount();
-				if (contract->GetTxDoCount() > General::CONTRACT_TRANSACTION_LIMIT) {
-					//txfrm->result_.set_code(protocol::ERRCODE_CONTRACT_TOO_MANY_TRANSACTIONS);
-					//break;
-					result.set_code(protocol::ERRCODE_CONTRACT_TOO_MANY_TRANSACTIONS);
-					result.set_desc("Too many transaction");
-					LOG_ERROR("Too many transactions triggered by transaction(hash:%s)", contract->GetParameter().sender_.c_str());
-					return result;
-				}
-			}
-
-			ledger_context->transaction_stack_.push_back(txfrm);
-			txfrm->SetMaxEndTime(back->GetMaxEndTime());
-			txfrm->NonceIncrease(ledger_context->closing_ledger_.get(), back->environment_);
-			if (txfrm->ValidForParameter(true)) {
-				std::shared_ptr<Environment> cacheEnv = back->environment_->NewStackFrameEnv();
-				txfrm->Apply(ledger_context->closing_ledger_.get(), cacheEnv, true);
+			ledger_context->transaction_stack_.push_back(new_tx);
+			new_tx->NonceIncrease(ledger_context->closing_ledger_.get(), top_tx->environment_);
+			if (new_tx->ValidForParameter(true)) {
+				std::shared_ptr<Environment> cacheEnv = top_tx->environment_->NewStackFrameEnv();
+				new_tx->Apply(ledger_context->closing_ledger_.get(), cacheEnv, true);
 			}
 			else {
-				TransactionFrm::AddActualFee(bottom_tx, txfrm.get());
+				TransactionFrm::AddActualFee(bottom_tx, new_tx.get());
 			}
 
 			//Throw the contract
-			if (txfrm->GetResult().code() == protocol::ERRCODE_FEE_NOT_ENOUGH ||
-				txfrm->GetResult().code() == protocol::ERRCODE_CONTRACT_TOO_MANY_TRANSACTIONS) {
-				result = txfrm->GetResult();
-				LOG_ERROR("%s", txfrm->GetResult().desc().c_str());
+			if (new_tx->GetResult().code() == protocol::ERRCODE_FEE_NOT_ENOUGH ||
+				new_tx->GetResult().code() == protocol::ERRCODE_CONTRACT_TOO_MANY_TRANSACTIONS) {
+				result = new_tx->GetResult();
+				LOG_ERROR("%s", new_tx->GetResult().desc().c_str());
 				return result;
 			}
 
 			protocol::TransactionEnvStore tx_store;
-			tx_store.mutable_transaction_env()->CopyFrom(txfrm->GetProtoTxEnv());
+			tx_store.mutable_transaction_env()->CopyFrom(new_tx->GetProtoTxEnv());
 			auto trigger = tx_store.mutable_transaction_env()->mutable_trigger();
-			trigger->mutable_transaction()->set_hash(back->GetContentHash());
-			trigger->mutable_transaction()->set_index(back->processing_operation_);
+			trigger->mutable_transaction()->set_hash(top_tx->GetContentHash());
+			trigger->mutable_transaction()->set_index(top_tx->processing_operation_);
 
 
-			if (txfrm->GetResult().code() == protocol::ERRCODE_SUCCESS) {
-				back->instructions_.insert(back->instructions_.end(), txfrm->instructions_.begin(), txfrm->instructions_.end());
-				txfrm->environment_->Commit();
+			if (new_tx->GetResult().code() == protocol::ERRCODE_SUCCESS) {
+				top_tx->instructions_.insert(top_tx->instructions_.end(), new_tx->instructions_.begin(), new_tx->instructions_.end());
+				new_tx->environment_->Commit();
 			}
 
 			/* txfrm->environment_ was created in txfrm->Apply(...) when txfrm->ValidForParameter() == true,
@@ -964,27 +948,27 @@ namespace bumo {
 			   exists when operation called by the contract, it means only in Dotransaction function,
 			   because there is only one environment in normal operation, txfrm->environment_ is a reference to it*/
 			//txfrm->environment_->ClearChangeBuf();
-			tx_store.set_error_code(txfrm->GetResult().code());
-			tx_store.set_error_desc(txfrm->GetResult().desc());
+			tx_store.set_error_code(new_tx->GetResult().code());
+			tx_store.set_error_desc(new_tx->GetResult().desc());
 				
-			back->instructions_.push_back(tx_store);
+			top_tx->instructions_.push_back(tx_store);
 			ledger_context->transaction_stack_.pop_back();
 
-			result = txfrm->GetResult();
+			result = new_tx->GetResult();
 			return result;
 		} while (false);
 
 		protocol::TransactionEnvStore tx_store;
-		tx_store.set_error_code(txfrm->GetResult().code());
-		tx_store.set_error_desc(txfrm->GetResult().desc());
+		tx_store.set_error_code(new_tx->GetResult().code());
+		tx_store.set_error_desc(new_tx->GetResult().desc());
 			
-		tx_store.mutable_transaction_env()->CopyFrom(txfrm->GetProtoTxEnv());
+		tx_store.mutable_transaction_env()->CopyFrom(new_tx->GetProtoTxEnv());
 		auto trigger = tx_store.mutable_transaction_env()->mutable_trigger();
-		trigger->mutable_transaction()->set_hash(back->GetContentHash());
-		trigger->mutable_transaction()->set_index(back->processing_operation_);
-		back->instructions_.push_back(tx_store);
+		trigger->mutable_transaction()->set_hash(top_tx->GetContentHash());
+		trigger->mutable_transaction()->set_index(top_tx->processing_operation_);
+		top_tx->instructions_.push_back(tx_store);
 		
-		result = txfrm->GetResult();
+		result = new_tx->GetResult();
 		return result;
 	}
 }

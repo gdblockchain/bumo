@@ -33,6 +33,7 @@ namespace bumo{
 		ContractParameter();
 		~ContractParameter();
 
+		bool init_;
 		std::string code_;
 		std::string input_;
 		std::string this_address_;
@@ -97,8 +98,7 @@ namespace bumo{
 		virtual ~Contract();
 
 	public:
-		virtual bool Execute();
-		virtual bool InitContract();
+		virtual bool Execute(Json::Value& jsResult);
 		virtual bool Cancel();
 		virtual bool SourceCodeCheck();
 		virtual bool Query(Json::Value& jsResult);
@@ -127,8 +127,7 @@ namespace bumo{
 		V8Contract(bool readonly, const ContractParameter &parameter);
 		virtual ~V8Contract();
 	public:
-		virtual bool Execute();
-		virtual bool InitContract();
+		virtual bool Execute(Json::Value& jsResult);
 		virtual bool Cancel();
 		virtual bool Query(Json::Value& jsResult);
 		virtual bool SourceCodeCheck();
@@ -169,6 +168,7 @@ namespace bumo{
 		static v8::Platform* 	platform_;
 		static v8::Isolate::CreateParams create_params_;
 
+		static protocol::AssetKey GetAssetFromJsObject(v8::Isolate* isolate, v8::Local<v8::Object> &js_object);
 		static bool RemoveRandom(v8::Isolate* isolate, Json::Value &error_msg);
 		static v8::Local<v8::Context> CreateContext(v8::Isolate* isolate, bool readonly);
 		static void InitFuncTemplateGt1001(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> global, bool readonly);
@@ -183,6 +183,7 @@ namespace bumo{
 		static void CallBackGetValidators(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackAddressValidCheck(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackPayCoin(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackCall(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackIssueAsset(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackPayAsset(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void Include(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -190,6 +191,8 @@ namespace bumo{
 		//Get transaction info from a transaction
 		static void CallBackGetTransactionInfo(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackContractQuery(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackContractQueryGt11(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackDelegateCall(const v8::FunctionCallbackInfo<v8::Value>& args);
 		//static void CallBackGetThisAddress(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static V8Contract *UnwrapContract(v8::Local<v8::Object> obj);
 		static bool JsValueToCppJson(v8::Handle<v8::Context>& context, v8::Local<v8::Value>& jsvalue, Json::Value& jsonvalue);
@@ -239,7 +242,7 @@ namespace bumo{
 		static void CallBackInt64Compare(const v8::FunctionCallbackInfo<v8::Value>& args);
 
     private:
-        bool ExecuteCode(const char* fname);
+		bool ExecuteCode(Json::Value& jsResult);
 
 		typedef enum tagDataEncodeType {
 			BASE16 = 0,
@@ -265,7 +268,7 @@ namespace bumo{
 		bool Initialize(int argc, char** argv);
 		bool Exit();
 
-		Result Execute(int32_t type, const ContractParameter &paramter,bool init_execute = false);
+		Result Execute(int32_t type, const ContractParameter &paramter, Json::Value& jsResult);
 		bool Query(int32_t type, const ContractParameter &paramter, Json::Value &result);
 		bool Cancel(int64_t contract_id);
 		Result SourceCodeCheck(int32_t type, const std::string &code);
