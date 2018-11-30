@@ -630,14 +630,6 @@ namespace bumo {
 	}
 
 	bool TransactionFrm::AddActualFee(TransactionFrm::pointer bottom_tx, TransactionFrm* txfrm){
-		
-		//if ((bottom_tx->GetGasPrice() != 0) && ((utils::MAX_INT64 / bottom_tx->GetGasPrice())  <  bottom_tx->GetActualGas())) {
-		//	txfrm->result_.set_code(protocol::ERRCODE_FEE_INVALID);
-		//	txfrm->result_.set_desc(utils::String::Format("Transaction(%s), actual gas(" FMT_I64 "), gas price(" FMT_I64 ")", utils::String::BinToHexString(bottom_tx->GetContentHash()).c_str(),
-		//		bottom_tx->GetActualGas(), bottom_tx->GetGasPrice()));
-		//	return false;
-		//}
-
 		bottom_tx->AddActualGas(txfrm->GetSelfGas());
 		int64_t actual_fee = 0;
 		if (!utils::SafeIntMul(bottom_tx->GetActualGas(), bottom_tx->GetGasPrice(), actual_fee)){
