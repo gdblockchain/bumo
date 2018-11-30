@@ -280,9 +280,6 @@ namespace bumo {
 	}
 
 	std::string GlueManager::OnValueCommited(int64_t request_seq, const std::string &value, const std::string &proof, bool calculate_total) {
-		protocol::ConsensusValue request;
-		request.ParseFromString(value);
-
 		//Write to db
 		int64_t time_start = utils::Timestamp::HighResolution();
 		
@@ -294,10 +291,10 @@ namespace bumo {
 		int64_t time_use = utils::Timestamp::HighResolution() - time_start;
 
 		//Delete the cache 
-		tx_pool_->RemoveTxs(request.txset(),true);
+		tx_pool_->RemoveTxs(req.txset(),true);
 
 		//Start calculating the time to start the next block.
-		int64_t next_interval = GetIntervalTime(request.txset().txs_size() == 0);
+		int64_t next_interval = GetIntervalTime(req.txset().txs_size() == 0);
 		int64_t next_timestamp = next_interval + req.close_time();
 		int64_t seq = req.ledger_seq();
 		Global::Instance().GetIoService().post([next_timestamp, time_use, seq, this]() {
