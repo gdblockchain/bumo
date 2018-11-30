@@ -566,9 +566,11 @@ namespace bumo {
 				parameter.blocknumber_ = transaction_->ledger_->value_->ledger_seq();
 				parameter.ledger_context_ = transaction_->ledger_->lpledger_context_;
 				parameter.pay_coin_amount_ = 0;
+				parameter.init_ = true;
 
 				std::string err_msg;
-				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, true);
+				Json::Value json_return; //
+				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, json_return);
 
 				if (result_.code() == 0){
 					Json::Value contract_result;
@@ -685,7 +687,8 @@ namespace bumo {
 				parameter.ledger_context_ = transaction_->ledger_->lpledger_context_;
 				parameter.pay_asset_amount_ = payAsset.asset();
 
-				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter);
+				Json::Value json_return;
+				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, json_return);
 			}
 		} while (false);
 	}
@@ -867,7 +870,8 @@ namespace bumo {
 				parameter.pay_coin_amount_ = ope.amount();
 
 				std::string err_msg;
-				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter);
+				Json::Value json_return;
+				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, json_return);
 
 			}
 		} while (false);
