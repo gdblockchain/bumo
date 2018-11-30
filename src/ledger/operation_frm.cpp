@@ -832,7 +832,9 @@ namespace bumo {
 				account.mutable_priv()->set_master_weight(1);
 				account.mutable_priv()->mutable_thresholds()->set_tx_threshold(1);
 				account.set_address(ope.dest_address());
-				account.set_creator(source_account_->GetAccountAddress());
+				if (CHECK_VERSION_GT_2000) {
+					account.set_creator(source_account_->GetAccountAddress());
+				}
 				dest_account_ptr = std::make_shared<AccountFrm>(account);
 				environment->AddEntry(ope.dest_address(), dest_account_ptr);
 
@@ -841,7 +843,7 @@ namespace bumo {
 			int64_t src_balance=0;
 			if (!utils::SafeIntSub(proto_source_account.balance(), ope.amount(), src_balance)) {
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				result_.set_desc(utils::String::Format("PayCoin overflow: source ccount(%s), balance(" FMT_I64 "), payment amount:(" FMT_I64 ") ",
+				result_.set_desc(utils::String::Format("PayCoin overflow: source account(%s), balance(" FMT_I64 "), payment amount:(" FMT_I64 ") ",
 					proto_source_account.address().c_str(), proto_source_account.balance(), ope.amount()));
 				break;
 			}
