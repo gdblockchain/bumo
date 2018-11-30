@@ -166,7 +166,7 @@ namespace bumo {
 
 		do {
 			utils::MutexGuard guard(gmutex_);
-			if (current_time - sync_.update_time_ <= 30 * 1000000) {
+			if (current_time - sync_.update_time_ <= 30 * utils::MICRO_UNITS_PER_SEC) {
 				return;
 			}
 
