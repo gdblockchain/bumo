@@ -88,8 +88,6 @@ namespace bumo{
 		ContractParameter parameter_;
 
 		Result result_;
-		//int32_t error_code_;  //enum 0, FEE_NO_ENOUGH, MAX_TX
-		//std::string error_msg_;
 		int32_t tx_do_count_;  //Transactions triggerred by one contract.
 		utils::StringList logs_;
 	public:
@@ -193,7 +191,7 @@ namespace bumo{
 		static void CallBackContractQuery(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackContractQueryGt11(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackDelegateCall(const v8::FunctionCallbackInfo<v8::Value>& args);
-		//static void CallBackGetThisAddress(const v8::FunctionCallbackInfo<v8::Value>& args);
+
 		static V8Contract *UnwrapContract(v8::Local<v8::Object> obj);
 		static bool JsValueToCppJson(v8::Handle<v8::Context>& context, v8::Local<v8::Value>& jsvalue, Json::Value& jsonvalue);
 		static bool CppJsonToJsValue(v8::Isolate* isolate, Json::Value& jsonvalue, v8::Local<v8::Value>& jsvalue);
@@ -272,7 +270,6 @@ namespace bumo{
 		bool Query(int32_t type, const ContractParameter &paramter, Json::Value &result);
 		bool Cancel(int64_t contract_id);
 		Result SourceCodeCheck(int32_t type, const std::string &code);
-		//bool Test(int32_t type, const ContractTestParameter &paramter, Json::Value& jsResult);
 		Contract *GetContract(int64_t contract_id);
 	};
 }
