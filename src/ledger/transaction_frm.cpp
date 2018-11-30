@@ -592,17 +592,6 @@ namespace bumo {
 		}
 
 		int64_t self_gas = GetSelfGas();
-		//if ((self_gas != 0) && ((utils::MAX_INT64 / self_gas) < gas_price)) {
-		//	std::string error_desc = utils::String::Format(
-		//		"Transaction(%s), gas(" FMT_I64 "), self gas price(" FMT_I64 ") not valid",
-		//		utils::String::BinToHexString(GetContentHash()).c_str(), self_gas, gas_price);
-
-		//	result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-		//	result_.set_desc(error_desc);
-		//	LOG_ERROR("%s", error_desc.c_str());
-
-		//	return false;
-		//}
 		int64_t tx_fee=0;
 		if (!utils::SafeIntMul(self_gas, gas_price, tx_fee)){
 			std::string error_desc = utils::String::Format(
