@@ -168,7 +168,7 @@ namespace bumo{
 		static v8::Platform* 	platform_;
 		static v8::Isolate::CreateParams create_params_;
 
-		static protocol::AssetKey GetAssetFromJsObject(v8::Isolate* isolate, v8::Local<v8::Object> &js_object);
+		static protocol::AssetKey GetAssetFromJsObject(v8::Isolate* isolate, v8::Local<v8::Object> js_object);
 		static bool RemoveRandom(v8::Isolate* isolate, Json::Value &error_msg);
 		static v8::Local<v8::Context> CreateContext(v8::Isolate* isolate, bool readonly);
 		static void InitFuncTemplateGt1001(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> global, bool readonly);

@@ -1014,7 +1014,7 @@ namespace bumo{
 			v8::NewStringType::kNormal).ToLocalChecked());
 	}
 
-	protocol::AssetKey V8Contract::GetAssetFromJsObject(v8::Isolate* isolate, v8::Local<v8::Object> &js_object) {
+	protocol::AssetKey V8Contract::GetAssetFromJsObject(v8::Isolate* isolate, v8::Local<v8::Object> js_object) {
 		protocol::AssetKey asset_key;
 		v8::Local<v8::Value> v8_issue = js_object->Get(v8::String::NewFromUtf8(isolate, "issuer"));
 		v8::Local<v8::Value> v8_code = js_object->Get(v8::String::NewFromUtf8(isolate, "code"));
