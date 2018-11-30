@@ -479,7 +479,6 @@ namespace bumo {
 
 		if (tran.metadata().size() > General::METADATA_MAX_VALUE_SIZE) {
 			result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-			//result_.set_desc("Transaction metadata too long");
 			result_.set_desc(utils::String::Format("Length of the metadata from transaction exceeds the limit(%d).",
 				General::METADATA_MAX_VALUE_SIZE));
 
@@ -498,7 +497,6 @@ namespace bumo {
 
 			if (tran.ceil_ledger_seq() < current_ledger_seq) {
 				result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-				//result_.set_desc("Transaction metadata too long");
 				result_.set_desc(utils::String::Format("Limit ledger sequence(" FMT_I64 ") < current ledger sequence(" FMT_I64 ")",
 					tran.ceil_ledger_seq(), current_ledger_seq));
 
@@ -508,7 +506,6 @@ namespace bumo {
 		}
 		else if (tran.ceil_ledger_seq() < 0) {
 			result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-			//result_.set_desc("Transaction metadata too long");
 			result_.set_desc(utils::String::Format("Limit ledger sequence(" FMT_I64 ") < 0",
 				tran.ceil_ledger_seq()));
 			LOG_ERROR("%s", result_.desc().c_str());
@@ -592,17 +589,6 @@ namespace bumo {
 		}
 
 		int64_t self_gas = GetSelfGas();
-		//if ((self_gas != 0) && ((utils::MAX_INT64 / self_gas) < gas_price)) {
-		//	std::string error_desc = utils::String::Format(
-		//		"Transaction(%s), gas(" FMT_I64 "), self gas price(" FMT_I64 ") not valid",
-		//		utils::String::BinToHexString(GetContentHash()).c_str(), self_gas, gas_price);
-
-		//	result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
-		//	result_.set_desc(error_desc);
-		//	LOG_ERROR("%s", error_desc.c_str());
-
-		//	return false;
-		//}
 		int64_t tx_fee=0;
 		if (!utils::SafeIntMul(self_gas, gas_price, tx_fee)){
 			std::string error_desc = utils::String::Format(
@@ -630,14 +616,6 @@ namespace bumo {
 	}
 
 	bool TransactionFrm::AddActualFee(TransactionFrm::pointer bottom_tx, TransactionFrm* txfrm){
-		
-		//if ((bottom_tx->GetGasPrice() != 0) && ((utils::MAX_INT64 / bottom_tx->GetGasPrice())  <  bottom_tx->GetActualGas())) {
-		//	txfrm->result_.set_code(protocol::ERRCODE_FEE_INVALID);
-		//	txfrm->result_.set_desc(utils::String::Format("Transaction(%s), actual gas(" FMT_I64 "), gas price(" FMT_I64 ")", utils::String::BinToHexString(bottom_tx->GetContentHash()).c_str(),
-		//		bottom_tx->GetActualGas(), bottom_tx->GetGasPrice()));
-		//	return false;
-		//}
-
 		bottom_tx->AddActualGas(txfrm->GetSelfGas());
 		int64_t actual_fee = 0;
 		if (!utils::SafeIntMul(bottom_tx->GetActualGas(), bottom_tx->GetGasPrice(), actual_fee)){
@@ -786,9 +764,7 @@ namespace bumo {
 				}
 			}
 
-			//opt->SourceRelationTx();
 			Result result = opt->Apply(environment_);
-
 			if (result.code() != 0) {
 				result_ = opt->GetResult();
 				bSucess = false;
