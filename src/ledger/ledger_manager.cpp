@@ -522,9 +522,6 @@ namespace bumo {
 			if (kv.key() == "abnormal_node") {
 				abnormal_node = kv.value();
 			}
-			else if (kv.key() == General::VALIDATOR_LEADER){
-				validator_leader = kv.value();
-			}
 		}
 
 		if (!abnormal_node.empty()) {
@@ -533,7 +530,6 @@ namespace bumo {
 		}
 
 		ElectionManager& election = ElectionManager::Instance();
-		election.GetCandidateMpt()->batch_->Put(ComposePrefix(General::VALIDATOR_LEADER, consensus.ledger_seq()), validator_leader);
 
 		//for validator candidate
 		ledger->environment_->UpdateValidatorCandidate();

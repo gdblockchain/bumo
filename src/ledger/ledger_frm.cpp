@@ -100,7 +100,7 @@ namespace bumo {
 			batch.Put(ComposePrefix(General::TRANSACTION_PREFIX, ptr->GetContentHash()), env_store.SerializeAsString());
 			list.add_entry(ptr->GetContentHash());
 
-			//If a transaction succeeds, the transactions tiggerred by it can be stored in db.
+			//If a transaction succeeds, the transactions triggered by it can be stored in db.
 			if (ptr->GetResult().code() == protocol::ERRCODE_SUCCESS)
 				for (size_t j = 0; j < ptr->instructions_.size(); j++){
 					protocol::TransactionEnvStore &env_sto = ptr->instructions_[j];
@@ -574,12 +574,16 @@ namespace bumo {
 			return true;
 		}
 
-		std::string key = ComposePrefix(General::VALIDATOR_LEADER, ledger_.header().seq() - 1);
 		std::string addr;
+		for (int i = 0; i < value_->entry().size(); i++) {
+			const protocol::KeyPair& kv = value_->entry(i);
+			if (kv.key() == General::VALIDATOR_LEADER) {
+				addr = kv.value();
+			}
+		}
 
-		auto db = Storage::Instance().account_db();
-		if (!db->Get(key, addr)) {
-			LOG_ERROR("Failed to get validator leader of ledger(" FMT_I64 ")", ledger_.header().seq() - 1);
+		if (addr.empty()) {
+			LOG_ERROR("Failed to get validator leader from consensus value");
 			return false;
 		}
 

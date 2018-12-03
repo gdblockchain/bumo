@@ -28,7 +28,6 @@ namespace bumo {
 	}
 
 	bool ElectionManager::Initialize(){
-		if (!GlueManager::Instance().CheckVersionGt2000()) return true;
 
 		candidate_mpt_ = new KVTrie();
 		auto batch = std::make_shared<WRITE_BATCH>();
@@ -198,7 +197,12 @@ namespace bumo {
 			abnormal_json.append(item);
 		}
 		auto batch = candidate_mpt_->batch_;
-		batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
+		if (batch) {
+			batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
+		}
+		else {
+			LOG_ERROR("Failed to get batch of candidate merkle tree, abnormal is:%s", abnormal_json.toFastString().c_str());
+		}
 		KeyValueDb *db = Storage::Instance().account_db();
 		if (!db->WriteBatch(*batch)){
 			LOG_ERROR("Failed to write abnormal records to database(%s)", db->error_desc().c_str());
