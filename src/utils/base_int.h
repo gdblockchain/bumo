@@ -510,7 +510,7 @@ namespace utils {
 	//CAUTION: not suitable for all kinds of unsigned integer
 	template<class T>
 	bool SafeIntMul(T x, T y, T& r){
-		T mul = x * y;
+		volatile T mul = x * y;
 
 		bool safe = x == 0 || mul / x == y;
 		if (safe) r = mul;
@@ -521,7 +521,7 @@ namespace utils {
 	//CAUTION: not suitable for all kinds of unsigned integer
 	template<class T>
 	bool SafeIntAdd(T x, T y, T& r){
-		T sum = x + y;
+		volatile T sum = x + y;
 
 		bool negOver = x < 0 && y < 0 && sum >= 0;
 		bool posOver = x >= 0 && y >= 0 && sum < 0;
@@ -535,7 +535,7 @@ namespace utils {
 	//CAUTION: not suitable for all kinds of unsigned integer
 	template<class T>
 	bool SafeIntSub(T x, T y, T& r){
-		T dif = x - y;
+		volatile T dif = x - y;
 		bool negOver = x < 0 && y >= 0 && dif >= 0;
 		bool posOver = x >= 0 && y < 0 && dif <= 0;
 		bool safe = !negOver && !posOver;
