@@ -25,7 +25,8 @@
 		"thread_count": 8
     },
     "wsserver": {
-        "listen_address": "0.0.0.0:36003"
+        "listen_address": "0.0.0.0:36003",
+	"allow_orgin" : ""
     },
     "ledger": {
 	"validation_address": "buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY",
