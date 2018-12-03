@@ -341,6 +341,12 @@ namespace bumo{
 		do {
 			Json::Value error_random;
 			if (!RemoveRandom(isolate_, error_random)) {
+				//"VERSION CHECKING condition" may be removed after version 1002
+				if (CHECK_VERSION_GT_1001){
+					result_.set_code(protocol::ERRCODE_CONTRACT_EXECUTE_FAIL);
+				}
+				//--------end-----------
+
 				result_.set_desc(error_random.toFastString());
 				break;
 			}
@@ -351,12 +357,24 @@ namespace bumo{
 			v8::ScriptOrigin origin_check_time_name(check_time_name);
 
 			if (!v8::Script::Compile(context, v8src, &origin_check_time_name).ToLocal(&compiled_script)) {
+				//"VERSION CHECKING condition" may be removed after version 1002
+				if (CHECK_VERSION_GT_1001) {
+					result_.set_code(protocol::ERRCODE_CONTRACT_EXECUTE_FAIL);
+				}
+
 				result_.set_desc(ReportException(isolate_, &try_catch).toFastString());
 				break;
 			}
 
 			v8::Local<v8::Value> result;
 			if (!compiled_script->Run(context).ToLocal(&result)) {
+				//"VERSION CHECKING condition" may be removed after version 1002
+				if (CHECK_VERSION_GT_1001) {
+					if (result_.code() == 0) { //Set the code if it is not set.
+						result_.set_code(protocol::ERRCODE_CONTRACT_EXECUTE_FAIL);
+					}
+				}
+
 				result_.set_desc(ReportException(isolate_, &try_catch).toFastString());
 				break;
 			}
