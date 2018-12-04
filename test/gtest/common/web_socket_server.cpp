@@ -183,7 +183,6 @@ namespace bumo{
 
 	void WebSocketServer::on_error(connection_hdl hdl){
 		utils::MutexGuard guard(connet_clients_mutex_);
-
 		std::string endpoint_key = server_ptr_->get_con_from_hdl(hdl)->get_remote_endpoint();
 		connet_clients_.erase(endpoint_key);
 	}
