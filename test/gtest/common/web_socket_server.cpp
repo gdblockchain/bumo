@@ -1639,8 +1639,7 @@ namespace bumo{
 		}
 		EXPECT_EQ(connet_clients_.size(), 0);
 	}
-	void WebSocketServer::BadHelloResponseTest()
-	{
+	void WebSocketServer::BadHelloResponseTest(){
 		printf("**Test Start**this is a test for testing response with err code 2 and 16 on hello request!\n");
 		bool ret = true;
 		if (connet_clients_.size() != 0)
