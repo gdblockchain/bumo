@@ -1901,18 +1901,18 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
     
     ```
 
-- ##### 公钥转地址
+- ##### Public key to address
 
     `toAddress(public_key);`
-    - public_key 公钥，base16编码的字符串
-    - 成功，返回账号地址；失败返回false
+    - public_key:Public key，base16 encoded string
+    - success，return account address; failed to false
 
-    例如
+    example
     ```javascript
     let ret = toAddress('b0016ebe6191f2eb73a4f62880b2874cae1191183f50e1b18b23fcf40b75b7cd5745d671d1c8');
     /*
-      权限：只读
-      返回：成功返回 "buQi6f36idrKiGrno3RcdjUjGAibUC37FJK6"，失败返回false
+      Authority: Read-Only
+      return: Successfully-> "buQi6f36idrKiGrno3RcdjUjGAibUC37FJK6"，failed to false
     */
 
     ```
