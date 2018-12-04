@@ -1630,8 +1630,7 @@ namespace bumo{
 
 		//wait for a connection
 		while (utils::Timestamp::HighResolution() - start_time < 10000000){
-			if (connet_clients_.size() == 0)
-			{
+			if (connet_clients_.size() == 0){
 				break;
 			}
 			utils::Sleep(1);
