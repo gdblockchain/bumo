@@ -1856,8 +1856,7 @@ namespace bumo{
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestLedgerTest()
-	{
+	void WebSocketServer::RequestLedgerTest(){
 		
 		printf("**Test Start**this is a test to verify the response of request \"ledger\"!\n");
 		uint32_t testconditions[] = { 
