@@ -2067,7 +2067,7 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
     ```
 
      - ##### 校验签名是否合法
-    `verify(signedData, publicKey,blobData [, blobDataType]);`
+    `ecVerify(signedData, publicKey,blobData [, blobDataType]);`
 
     - signedData: 签名数据，base16编码的字符串。
     - publicKey：公钥，base16编码的字符串。
@@ -2077,7 +2077,7 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
 
     例如
     ```javascript
-    let ret = verify('3471aceac411975bb83a22d7a0f0499b4bfcb504e937d29bb11ea263b5f657badb40714850a1209a0940d1ccbcfc095c4b2d38a7160a824a6f9ba11f743ad80a', 'b0014e28b305b56ae3062b2cee32ea5b9f3eccd6d738262c656b56af14a3823b76c2a4adda3c', 'abcd', 1);
+    let ret = ecVerify('3471aceac411975bb83a22d7a0f0499b4bfcb504e937d29bb11ea263b5f657badb40714850a1209a0940d1ccbcfc095c4b2d38a7160a824a6f9ba11f743ad80a', 'b0014e28b305b56ae3062b2cee32ea5b9f3eccd6d738262c656b56af14a3823b76c2a4adda3c', 'abcd', 1);
     /*
       权限：只读
       返回：成功会返回true，失败会返回 false
