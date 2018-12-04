@@ -199,9 +199,11 @@ namespace bumo{
 		for (auto it = election_cfg.begin(); it != election_cfg.end(); it++) {
 			std::string key = it.memberName();
 			std::string value = election_cfg[key].asString();
-			if (key == "fee_distribution_rate" && old_cfg.fee_distribution_rate() != value) {
-				change = true;
-				new_cfg.set_fee_distribution_rate(value);
+			if (key == "fee_distribution_rate") {
+				if (old_cfg.fee_distribution_rate() != value) {
+					change = true;
+					new_cfg.set_fee_distribution_rate(value);
+				}
 			}
 			else if (key == "pledge_amount" || key == "validators_refresh_interval" || 
 					 key == "coin_to_vote_rate" || key == "fee_to_vote_rate") {
