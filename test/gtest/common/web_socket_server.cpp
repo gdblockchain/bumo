@@ -38,6 +38,7 @@ namespace bumo{
 			bret = true;		
 		return bret;
 	}
+	
 	void MsgProcessor::Run(utils::Thread *thread) {
 		while (thread->enabled()) {
 			// process request message
