@@ -1902,6 +1902,23 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
     
     ```
 
+- ##### 公钥转地址
+
+    `toAddress(public_key);`
+    - public_key 公钥，base16编码的字符串
+    - 成功，返回账号地址；失败返回false
+
+    例如
+    ```javascript
+    let ret = toAddress('b0016ebe6191f2eb73a4f62880b2874cae1191183f50e1b18b23fcf40b75b7cd5745d671d1c8');
+    /*
+      权限：只读
+      返回：成功返回 "buQi6f36idrKiGrno3RcdjUjGAibUC37FJK6"，失败返回false
+    */
+
+    ```
+
+
 - ##### Check the validity of string number
 
     `stoI64Check(strNumber);`
