@@ -108,6 +108,7 @@ namespace bumo{
 	WebSocketServer::WebSocketServer(){
 
 	}
+	
 	WebSocketServer::~WebSocketServer(){
 		msg_processor_.Exit();		
 	}
