@@ -2047,6 +2047,24 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
     */
     
     ```
+          
+ - ##### sha256 计算
+    `sha256(data[, dataType]);`
+
+    - data: 待计算hash的原始数据，根据dataType不同，填不同格式的数据。
+    - dataType：data 的数据类型，整数，可选字段，默认为0。0：base16编码后的字符串，如"61626364"；1：普通原始字符串，如"abcd"；2：base64编码后的字符串,如"YWJjZA=="。如果对二进制数据hash计算，建议使用base16或者base64编码。
+    - 返回值: 成功会hash之后的base16编码后的字符串，失败会返回 false
+
+    例如
+    ```javascript
+    let ret = sha256('61626364');
+    /*
+      权限：只读
+      功能：对
+      返回：成功返回64个字节的base16格式字符串 '88d4266fd4e6338d13b845fcf289579d209c897823b9217da3e161936f031589'，失败返回false
+    */
+
+    ```
 
 - ##### Log
 
