@@ -1823,8 +1823,7 @@ namespace bumo{
 		EXPECT_EQ(msg_processor_.GetTestOutput(), (HELLO_VALID | REG_VALID | HB_VALID));		
 		
 	}
-	void WebSocketServer::RequestBumoTest()
-	{
+	void WebSocketServer::RequestBumoTest(){
 		printf("**Test Start**this is a test to verify the response of request \"bumo\"!\n");
 		uint32_t testconditions[] = { GENERAL_CASE_RESPONSE_ERRCODE_0, GENERAL_CASE_RESPONSE_ERRCODE_14, \
 			GENERAL_CASE_RESPONSE_ERRCODE_21, GENERAL_CASE_RESPONSE_ERRCODE_22, GENERAL_CASE_RESPONSE_ERRCODE_MAX, \
