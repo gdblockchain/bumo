@@ -2085,6 +2085,24 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
 
     ```
 
+     - ##### DelegateCall
+    `delegateCall(contractAddress, input);`
+
+    - contractAddress: 被调用的合约地址。
+    - input：调用参数。
+    
+    delegateCall 函数会触发被调用的合约main函数入口，并且把当前合约的执行环境赋予被调用的合约。
+    
+    例如
+    ```javascript
+    let ret = delegateCall('buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY'，'{}');
+    /*
+      权限：可写
+      返回：成功会返回结果，失败抛出异常
+    */
+
+    ```
+
 - ##### Log
 
     `log(info);`
