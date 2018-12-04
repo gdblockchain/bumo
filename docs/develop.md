@@ -1854,6 +1854,24 @@ Referenced Documents: [Smart Contract Rules](../src/web/jslint/ContractRules.md)
     */
     ```
 
+- ##### 获取指定账号的metadata
+
+    `getAccountMetadata(account_address, metadata_key);`
+
+    - account_address: 账号地址
+    - metadata_key: metadata的key 
+
+    例如
+    ```javascript
+    let value = getAccountMetadata('buQsZNDpqHJZ4g5hz47CqVMk5154w1bHKsHY', 'abc');
+
+    /*
+      权限：只读
+      返回：成功返回字符串，如 'values', 失败返回false
+    */
+    ```
+
+
 - ##### Get block information
 
     `getBlockHash(offset_seq);`
