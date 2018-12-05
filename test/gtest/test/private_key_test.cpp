@@ -13,12 +13,10 @@ protected:
 		delete priv_key;
 		priv_key = NULL;
 	}
-
 	bubi::PrivateKey* priv_key;
 };
 
 TEST_F(PrivateKeyTest, KeyNotNULL){
-
 	EXPECT_TRUE(priv_key->IsValid());
 	EXPECT_STRNE("", priv_key->GetBase58PublicKey().c_str());
 	EXPECT_STRNE("", priv_key->GetBase58PrivateKey().c_str());
