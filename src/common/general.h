@@ -98,6 +98,7 @@ namespace bumo {
 		const static char *CHECK_TIME_FUNCTION;
 
 		const static char *CONTRACT_VALIDATOR_ADDRESS;
+		const static char *CONTRACT_VALIDATOR_ADDRESS_GT2000;
 		const static char *CONTRACT_FEE_ADDRESS;
 		const static char *ABNORMAL_RECORDS;
 		const static char *ELECTION_CONFIG;
@@ -292,6 +293,7 @@ namespace bumo {
 
 #define CHECK_VERSION_GT_1000 (LedgerManager::Instance().GetLastClosedLedger().version() > General::LEDGER_VERSION_HISTORY_1000)
 #define CHECK_VERSION_GT_2000 (LedgerManager::Instance().GetLastClosedLedger().version() > General::LEDGER_VERSION_HISTORY_2000)
+#define GET_CONTRACT_VALIDATOR_ADDRESS (CHECK_VERSION_GT_2000 ? General::CONTRACT_VALIDATOR_ADDRESS_GT2000 : General::CONTRACT_VALIDATOR_ADDRESS)
 }
 
 #endif

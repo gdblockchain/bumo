@@ -182,7 +182,7 @@ namespace bumo{
 
 		Json::Value election_cfg;
 		AccountFrm::pointer election_contract;
-		if (!GetEntry(General::CONTRACT_VALIDATOR_ADDRESS, election_contract)) {
+		if (!GetEntry(GET_CONTRACT_VALIDATOR_ADDRESS, election_contract)) {
 			return false;
 		}
 		protocol::KeyPair pair;

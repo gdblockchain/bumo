@@ -91,8 +91,10 @@ namespace bumo {
 	//std::string account1 = pub_key.GetEncAddress(); "buQtxgoaDrVJGtoPT66YnA2S84yE8FbBqQDJ"
 	//pub_key.Init("2");
 	//std::string account2 = pub_key.GetEncAddress();"buQiQgRerQM1fUM3GkqUftpNxGzNg2AdJBpe"
-
+	//pub_key.Init("3");
+	//std::string account2 = pub_key.GetEncAddress();"buQqzdS9YSnokDjvzg4YaNatcFQfkgXqk6ss"
 	const char *General::CONTRACT_VALIDATOR_ADDRESS = "buQtxgoaDrVJGtoPT66YnA2S84yE8FbBqQDJ";
+	const char *General::CONTRACT_VALIDATOR_ADDRESS_GT2000 = "buQqzdS9YSnokDjvzg4YaNatcFQfkgXqk6ss";
 	const char *General::CONTRACT_FEE_ADDRESS = "buQiQgRerQM1fUM3GkqUftpNxGzNg2AdJBpe";
 	const char *General::ABNORMAL_RECORDS = "abnormal_records";
 	const char *General::ELECTION_CONFIG = "election_config";
