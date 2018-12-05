@@ -43,7 +43,6 @@ void Base64Test::UT_BASE64_ENCODE(){
 
 	{
 		std::string input_str("12346");
-		//std::string encode_str;
 		std::string decode_str;
 		//EXPECT_EQ(utils::Base64Encode(input_str, encode_str), false);
 		EXPECT_EQ(utils::Base64Decode(input_str, decode_str), false);
