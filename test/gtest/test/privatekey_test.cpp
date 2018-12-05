@@ -5,7 +5,6 @@
 #include <iostream>
 
 void encode_decode(){
-    //for (int i = 0; i < 1000; i++){
         bubi::PrivateKey priv_key(bubi::SIGNTYPE_ED25519);
         std::string public_key = priv_key.GetEncPublicKey();
         std::string private_key = priv_key.GetEncPrivateKey();
@@ -30,7 +29,7 @@ void encode_decode(){
         std::cout << "public_address:" << addr << std::endl;
         ASSERT_EQ(addr, public_address);
         ASSERT_EQ(pubkey.IsValid(), true);
-    //}
+
 }
 
 void sign_verify(){
