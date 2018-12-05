@@ -656,6 +656,28 @@ namespace bumo {
 				int64_t blockReward = GetBlockReward(seq);
 				result["block_reward"] = blockReward;
 
+				protocol::ConsensusValue cons;
+				if (LedgerManager::Instance().ConsensusValueFromDB(seq, cons)) {
+					bool got_validator_leader = false;
+					for (int i = 0; i < cons.entry().size(); i++) {
+						const protocol::KeyPair& kv = cons.entry(i);
+						if (kv.key() == General::VALIDATOR_LEADER) {
+							got_validator_leader = true;
+							Json::Value &validatorsReward = result["validators_reward"];
+							validatorsReward[kv.value()] = blockReward;
+							break;
+						}
+					}
+
+					if (got_validator_leader) { // means ledger version greater than 2000
+						break;
+					}
+				}
+				else {
+					error_code = protocol::ERRCODE_NOT_EXIST;
+					break;
+				}
+
 				protocol::ValidatorSet sets;
 				if (!LedgerManager::Instance().GetValidators(seq - 1, sets)) {
 					error_code = protocol::ERRCODE_NOT_EXIST;
