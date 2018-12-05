@@ -79,13 +79,11 @@ void bumo_tools_utest::UT_CheckAccountAddressValid(){
 	}
 
 	{
-		//ed25519
 		char input_encode_address[1024] = "buQY2pK5tdBkwP7z51Q5yy8WdgychHoRV6He";
 		EXPECT_EQ(CheckAccountAddressValid(input_encode_address), 0);
 	}
 
 	{
-		//sm2
 		char input_encode_address[1024] = "buR8BgyAe6JjBRFF4uGh9TW7jCJi7NTo4imU";
 		EXPECT_EQ(CheckAccountAddressValid(input_encode_address), 0);
 	}
