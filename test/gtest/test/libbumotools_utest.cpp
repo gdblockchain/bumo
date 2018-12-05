@@ -47,7 +47,6 @@ void bumo_tools_utest::UT_CreateAccountAddress(){
 
 		Json::Value result;
 		result.fromString(output_result);
-		//printf("%s\n", result.toFastString().c_str());
 		EXPECT_EQ(result["sign_type"].asString(), "sm2");
 	}
 
