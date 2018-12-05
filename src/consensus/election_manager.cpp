@@ -109,10 +109,19 @@ namespace bumo {
 		data["name"] = "election_manager";
 		data["configuration"] = Proto2Json(election_config_);
 		Json::Value candidates;
-		// add candidates
+
+		// sort candidate and update validators
+		std::multiset<CandidatePtr, PriorityCompare> sorted_candidates;
 		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
 		for (; it != validator_candidates_.end(); it++) {
-			Json::Value value = Proto2Json(*it->second);
+			sorted_candidates.insert(it->second);
+		}
+
+		// add candidates
+		std::multiset<CandidatePtr, PriorityCompare> ::reverse_iterator sit = sorted_candidates.rbegin();
+		for (; sit != sorted_candidates.rend(); sit++) {
+			CandidatePtr item = *sit;
+			Json::Value value = Proto2Json(*item);
 			candidates.append(value);
 		}
 		data["candidates"] = candidates;
@@ -368,28 +377,29 @@ namespace bumo {
 		if (validator_candidates_.size() == 0) return false;
 
 		// sort candidate and update validators
-		std::multimap<int64_t, CandidatePtr> new_validators;
+		std::multiset<CandidatePtr, PriorityCompare> new_validators;
 		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
 		for (; it != validator_candidates_.end(); it++) {
 			int64_t key = it->second->coin_vote() + it->second->fee_vote();
 			if (new_validators.size() < General::MAX_VALIDATORS) {
-				new_validators.insert(std::make_pair(key, it->second));
+				new_validators.insert(it->second);
 			}
 			else {
-				if (new_validators.begin()->first < key) {
-					new_validators.insert(std::make_pair(key, it->second));
+				CandidatePtr min_item = *new_validators.begin();
+				if (min_item->coin_vote() + min_item->fee_vote() <= key) { // compare string if votes are the same
+					new_validators.insert(it->second);
 					new_validators.erase(new_validators.begin());
 				}
 			}
 		}
-
+		
 		// convert new validators to json object
-		std::multimap<int64_t, CandidatePtr>::iterator vit = new_validators.begin();
-		for (; vit != new_validators.end(); vit++) 
+		std::multiset<CandidatePtr, PriorityCompare>::reverse_iterator vit = new_validators.rbegin();
+		for (; vit != new_validators.rend(); vit++) 
 		{
 			Json::Value value;
-			value.append(vit->second->address());
-			value.append(utils::String::ToString(vit->second->pledge()));
+			value.append((*vit)->address());
+			value.append(utils::String::ToString((*vit)->pledge()));
 			validators_json.append(value);
 		}
 

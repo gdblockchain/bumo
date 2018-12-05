@@ -50,6 +50,22 @@ namespace bumo {
 		~ElectionManager();
 
 	private:
+		struct PriorityCompare
+		{
+			/// Compare transactions by votes and ascii string value.
+			bool operator()(CandidatePtr const& l, CandidatePtr const& r) const
+			{
+				int64_t votes_l = l->coin_vote() + l->fee_vote();
+				int64_t votes_r = r->coin_vote() + r->fee_vote();
+				if (votes_l == votes_r) {
+					return l->address() < r->address();
+				}
+				else {
+					return votes_l < votes_r;
+				}
+			}
+		};
+
 		protocol::ElectionConfig election_config_;
 		std::unordered_map<std::string, int64_t> abnormal_records_;
 
