@@ -82,6 +82,11 @@ namespace bumo {
 		result["actual_fee"] = actual_gas_for_query_;
 		result["hash"] = utils::String::BinToHexString(hash_);
 		result["tx_size"] = transaction_env_.ByteSize();
+
+		for (auto const &i : contract_tx_hashes_){
+			Json::Value &array_json = result["contract_tx_hashes"];
+			array_json[array_json.size()] = utils::String::BinToHexString(i);
+		}
 	}
 
 	void TransactionFrm::CacheTxToJson(Json::Value &result){
@@ -698,6 +703,11 @@ namespace bumo {
 		apply_time_ = envstor.close_time();
 		transaction_env_ = envstor.transaction_env();
 		actual_gas_for_query_ = envstor.actual_fee();
+		
+		contract_tx_hashes_.clear();
+		for (int32_t i = 0; i < envstor.contract_tx_hashes_size(); i++) {
+			contract_tx_hashes_.push_back(envstor.contract_tx_hashes(i));
+		}
 
 		ledger_seq_ = envstor.ledger_seq();
 		Initialize();

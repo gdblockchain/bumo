@@ -544,7 +544,7 @@ void protobuf_AssignDesc_chain_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnv, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnv, _is_default_instance_));
   TransactionEnvStore_descriptor_ = file->message_type(22);
-  static const int TransactionEnvStore_offsets_[7] = {
+  static const int TransactionEnvStore_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, transaction_env_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, error_code_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, error_desc_),
@@ -552,6 +552,7 @@ void protobuf_AssignDesc_chain_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, close_time_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, actual_fee_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TransactionEnvStore, contract_tx_hashes_),
   };
   TransactionEnvStore_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -903,34 +904,35 @@ void protobuf_AddDesc_chain_2eproto() {
     "RACT_TRANSACTION\020\001\"\211\001\n\016TransactionEnv\022*\n"
     "\013transaction\030\001 \001(\0132\025.protocol.Transactio"
     "n\022\'\n\nsignatures\030\002 \003(\0132\023.protocol.Signatu"
-    "re\022\"\n\007trigger\030\003 \001(\0132\021.protocol.Trigger\"\272"
+    "re\022\"\n\007trigger\030\003 \001(\0132\021.protocol.Trigger\"\326"
     "\001\n\023TransactionEnvStore\0221\n\017transaction_en"
     "v\030\001 \001(\0132\030.protocol.TransactionEnv\022\022\n\nerr"
     "or_code\030\002 \001(\005\022\022\n\nerror_desc\030\003 \001(\t\022\022\n\nled"
     "ger_seq\030\004 \001(\003\022\022\n\nclose_time\030\005 \001(\003\022\014\n\004has"
-    "h\030\006 \001(\014\022\022\n\nactual_fee\030\007 \001(\003\":\n\021Transacti"
-    "onEnvSet\022%\n\003txs\030\002 \003(\0132\030.protocol.Transac"
-    "tionEnv\"G\n\030ConsensusValueValidation\022\025\n\re"
-    "xpire_tx_ids\030\001 \003(\005\022\024\n\014error_tx_ids\030\002 \003(\005"
-    "\"\203\002\n\016ConsensusValue\022*\n\005txset\030\001 \001(\0132\033.pro"
-    "tocol.TransactionEnvSet\022\022\n\nclose_time\030\002 "
-    "\001(\003\022\026\n\016previous_proof\030\003 \001(\014\022\022\n\nledger_se"
-    "q\030\004 \001(\003\022\034\n\024previous_ledger_hash\030\005 \001(\014\022/\n"
-    "\016ledger_upgrade\030\006 \001(\0132\027.protocol.LedgerU"
-    "pgrade\0226\n\nvalidation\030\007 \001(\0132\".protocol.Co"
-    "nsensusValueValidation\"j\n\010Contract\022-\n\004ty"
-    "pe\030\001 \001(\0162\037.protocol.Contract.ContractTyp"
-    "e\022\017\n\007payload\030\002 \001(\t\"\036\n\014ContractType\022\016\n\nJA"
-    "VASCRIPT\020\000\"\316\001\n\026OperationCreateAccount\022\024\n"
-    "\014dest_address\030\001 \001(\t\022$\n\010contract\030\002 \001(\0132\022."
-    "protocol.Contract\022(\n\004priv\030\003 \001(\0132\032.protoc"
-    "ol.AccountPrivilege\022$\n\tmetadatas\030\004 \003(\0132\021"
-    ".protocol.KeyPair\022\024\n\014init_balance\030\005 \001(\003\022"
-    "\022\n\ninit_input\030\006 \001(\t\"X\n\024OperationSetMetad"
-    "ata\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t\022\017\n\007versi"
-    "on\030\003 \001(\003\022\023\n\013delete_flag\030\004 \001(\010*#\n\005Limit\022\013"
-    "\n\007UNKNOWN\020\000\022\r\n\tSIGNATURE\020dB\"\n io.bumo.sd"
-    "k.core.extend.protobufb\006proto3", 4390);
+    "h\030\006 \001(\014\022\022\n\nactual_fee\030\007 \001(\003\022\032\n\022contract_"
+    "tx_hashes\030\010 \003(\014\":\n\021TransactionEnvSet\022%\n\003"
+    "txs\030\002 \003(\0132\030.protocol.TransactionEnv\"G\n\030C"
+    "onsensusValueValidation\022\025\n\rexpire_tx_ids"
+    "\030\001 \003(\005\022\024\n\014error_tx_ids\030\002 \003(\005\"\203\002\n\016Consens"
+    "usValue\022*\n\005txset\030\001 \001(\0132\033.protocol.Transa"
+    "ctionEnvSet\022\022\n\nclose_time\030\002 \001(\003\022\026\n\016previ"
+    "ous_proof\030\003 \001(\014\022\022\n\nledger_seq\030\004 \001(\003\022\034\n\024p"
+    "revious_ledger_hash\030\005 \001(\014\022/\n\016ledger_upgr"
+    "ade\030\006 \001(\0132\027.protocol.LedgerUpgrade\0226\n\nva"
+    "lidation\030\007 \001(\0132\".protocol.ConsensusValue"
+    "Validation\"j\n\010Contract\022-\n\004type\030\001 \001(\0162\037.p"
+    "rotocol.Contract.ContractType\022\017\n\007payload"
+    "\030\002 \001(\t\"\036\n\014ContractType\022\016\n\nJAVASCRIPT\020\000\"\316"
+    "\001\n\026OperationCreateAccount\022\024\n\014dest_addres"
+    "s\030\001 \001(\t\022$\n\010contract\030\002 \001(\0132\022.protocol.Con"
+    "tract\022(\n\004priv\030\003 \001(\0132\032.protocol.AccountPr"
+    "ivilege\022$\n\tmetadatas\030\004 \003(\0132\021.protocol.Ke"
+    "yPair\022\024\n\014init_balance\030\005 \001(\003\022\022\n\ninit_inpu"
+    "t\030\006 \001(\t\"X\n\024OperationSetMetadata\022\013\n\003key\030\001"
+    " \001(\t\022\r\n\005value\030\002 \001(\t\022\017\n\007version\030\003 \001(\003\022\023\n\013"
+    "delete_flag\030\004 \001(\010*#\n\005Limit\022\013\n\007UNKNOWN\020\000\022"
+    "\r\n\tSIGNATURE\020dB\"\n io.bumo.sdk.core.exten"
+    "d.protobufb\006proto3", 4418);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "chain.proto", &protobuf_RegisterTypes);
   Account::default_instance_ = new Account();
@@ -12056,6 +12058,7 @@ const int TransactionEnvStore::kLedgerSeqFieldNumber;
 const int TransactionEnvStore::kCloseTimeFieldNumber;
 const int TransactionEnvStore::kHashFieldNumber;
 const int TransactionEnvStore::kActualFeeFieldNumber;
+const int TransactionEnvStore::kContractTxHashesFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 TransactionEnvStore::TransactionEnvStore()
@@ -12147,15 +12150,17 @@ void TransactionEnvStore::Clear() {
 } while (0)
 
   ZR_(ledger_seq_, close_time_);
-  ZR_(actual_fee_, error_code_);
   if (GetArenaNoVirtual() == NULL && transaction_env_ != NULL) delete transaction_env_;
   transaction_env_ = NULL;
+  error_code_ = 0;
   error_desc_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   hash_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  actual_fee_ = GOOGLE_LONGLONG(0);
 
 #undef ZR_HELPER_
 #undef ZR_
 
+  contract_tx_hashes_.Clear();
 }
 
 bool TransactionEnvStore::MergePartialFromCodedStream(
@@ -12266,6 +12271,20 @@ bool TransactionEnvStore::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
+        if (input->ExpectTag(66)) goto parse_contract_tx_hashes;
+        break;
+      }
+
+      // repeated bytes contract_tx_hashes = 8;
+      case 8: {
+        if (tag == 66) {
+         parse_contract_tx_hashes:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->add_contract_tx_hashes()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(66)) goto parse_contract_tx_hashes;
         if (input->ExpectAtEnd()) goto success;
         break;
       }
@@ -12336,6 +12355,12 @@ void TransactionEnvStore::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(7, this->actual_fee(), output);
   }
 
+  // repeated bytes contract_tx_hashes = 8;
+  for (int i = 0; i < this->contract_tx_hashes_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytes(
+      8, this->contract_tx_hashes(i), output);
+  }
+
   // @@protoc_insertion_point(serialize_end:protocol.TransactionEnvStore)
 }
 
@@ -12385,6 +12410,12 @@ void TransactionEnvStore::SerializeWithCachedSizes(
   // optional int64 actual_fee = 7;
   if (this->actual_fee() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(7, this->actual_fee(), target);
+  }
+
+  // repeated bytes contract_tx_hashes = 8;
+  for (int i = 0; i < this->contract_tx_hashes_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteBytesToArray(8, this->contract_tx_hashes(i), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:protocol.TransactionEnvStore)
@@ -12444,6 +12475,13 @@ int TransactionEnvStore::ByteSize() const {
         this->actual_fee());
   }
 
+  // repeated bytes contract_tx_hashes = 8;
+  total_size += 1 * this->contract_tx_hashes_size();
+  for (int i = 0; i < this->contract_tx_hashes_size(); i++) {
+    total_size += ::google::protobuf::internal::WireFormatLite::BytesSize(
+      this->contract_tx_hashes(i));
+  }
+
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
   _cached_size_ = total_size;
   GOOGLE_SAFE_CONCURRENT_WRITES_END();
@@ -12472,6 +12510,7 @@ void TransactionEnvStore::MergeFrom(const TransactionEnvStore& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
+  contract_tx_hashes_.MergeFrom(from.contract_tx_hashes_);
   if (from.has_transaction_env()) {
     mutable_transaction_env()->::protocol::TransactionEnv::MergeFrom(from.transaction_env());
   }
@@ -12528,6 +12567,7 @@ void TransactionEnvStore::InternalSwap(TransactionEnvStore* other) {
   std::swap(close_time_, other->close_time_);
   hash_.Swap(&other->hash_);
   std::swap(actual_fee_, other->actual_fee_);
+  contract_tx_hashes_.UnsafeArenaSwap(&other->contract_tx_hashes_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
@@ -12723,6 +12763,61 @@ void TransactionEnvStore::clear_actual_fee() {
   
   actual_fee_ = value;
   // @@protoc_insertion_point(field_set:protocol.TransactionEnvStore.actual_fee)
+}
+
+// repeated bytes contract_tx_hashes = 8;
+int TransactionEnvStore::contract_tx_hashes_size() const {
+  return contract_tx_hashes_.size();
+}
+void TransactionEnvStore::clear_contract_tx_hashes() {
+  contract_tx_hashes_.Clear();
+}
+ const ::std::string& TransactionEnvStore::contract_tx_hashes(int index) const {
+  // @@protoc_insertion_point(field_get:protocol.TransactionEnvStore.contract_tx_hashes)
+  return contract_tx_hashes_.Get(index);
+}
+ ::std::string* TransactionEnvStore::mutable_contract_tx_hashes(int index) {
+  // @@protoc_insertion_point(field_mutable:protocol.TransactionEnvStore.contract_tx_hashes)
+  return contract_tx_hashes_.Mutable(index);
+}
+ void TransactionEnvStore::set_contract_tx_hashes(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:protocol.TransactionEnvStore.contract_tx_hashes)
+  contract_tx_hashes_.Mutable(index)->assign(value);
+}
+ void TransactionEnvStore::set_contract_tx_hashes(int index, const char* value) {
+  contract_tx_hashes_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:protocol.TransactionEnvStore.contract_tx_hashes)
+}
+ void TransactionEnvStore::set_contract_tx_hashes(int index, const void* value, size_t size) {
+  contract_tx_hashes_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:protocol.TransactionEnvStore.contract_tx_hashes)
+}
+ ::std::string* TransactionEnvStore::add_contract_tx_hashes() {
+  // @@protoc_insertion_point(field_add_mutable:protocol.TransactionEnvStore.contract_tx_hashes)
+  return contract_tx_hashes_.Add();
+}
+ void TransactionEnvStore::add_contract_tx_hashes(const ::std::string& value) {
+  contract_tx_hashes_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:protocol.TransactionEnvStore.contract_tx_hashes)
+}
+ void TransactionEnvStore::add_contract_tx_hashes(const char* value) {
+  contract_tx_hashes_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:protocol.TransactionEnvStore.contract_tx_hashes)
+}
+ void TransactionEnvStore::add_contract_tx_hashes(const void* value, size_t size) {
+  contract_tx_hashes_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:protocol.TransactionEnvStore.contract_tx_hashes)
+}
+ const ::google::protobuf::RepeatedPtrField< ::std::string>&
+TransactionEnvStore::contract_tx_hashes() const {
+  // @@protoc_insertion_point(field_list:protocol.TransactionEnvStore.contract_tx_hashes)
+  return contract_tx_hashes_;
+}
+ ::google::protobuf::RepeatedPtrField< ::std::string>*
+TransactionEnvStore::mutable_contract_tx_hashes() {
+  // @@protoc_insertion_point(field_mutable_list:protocol.TransactionEnvStore.contract_tx_hashes)
+  return &contract_tx_hashes_;
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

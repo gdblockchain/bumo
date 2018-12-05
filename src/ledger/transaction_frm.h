@@ -115,7 +115,9 @@ namespace bumo {
 		Result result_;	
 		int32_t processing_operation_;
 		LedgerFrm* ledger_;
-
+		
+		//for query
+		std::list<std::string> contract_tx_hashes_;
 	private:		
 		protocol::TransactionEnv transaction_env_;
 		std::string hash_;
