@@ -13,7 +13,6 @@ protected:
 		delete priv_key;
 		priv_key = NULL;
 	}
-
 	bubi::PrivateKey* priv_key;
 };
 
