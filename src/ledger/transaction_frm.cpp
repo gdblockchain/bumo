@@ -369,7 +369,7 @@ namespace bumo {
 			uint32_t user_rate = ElectionManager::Instance().GetFeesSharerRate(ElectionManager::SHARER_USER);
 
 			if (dapp_rate > user_rate){
-				LOG_TRACE("Dapp share rate("FMT_I64") exceed the user's share rate("FMT_I64").", dapp_rate, user_rate);
+				LOG_TRACE("Dapp share rate(" FMT_I64 ") exceed the user's share rate(" FMT_I64 ").", dapp_rate, user_rate);
 				return false;
 			}
 

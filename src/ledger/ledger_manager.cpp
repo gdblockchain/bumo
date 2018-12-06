@@ -536,7 +536,7 @@ namespace bumo {
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
 
 		if ((consensus.ledger_seq() % interval_block == 0) || (election.GetUpdateValidatorsFlag())) {
-			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", consensus.ledger_seq());
+			LOG_INFO("Start validator dynasty change, ledger_seq:" FMT_I64 "", consensus.ledger_seq());
 			Json::Value validators_json;
 
 			if (election.DynastyChange(validators_json)) {

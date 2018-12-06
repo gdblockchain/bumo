@@ -226,7 +226,7 @@ namespace bumo{
 				}
 			}
 			else {
-				LOG_TRACE("No such configuration parameter key:%s, value:" FMT_I64 "", key.c_str(), value);
+				LOG_TRACE("No such configuration parameter key:%s, value:%s", key.c_str(), value.c_str());
 			}
 		}
 
