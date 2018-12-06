@@ -40,7 +40,7 @@ namespace bumo {
 
 		// Initialize election configuration and write to database when get configuration failed
 		if (!ElectionConfigGet(election_config_)) {
-			LOG_ERROR("Failed to get election configuration!");
+			LOG_ERROR("Failed to get election configuration from database!");
 			election_config_.set_pledge_amount(ecfg.pledge_amount_);
 			election_config_.set_validators_refresh_interval(ecfg.validators_refresh_interval_);
 			election_config_.set_coin_to_vote_rate(ecfg.coin_to_vote_rate_);
@@ -59,11 +59,6 @@ namespace bumo {
 			LOG_ERROR("Failed to read fees share rate(%s)", election_config_.DebugString().c_str());
 			return false;
 		}
-		else {
-			LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
-		}
-
-		LOG_INFO("The election configuration is : %s", election_config_.DebugString().c_str());
 
 		// Validator abnormal records
 		auto db = Storage::Instance().account_db();
@@ -72,8 +67,8 @@ namespace bumo {
 			abnormal_records_.clear();
 			Json::Value abnormal_json;
 			if (abnormal_json.fromString(json_str)) {
-				LOG_ERROR("Failed to parse the json content of validator abnormal records");
-				UpdateAbnormalRecords();
+				LOG_ERROR("Failed to parse json string %s", json_str.c_str());
+				UpdateAbnormalRecords(); // reset validator abnormal records
 			}
 			else {
 				for (size_t i = 0; i < abnormal_json.size(); i++) {
@@ -213,9 +208,6 @@ namespace bumo {
 		if (!db->WriteBatch(*batch)){
 			LOG_ERROR("Failed to write validator abnormal records to database(%s)", db->error_desc().c_str());
 		}
-		else {
-			LOG_TRACE("Update validator abnormal records to database done");
-		}
 	}
 
 	int64_t ElectionManager::CoinToVotes(int64_t coin) {
@@ -233,7 +225,6 @@ namespace bumo {
 	bool ElectionManager::ReadSharerRate(){
 		std::vector<std::string> vec = utils::String::split(election_config_.fee_distribution_rate(), ":");
 		if (vec.size() != SHARER_MAX) {
-			LOG_ERROR("Failed to read fees sharer rate from %s.", election_config_.fee_distribution_rate().c_str());
 			return false;
 		}
 
@@ -289,7 +280,7 @@ namespace bumo {
 		DelAbnormalRecord(key);
 
 		protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
-		for (size_t i = 0; i < set.validators_size(); i++) {
+		for (int i = 0; i < set.validators_size(); i++) {
 			if (set.validators(i).address() == key) {
 				update_validators_ = true;
 			}
@@ -331,7 +322,7 @@ namespace bumo {
 			}
 			else{
 				protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
-				for (size_t i = 0; i < set.validators_size(); i++) {
+				for (int i = 0; i < set.validators_size(); i++) {
 					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
 					candidate->set_address(set.validators(i).address());
 					candidate->set_pledge(set.validators(i).pledge_coin_amount());
