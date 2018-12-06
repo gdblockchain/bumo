@@ -511,12 +511,9 @@ namespace bumo {
 		chain_max_ledger_probaly_ : data["ledger_sequence"].asInt64();
 	}
 
-	bool LedgerManager::DposUpdate(const protocol::ConsensusValue& consensus, LedgerFrm::pointer ledger){
-
-		//for abnormal record and validator leader
+	bool LedgerManager::DposUpdate(const protocol::ConsensusValue& consensus, LedgerFrm::pointer ledger) {
+		//for abnormal record
 		std::string abnormal_node;
-		std::string validator_leader;
-
 		for (int i = 0; i < consensus.entry().size(); i++) {
 			const protocol::KeyPair& kv = consensus.entry(i);
 			if (kv.key() == "abnormal_node") {
@@ -538,7 +535,7 @@ namespace bumo {
 		int64_t refresh_interval = election.GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
 
-		if ((consensus.ledger_seq() % interval_block == 0) || (election.GetUpdateVotesFlag())) {
+		if ((consensus.ledger_seq() % interval_block == 0) || (election.GetUpdateValidatorsFlag())) {
 			LOG_INFO("Start validator dynasty change, ledger_seq:"FMT_I64"", consensus.ledger_seq());
 			Json::Value validators_json;
 

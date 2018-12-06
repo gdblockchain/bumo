@@ -45,44 +45,15 @@ namespace bumo {
 			SHARER_MAX = 3
 		};
 
-	private:
 		ElectionManager();
 		~ElectionManager();
-
-	private:
-		struct PriorityCompare
-		{
-			/// Compare transactions by votes and ascii string value.
-			bool operator()(CandidatePtr const& l, CandidatePtr const& r) const
-			{
-				int64_t votes_l = l->coin_vote() + l->fee_vote();
-				int64_t votes_r = r->coin_vote() + r->fee_vote();
-				if (votes_l == votes_r) {
-					return l->address() < r->address();
-				}
-				else {
-					return votes_l < votes_r;
-				}
-			}
-		};
-
-		protocol::ElectionConfig election_config_;
-		std::unordered_map<std::string, int64_t> abnormal_records_;
-
-		utils::ReadWriteLock candidates_mutex_;
-		std::vector<std::string> to_delete_candidates_;
-		std::unordered_map<std::string, CandidatePtr> validator_candidates_;
-		bool update_votes_;
-		KVTrie* candidate_mpt_;
-
-		std::vector<uint32_t> fee_sharer_rate_;
 
 	public:
 		bool Initialize();
 		bool Exit();
 
-		bool GetUpdateVotesFlag(){
-			return update_votes_;
+		bool GetUpdateValidatorsFlag(){
+			return update_validators_;
 		}
 
 		KVTrie* GetCandidateMpt(){
@@ -122,6 +93,28 @@ namespace bumo {
 		virtual void OnSlowTimer(int64_t current_time);
 		virtual void GetModuleStatus(Json::Value &data);
 
+	private:
+		struct PriorityCompare
+		{
+			/// Compare transactions by votes and ASCII string value.
+			bool operator()(CandidatePtr const& l, CandidatePtr const& r) const
+			{
+				int64_t votes_l = l->coin_vote() + l->fee_vote();
+				int64_t votes_r = r->coin_vote() + r->fee_vote();
+				return (votes_l == votes_r) ? (l->address() < r->address()) : (votes_l < votes_r);
+			}
+		};
+
+		protocol::ElectionConfig election_config_;
+		std::unordered_map<std::string, int64_t> abnormal_records_;
+
+		utils::ReadWriteLock candidates_mutex_;
+		std::vector<std::string> to_delete_candidates_;
+		std::unordered_map<std::string, CandidatePtr> validator_candidates_;
+		bool update_validators_;
+		KVTrie* candidate_mpt_;
+
+		std::vector<uint32_t> fee_sharer_rate_;
 	};
 
 }

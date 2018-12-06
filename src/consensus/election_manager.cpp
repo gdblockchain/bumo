@@ -17,17 +17,17 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 #include "glue/glue_manager.h"
 
 namespace bumo {
-	ElectionManager::ElectionManager() : candidate_mpt_(nullptr), update_votes_(false){
+	ElectionManager::ElectionManager() : candidate_mpt_(nullptr), update_validators_(false) {
 	}
 
-	ElectionManager::~ElectionManager(){
+	ElectionManager::~ElectionManager() {
 		if (candidate_mpt_){
 			delete candidate_mpt_;
 			candidate_mpt_ = nullptr;
 		}
 	}
 
-	bool ElectionManager::Initialize(){
+	bool ElectionManager::Initialize() {
 
 		candidate_mpt_ = new KVTrie();
 		auto batch = std::make_shared<WRITE_BATCH>();
@@ -38,7 +38,7 @@ namespace bumo {
 		// Election configuration
 		ElectionConfigure& ecfg = Configure::Instance().election_configure_;
 
-		// Initialize election configuration to db if get configuration failed
+		// Initialize election configuration and write to database when get configuration failed
 		if (!ElectionConfigGet(election_config_)) {
 			LOG_ERROR("Failed to get election configuration!");
 			election_config_.set_pledge_amount(ecfg.pledge_amount_);
@@ -49,7 +49,7 @@ namespace bumo {
 
 			ElectionConfigSet(batch, election_config_);
 			KeyValueDb *db = Storage::Instance().account_db();
-			if (!db->WriteBatch(*batch)){
+			if (!db->WriteBatch(*batch)) {
 				LOG_ERROR("Failed to write election configuration to database(%s)", db->error_desc().c_str());
 				return false;
 			}
@@ -99,13 +99,13 @@ namespace bumo {
 		return true;
 	}
 
-	void ElectionManager::OnTimer(int64_t current_time){
+	void ElectionManager::OnTimer(int64_t current_time) {
 	}
 
-	void ElectionManager::OnSlowTimer(int64_t current_time){
+	void ElectionManager::OnSlowTimer(int64_t current_time) {
 	}
 
-	void ElectionManager::GetModuleStatus(Json::Value &data){
+	void ElectionManager::GetModuleStatus(Json::Value &data) {
 		data["name"] = "election_manager";
 		data["configuration"] = Proto2Json(election_config_);
 		Json::Value candidates;
@@ -158,10 +158,7 @@ namespace bumo {
 			return false;
 		}
 		
-		if (!ecfg.ParseFromString(str)){
-			return false;
-		}
-		return true;
+		return ecfg.ParseFromString(str);
 	}
 
 	int32_t ElectionManager::GetCandidatesNumber() {
@@ -179,7 +176,7 @@ namespace bumo {
 		UpdateAbnormalRecords();
 	}
 
-	void ElectionManager::DelAbnormalRecord(const std::string& abnormal_node){
+	void ElectionManager::DelAbnormalRecord(const std::string& abnormal_node) {
 		auto it = abnormal_records_.find(abnormal_node);
 		if (it != abnormal_records_.end()) {
 			abnormal_records_.erase(abnormal_node);
@@ -210,33 +207,23 @@ namespace bumo {
 			batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
 		}
 		else {
-			LOG_ERROR("Failed to get batch of candidate merkle tree, abnormal is:%s", abnormal_json.toFastString().c_str());
+			LOG_ERROR("Failed to get batch of candidate MPT tree");
 		}
 		KeyValueDb *db = Storage::Instance().account_db();
 		if (!db->WriteBatch(*batch)){
-			LOG_ERROR("Failed to write abnormal records to database(%s)", db->error_desc().c_str());
+			LOG_ERROR("Failed to write validator abnormal records to database(%s)", db->error_desc().c_str());
 		}
 		else {
-			LOG_TRACE("Update abnormal records to db done");
+			LOG_TRACE("Update validator abnormal records to database done");
 		}
 	}
 
 	int64_t ElectionManager::CoinToVotes(int64_t coin) {
-		if (election_config_.coin_to_vote_rate() < 1) {
-			return 0;
-		}
-		else {
-			return coin / election_config_.coin_to_vote_rate();
-		}
+		return (election_config_.coin_to_vote_rate() < 1) ? 0 : coin / election_config_.coin_to_vote_rate();
 	}
 
 	int64_t ElectionManager::FeeToVotes(int64_t fee) {
-		if (election_config_.fee_to_vote_rate() < 1) {
-			return 0;
-		}
-		else {
-			return fee / election_config_.fee_to_vote_rate();
-		}
+		return (election_config_.fee_to_vote_rate() < 1) ? 0 : fee / election_config_.fee_to_vote_rate();
 	}
 
 	int64_t ElectionManager::GetValidatorsRefreshInterval() {
@@ -246,7 +233,7 @@ namespace bumo {
 	bool ElectionManager::ReadSharerRate(){
 		std::vector<std::string> vec = utils::String::split(election_config_.fee_distribution_rate(), ":");
 		if (vec.size() != SHARER_MAX) {
-			LOG_ERROR("Failed to read fees sharer rate.");
+			LOG_ERROR("Failed to read fees sharer rate from %s.", election_config_.fee_distribution_rate().c_str());
 			return false;
 		}
 
@@ -266,7 +253,7 @@ namespace bumo {
 		return fee_sharer_rate_[owner];
 	}
 
-	CandidatePtr ElectionManager::GetValidatorCandidate(const std::string& key){
+	CandidatePtr ElectionManager::GetValidatorCandidate(const std::string& key) {
 		CandidatePtr candidate = nullptr;
 
 		auto it = validator_candidates_.find(key);
@@ -277,60 +264,53 @@ namespace bumo {
 		return candidate;
 	}
 
-	bool  ElectionManager::SetValidatorCandidate(const std::string& key, CandidatePtr value){
-		if (!value){
-			return false;
-		}
+	bool  ElectionManager::SetValidatorCandidate(const std::string& key, CandidatePtr value) {
+		if (!value) return false;
 
-		try{
+		try {
 			validator_candidates_[key] = value;
 		}
-		catch (std::exception& e){
+		catch (std::exception& e) {
+			LOG_ERROR("Caught an exception when set validator candidate, %s", e.what());
 			return false;
 		}
 
 		return true;
 	}
 
-	bool ElectionManager::SetValidatorCandidate(const std::string& key, const protocol::ValidatorCandidate& value){
-		try{
-			CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>(value);
-			validator_candidates_[key] = candidate;
-		}
-		catch (std::exception& e){
-			return false;
-		}
-
-		return true;
+	bool ElectionManager::SetValidatorCandidate(const std::string& key, const protocol::ValidatorCandidate& value) {
+		CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>(value);
+		return SetValidatorCandidate(key, candidate);
 	}
 
-	void ElectionManager::DelValidatorCandidate(const std::string& key){
+	void ElectionManager::DelValidatorCandidate(const std::string& key) {
 		validator_candidates_.erase(key);
 		to_delete_candidates_.push_back(key);
 		DelAbnormalRecord(key);
 
 		protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
-		for (size_t i = 0; i < set.validators_size(); i++){
-			if (set.validators(i).address() == key){
-				update_votes_ = true;
+		for (size_t i = 0; i < set.validators_size(); i++) {
+			if (set.validators(i).address() == key) {
+				update_validators_ = true;
 			}
 		}
 	}
 
 	bool ElectionManager::ValidatorCandidatesStorage() {
-		try{
-			for (auto kv : validator_candidates_){
+		try {
+			for (auto kv : validator_candidates_) {
 				candidate_mpt_->Set(kv.first, kv.second->SerializeAsString());
 			}
 
-			for (auto node : to_delete_candidates_){
+			for (auto node : to_delete_candidates_) {
 				candidate_mpt_->Delete(node);
 			}
 
 			to_delete_candidates_.clear();
 			candidate_mpt_->UpdateHash();
 		}
-		catch (std::exception& e){
+		catch (std::exception& e) {
+			LOG_ERROR("Caught an exception when store validator candidate, %s", e.what());
 			return false;
 		}
 
@@ -339,11 +319,11 @@ namespace bumo {
 
 	bool ElectionManager::ValidatorCandidatesLoad() {
 
-		try{
+		try {
 			std::vector<std::string> entries;
 			candidate_mpt_->GetAll("", entries);
-			if (!entries.empty()){
-				for (size_t i = 0; i < entries.size(); i++){
+			if (!entries.empty()) {
+				for (size_t i = 0; i < entries.size(); i++) {
 					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
 					candidate->ParseFromString(entries[i]);
 					validator_candidates_[candidate->address()] = candidate;
@@ -351,7 +331,7 @@ namespace bumo {
 			}
 			else{
 				protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
-				for (size_t i = 0; i < set.validators_size(); i++){
+				for (size_t i = 0; i < set.validators_size(); i++) {
 					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
 					candidate->set_address(set.validators(i).address());
 					candidate->set_pledge(set.validators(i).pledge_coin_amount());
@@ -359,24 +339,24 @@ namespace bumo {
 				}
 			}
 		}
-		catch (std::exception& e){
+		catch (std::exception& e) {
+			LOG_ERROR("Caught an exception when load validator candidate, %s", e.what());
 			return false;
 		}
 
 		return true;
 	}
 
-	void ElectionManager::UpdateToDB(){
+	void ElectionManager::UpdateToDB() {
 		if (!Storage::Instance().account_db()->WriteBatch(*(candidate_mpt_->batch_))) {
 			PROCESS_EXIT("Failed to write accounts to database: %s", Storage::Instance().account_db()->error_desc().c_str());
 		}
 	}
 
 	bool ElectionManager::DynastyChange(Json::Value& validators_json) {
-
 		if (validator_candidates_.size() == 0) return false;
 
-		// sort candidate and update validators
+		// sort candidates and update validators
 		std::multiset<CandidatePtr, PriorityCompare> new_validators;
 		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
 		for (; it != validator_candidates_.end(); it++) {
@@ -385,8 +365,8 @@ namespace bumo {
 				new_validators.insert(it->second);
 			}
 			else {
-				CandidatePtr min_item = *new_validators.begin();
-				if (min_item->coin_vote() + min_item->fee_vote() <= key) { // compare string if votes are the same
+				CandidatePtr min_item = *(new_validators.begin());
+				if (min_item->coin_vote() + min_item->fee_vote() <= key) { // compare address if votes are the same
 					new_validators.insert(it->second);
 					new_validators.erase(new_validators.begin());
 				}
@@ -408,7 +388,7 @@ namespace bumo {
 			it->second->clear_fee_vote();
 		}
 
-		update_votes_ = false;
+		update_validators_ = false;
 		return true;
 	}
 }
