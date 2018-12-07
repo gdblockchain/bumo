@@ -1050,17 +1050,6 @@ namespace bumo {
 			}
 		}
 
-		//Get max sequence
-		int64_t max_seq = last_exe_seq_;
-		for (PbftInstanceMap::iterator iter_inst = instances_.begin();
-			iter_inst != instances_.end();
-			iter_inst++
-			) {
-			if (iter_inst->first.sequence_ > max_seq) {
-				max_seq = iter_inst->first.sequence_;
-			}
-		}
-
 		LOG_INFO("Replica(id: " FMT_I64 ") enter the new view(number:" FMT_I64 ")", replica_id_, new_view.view_number());
 		//Enter the new view
 		ValueSaver saver;
