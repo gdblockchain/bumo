@@ -125,10 +125,9 @@ namespace bumo {
 				LOG_INFO("Take the last consensus value as the proposal. The number of transactions in consensus value is %d, and the last closed ledger's hash is %s.", propose_value.txset().txs_size(),
 					utils::String::Bin4ToHexString(lcl.hash()).c_str());
 
-				return consensus_->Request(propose_value.SerializeAsString(), CHECK_VERSION_GT_2000);
+				return consensus_->Request(propose_value.SerializeAsString());
 			}
 		}
-
 
 		protocol::ConsensusValue propose_value;
 		do {
@@ -137,6 +136,11 @@ namespace bumo {
 			propose_value.set_ledger_seq(lcl.seq() + 1);
 			propose_value.set_previous_ledger_hash(lcl.hash());
 			propose_value.set_previous_proof(proof);
+
+			std::string localNode = consensus_->GetNodeAddress();
+			protocol::KeyPair* leader = propose_value.add_entry();
+			leader->set_key(General::VALIDATOR_LEADER);
+			leader->set_value(localNode);
 
 			// add abnormal record
 			if (!abnormal_node.empty() && CHECK_VERSION_GT_2000) {
@@ -207,7 +211,7 @@ namespace bumo {
 
 		LOG_INFO("The number of transactions in the proposal is %d, and the last ledger's hash is %s.", propose_value.txset().txs_size(),
 			utils::String::Bin4ToHexString(lcl.hash()).c_str());
-		consensus_->Request(propose_value.SerializeAsString(), CHECK_VERSION_GT_2000);
+		consensus_->Request(propose_value.SerializeAsString());
 		return true;
 	}
 

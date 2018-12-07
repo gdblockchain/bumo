@@ -96,7 +96,7 @@ namespace bumo {
 
 		virtual bool Initialize();
 		virtual bool Exit();
-		virtual bool Request(const std::string &value, bool add_leader = false);
+		virtual bool Request(const std::string &value);
 		virtual bool OnRecv(const ConsensusMsg &meesage);
 
 		virtual void OnTimer(int64_t current_time);

@@ -311,22 +311,12 @@ namespace bumo {
 		return seq >= last_exe_seq_  && seq <= last_exe_seq_ + ckp_interval_;
 	}
 
-	bool Pbft::Request(const std::string &value, bool add_leader) {
+	bool Pbft::Request(const std::string &value) {
 		if (view_number_ % validators_.size() != replica_id_) {
 			return false;
 		}
-		
-		protocol::ConsensusValue proposal;
-		proposal.ParseFromString(value);
-		if (add_leader) {
-			protocol::KeyPair* leader = proposal.add_entry();
-			leader->set_key(General::VALIDATOR_LEADER);
-			leader->set_value(ValidatorLeader());
-		}
 
-		std::string proposal_value = proposal.SerializeAsString();
-
-		LOG_INFO("Start to request value(%s)", notify_->DescConsensusValue(proposal_value).c_str());
+		LOG_INFO("Start to request value(%s)", notify_->DescConsensusValue(value).c_str());
 
 		if (!view_active_) {
 			LOG_INFO("The view(view-number:" FMT_I64 ") is not active, so request failed.", view_number_);
@@ -351,7 +341,7 @@ namespace bumo {
 		}
 
 		int64_t sequence = last_exe_seq_ + 1;
-		PbftEnvPointer env = NewPrePrepare(proposal_value, sequence);
+		PbftEnvPointer env = NewPrePrepare(value, sequence);
 
 		//Check the index
 		PbftInstanceIndex index(view_number_, sequence);
@@ -367,7 +357,7 @@ namespace bumo {
 
 		saver.Commit();
 		LOG_INFO("Send pre-prepare message: view number(" FMT_I64 "), sequence(" FMT_I64 "), consensus value(%s)", 
-			view_number_, index.sequence_, notify_->DescConsensusValue(proposal_value).c_str());
+			view_number_, index.sequence_, notify_->DescConsensusValue(value).c_str());
 		//Broadcast the message to other nodes
 		return SendMessage(env);
 	}

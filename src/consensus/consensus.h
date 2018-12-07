@@ -74,7 +74,7 @@ namespace bumo {
 
 		virtual bool Initialize();
 		virtual bool Exit();
-		virtual bool Request(const std::string &value, bool add_leader = false) { return true; };
+		virtual bool Request(const std::string &value) { return true; };
 		virtual bool OnRecv(const ConsensusMsg &message) { return true; };
 		virtual size_t GetQuorumSize() { return 0; };
 
