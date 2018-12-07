@@ -242,9 +242,9 @@ function proposalCfg(configuration) {
 	Object.keys(proposalRecords).forEach(function(proposalId) {
 		if(proposalRecords[proposalId].accountId === accountId) {
 			delete proposalRecords[proposalId];
-			let key =voteRecordKeyPrefix + proposalId;
+			let key = voteRecordKeyPrefix + proposalId;
 			storageDel(key);
-			return false;			
+			return false;
 		} else {
 			return true;
 		}
@@ -253,7 +253,7 @@ function proposalCfg(configuration) {
     proposalRecords[newProposalId] = {'accountId':accountId, 'proposalId':newProposalId, 'configuration':configuration, 'voteCount': 1,'expireTime':blockTimestamp+effectiveVoteInterval};
     storageStore(proposalRecordsKey, JSON.stringify(proposalRecords));
     let v={};
-    v[accountId] =1;
+    v[accountId] = 1;
     storageStore(voteRecordKeyPrefix + newProposalId,JSON.stringify(v));  
 	storageStore(nonceKey, nonce.toString());
 }
