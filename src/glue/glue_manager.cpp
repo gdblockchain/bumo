@@ -95,10 +95,6 @@ namespace bumo {
 			next_close_time = lcl.close_time() + Configure::Instance().ledger_configure_.close_interval_;
 		}
 
-		//Get previous block proof
-		std::string proof;
-		Storage::Instance().account_db()->Get(General::LAST_PROOF, proof);
-
 		if (!last_consavlue.empty()) {
 			LOG_INFO("The last PREPARED message value is not empty. Value digest(%s)", 
 				utils::String::BinToHexString(HashWrapper::Crypto(last_consavlue)).c_str());
@@ -113,6 +109,9 @@ namespace bumo {
 			}
 		}
 
+		// Get previous block proof
+		std::string proof;
+		Storage::Instance().account_db()->Get(General::LAST_PROOF, proof);
 
 		protocol::ConsensusValue propose_value;
 		do {
