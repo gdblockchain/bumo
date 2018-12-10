@@ -177,7 +177,7 @@ namespace bumo{
 		
 		uint32_t GetTestWarning(){ return test_warning; };
 		void SetTestOutput(uint32_t output_init){ test_output_ = output_init; };
-		
+
 		void ResetTestWarning(){ test_warning = 0xff; };
 		void SendRequestMessage(const std::string& method, const bool& request, const Json::Value& parameter);
 		void SendResponseMessage(const std::string& method, const bool& request, const int& error_code, const Json::Value& result);
@@ -229,7 +229,6 @@ namespace bumo{
 		std::string generateRandom();
 
 		
-
 		bool CheckHello(const std::string& msg);
 		bool CheckReg(const std::string& msg);
 		bool CheckHB(const std::string& msg);
