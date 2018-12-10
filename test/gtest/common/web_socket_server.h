@@ -245,7 +245,6 @@ namespace bumo{
 
 	};//end gya
 
-
 	class WebSocketServer :	public utils::Thread{
 	
 	public:
