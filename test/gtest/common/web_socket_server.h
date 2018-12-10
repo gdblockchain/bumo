@@ -216,7 +216,6 @@ namespace bumo{
 		std::string current_monitor_id_;
 		bool request_test_result_;
 
-		
 #ifdef WIN32
 		const std::string monitor_id_ = "123123123123123";
 		
