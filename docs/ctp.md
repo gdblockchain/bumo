@@ -41,7 +41,7 @@ Token 属性可以通过合约的 `tokenInfo` 功能函数查询到，存储在�
 |name          | Token 名称                  |
 |symbol        | Token 符号                  |
 |decimals      | Token 小数位数              |
-|totalSupply   | Token 总量，totalSupply = Token 个数(supply) * 10 ^ decimals |
+|totalSupply   | Token 总量      |
 |version       | Contract Token Protocol版本 |
 
 注意：
@@ -222,7 +222,7 @@ function init(input_str){
         "name":"DemoToken",
         "symbol":"DT",
         "decimals":8,
-        "supply":"50000",
+        "totalSupply":"5000000000000",
         "version": "1.0"
     }
 }
@@ -230,7 +230,7 @@ function init(input_str){
 - name: token 名称
 - symbol: 资产符号
 - decimals: 小数位数
-- supply: 字符串格式，发行Token 个数(整数部分)。例如发行 50000 个 Token，其 totalSupply 总量为 50000 * 100000000
+- totalSupply: 字符串格式，发行Token 总数。例如发行 50000 个 Token，其 totalSupply 总量为 50000 * 100000000
 - version: 版本号
 
 入口函数的返回值：true或者抛异常

@@ -101,20 +101,14 @@ function balanceOf(address){
 function init(input_str){
     let params = JSON.parse(input_str).params;
 
-    assert(stoI64Check(params.supply) === true && params.supply > 0 &&
+    assert(stoI64Check(params.totalSupply) === true && params.totalSupply > 0 &&
            typeof params.name === 'string' && params.name.length > 0 &&
            typeof params.symbol === 'string' && params.symbol.length > 0 &&
            typeof params.version === 'string' && params.version.length > 0 &&
            typeof params.decimals === 'number' && params.decimals >= 0, 
            'Failed to check args');
        
-    let i = 0;
-    let power = 1;
-    for(i = 0; i < params.decimals; i = i + 1){
-        power = power * 10;
-    }
-
-    globalAttribute.totalSupply = int64Mul(params.supply, power);
+    globalAttribute.totalSupply = params.totalSupply;
     globalAttribute.name = params.name;
     globalAttribute.symbol = params.symbol;
     globalAttribute.version = params.version;
