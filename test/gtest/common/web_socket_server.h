@@ -312,7 +312,6 @@ namespace bumo{
 		
 		
 	};
-
 }
 
 #endif
