@@ -226,8 +226,7 @@ namespace bumo{
 #endif
 		std::string random_key_;
 		std::string generateRandom();
-
-		
+	
 		bool CheckHello(const std::string& msg);
 		bool CheckReg(const std::string& msg);
 		bool CheckHB(const std::string& msg);
