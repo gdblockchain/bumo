@@ -310,7 +310,6 @@ namespace bumo{
 		fpos_t pos_of_end_of_err_log;
 
 		
-		
 	};
 }
 
