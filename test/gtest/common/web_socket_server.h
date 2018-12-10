@@ -49,7 +49,7 @@
 #define SETCONFG						BIT(7)		//set to 1 if setconfg request is under test
 
 //general case for every request
-//attaension£ºthese conditions are for responses, not request itself
+//attaensionÂ£Âºthese conditions are for responses, not request itself
 #define GENERAL_CASE_RESPONSE_ERRCODE_MAX	BIT(1)
 #define GENERAL_CASE_RESPONSE_ERRCODE_MINUS	BIT(2)
 #define GENERAL_CASE_RESPONSE_ERRCODE_UNDEF	BIT(3)
@@ -148,7 +148,6 @@
 #define WARNING_BUMO_ATTACK_CONT_HIGH		BIT(13)
 
 #define random(x) (rand()%x)
-
 
 using websocketpp::connection_hdl;
 namespace bumo{
