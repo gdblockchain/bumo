@@ -261,7 +261,6 @@ namespace bumo{
 
 		void Send(std::string &data);
 
-
 		//test interface
 		void NormalResponseTest1();
 		void NormalResponseTest();
