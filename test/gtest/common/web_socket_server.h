@@ -284,7 +284,6 @@ namespace bumo{
 
 		MsgProcessor msg_processor_;
 
-
 	private:
 		void on_open(connection_hdl hdl);
 		void on_close(connection_hdl hdl);
