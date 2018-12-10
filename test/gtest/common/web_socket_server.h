@@ -247,8 +247,7 @@ namespace bumo{
 
 
 	class WebSocketServer :	public utils::Thread{
-
-		
+	
 	public:
 		WebSocketServer();
 		~WebSocketServer();
