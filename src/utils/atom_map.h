@@ -85,7 +85,6 @@ namespace utils
 		}
 
 		bool GetValue(const KEY& key, VALUE_PTR& ptr){
-			bool ret = false;
 			auto itAct = buff_.find(key);
 			if (itAct != buff_.end()){
 				if (itAct->second.type_ == DEL){
@@ -93,35 +92,32 @@ namespace utils
 				}
 
 				ptr = itAct->second.ptr_;
-				ret = true;
+				return true;
 			}
-			else{
-				auto itData = data_->find(key);
-				if (itData != data_->end()){
-					if (itData->second.type_ == DEL){
-						return false;
-					}
-
-					//can't be assigned directly, because itData->second.ptr_ is smart pointer
-					auto pv = std::make_shared<VALUE>(*(itData->second.ptr_));
-					if (!pv){
-						return false;
-					}
-
-					buff_[key] = Record(pv, MOD);
-					ptr = pv;
-					ret = true;
+			
+			auto itData = data_->find(key);
+			if (itData != data_->end()){
+				if (itData->second.type_ == DEL){
+					return false;
 				}
-				else{
-					if (!GetFromDB(key, ptr)){
-						return false;
-					}
 
-					buff_[key] = Record(ptr, ADD);
-					ret = true;
+				//can't be assigned directly, because itData->second.ptr_ is smart pointer
+				auto pv = std::make_shared<VALUE>(*(itData->second.ptr_));
+				if (!pv){
+					return false;
 				}
+
+				buff_[key] = Record(pv, MOD);
+				ptr = pv;
+				return true;
 			}
-			return ret;
+			
+			if (!GetFromDB(key, ptr)){
+				return false;
+			}
+
+			buff_[key] = Record(ptr, ADD);
+			return true;
 		}
 
 	public:
