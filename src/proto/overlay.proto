@@ -159,3 +159,8 @@ message ChainTxStatus {
 	int64		timestamp = 9;			
 }
 
+message MerkelProof {
+	bytes merkel_root = 1;
+	bytes merkel_path = 2;
+	Transaction transaction = 3;
+}
