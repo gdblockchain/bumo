@@ -212,9 +212,14 @@ namespace utils
 		}
 
 	public:
-		bool Commit(){
-			//return CopyCommit();
-			return DirectCommit();
+		bool Commit(bool bakMode = false){
+			if (!bakMode){
+				return DirectCommit();
+			}
+			else{
+				return CopyCommit();
+			}
+			
 		}
 
 		//Call ClearChange to discard the modification if Commit failed
