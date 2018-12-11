@@ -24,8 +24,7 @@ namespace utils
 	public:
 		typedef std::shared_ptr<VALUE> VALUE_PTR;
 
-		struct Record
-		{
+		struct Record{
 			actType type_;
 			VALUE_PTR ptr_;
 
@@ -41,26 +40,22 @@ namespace utils
 		Map* data_;
 
 	public:
-		AtomMap()
-		{
+		AtomMap(){
 			data_ = &stor_; //avoid manual memory management
 		}
 
-		AtomMap(Map* data)
-		{
+		AtomMap(Map* data){
 			if (data)
 				data_ = data;
 			else
 				data_ = &stor_; //avoid manual memory management
 		}
 
-		AtomMap(const AtomMap& other)
-		{
+		AtomMap(const AtomMap& other){
 			Copy(other);
 		}
 
-		AtomMap& operator=(const AtomMap& other)
-		{
+		AtomMap& operator=(const AtomMap& other){
 			buff_.clear();
 			stor_.clear();
 			data_ = nullptr;
@@ -71,8 +66,7 @@ namespace utils
 		}
 
 	private:
-		void Copy(const AtomMap& other)
-		{
+		void Copy(const AtomMap& other){
 			for (auto kvAct : other.buff_)
 				buff_[kvAct.first] = Record(std::make_shared<VALUE>(*(kvAct.second.ptr_)), kvAct.second.type_);
 
@@ -82,28 +76,23 @@ namespace utils
 			data_ = &stor_;
 		}
 
-		void SetValue(const KEY& key, const VALUE_PTR& ptr)
-		{
+		void SetValue(const KEY& key, const VALUE_PTR& ptr){
 			buff_[key] = Record(ptr, MOD);
 		}
 
-		bool GetValue(const KEY& key, VALUE_PTR& ptr)
-		{
+		bool GetValue(const KEY& key, VALUE_PTR& ptr){
 			bool ret = false;
 			auto itAct = buff_.find(key);
-			if (itAct != buff_.end())
-			{
+			if (itAct != buff_.end()){
 				if (itAct->second.type_ == DEL)
 					return false;
 
 				ptr = itAct->second.ptr_;
 				ret = true;
 			}
-			else
-			{
+			else{
 				auto itData = data_->find(key);
-				if (itData != data_->end())
-				{
+				if (itData != data_->end()){
 					if (itData->second.type_ == DEL)
 						return false;
 
@@ -116,8 +105,7 @@ namespace utils
 					ptr = pv;
 					ret = true;
 				}
-				else
-				{
+				else{
 					if (!GetFromDB(key, ptr))
 						return false;
 
@@ -129,18 +117,15 @@ namespace utils
 		}
 
 	public:
-		const Map& GetData()
-		{
+		const Map& GetData(){
 			return *data_;
 		}
 
-		Map& GetChangeBuf()
-		{
+		Map& GetChangeBuf(){
 			return buff_;
 		}
 
-		bool Set(const KEY& key, const VALUE_PTR& ptr)
-		{
+		bool Set(const KEY& key, const VALUE_PTR& ptr){
 			bool ret = true;
 
 			try{ SetValue(key, ptr); }
@@ -153,13 +138,13 @@ namespace utils
 			return ret;
 		}
 
-		bool Get(const KEY& key, VALUE_PTR& ptr)
-		{
+		bool Get(const KEY& key, VALUE_PTR& ptr){
 			bool ret = true;
 
-			try{ ret = GetValue(key, ptr); }
-			catch(std::exception& e)
-			{ 
+			try{
+				ret = GetValue(key, ptr);
+			}
+			catch(std::exception& e){ 
 				LOG_ERROR("Catched an get exception, detail: %s", e.what());
 				ret = false;
 			}
@@ -170,9 +155,10 @@ namespace utils
 		{
 			bool ret = true;
 
-			try{ buff_[key] = Record(DEL); }
-			catch(std::exception& e)
-			{ 
+			try{
+				buff_[key] = Record(DEL);
+			}
+			catch(std::exception& e){ 
 				LOG_ERROR("Catched an delete exception, detail: %s", e.what());
 				ret = false;
 			}
@@ -181,16 +167,14 @@ namespace utils
 		}
 
 	private:
-		bool CopyCommit()
-		{
+		bool CopyCommit(){
 			Map copyBuf = *data_;
-			try
-			{
-				for (auto act : buff_)
+			try{
+				for (auto act : buff_){
 					copyBuf[act.first] = act.second;
+				}
 			}
-			catch (std::exception& e)
-			{
+			catch (std::exception& e){
 				LOG_ERROR("Catched an copy exception, detail: %s", e.what());
 				buff_.clear();
 				return false;
@@ -205,18 +189,18 @@ namespace utils
 		}
 
 	public:
-		bool Commit()
-		{
+		bool Commit(){
 			return CopyCommit();
 		}
 
 		//Call ClearChange to discard the modification if Commit failed
-		void ClearChangeBuf()
-		{
+		void ClearChangeBuf(){
 			buff_.clear();
 		}
 
-		virtual bool GetFromDB(const KEY& key, VALUE_PTR& ptr){ return false; }
+		virtual bool GetFromDB(const KEY& key, VALUE_PTR& ptr){
+			return false;
+		}
 
 		virtual void updateToDB(){}
 	};
