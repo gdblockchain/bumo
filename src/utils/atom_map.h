@@ -193,9 +193,21 @@ namespace utils
 			return true;
 		}
 
+		bool DirectCommit(){
+			for (auto act : buff_){
+				(*data_)[act.first] = act.second;
+			}
+
+			//CAUTION: now the pointers in buff_ and copyBuf_ are overlapped with data_,
+			//so it must be clear, otherwise the later modification to them will aslo directly act on data_.
+			buff_.clear();
+			return true;
+		}
+
 	public:
 		bool Commit(){
-			return CopyCommit();
+			//return CopyCommit();
+			return DirectCommit();
 		}
 
 		//Call ClearChange to discard the modification if Commit failed
