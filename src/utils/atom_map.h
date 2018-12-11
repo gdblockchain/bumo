@@ -45,10 +45,12 @@ namespace utils
 		}
 
 		AtomMap(Map* data){
-			if (data)
+			if (data){
 				data_ = data;
-			else
+			}
+			else{
 				data_ = &stor_; //avoid manual memory management
+			}
 		}
 
 		AtomMap(const AtomMap& other){
@@ -67,11 +69,13 @@ namespace utils
 
 	private:
 		void Copy(const AtomMap& other){
-			for (auto kvAct : other.buff_)
+			for (auto kvAct : other.buff_){
 				buff_[kvAct.first] = Record(std::make_shared<VALUE>(*(kvAct.second.ptr_)), kvAct.second.type_);
+			}
 
-			for (auto kvData : *(other.data_))
+			for (auto kvData : *(other.data_)){
 				stor_[kvData.first] = Record(std::make_shared<VALUE>(*(kvData.second.ptr_)), kvData.second.type_);
+			}
 
 			data_ = &stor_;
 		}
@@ -84,8 +88,9 @@ namespace utils
 			bool ret = false;
 			auto itAct = buff_.find(key);
 			if (itAct != buff_.end()){
-				if (itAct->second.type_ == DEL)
+				if (itAct->second.type_ == DEL){
 					return false;
+				}
 
 				ptr = itAct->second.ptr_;
 				ret = true;
@@ -93,21 +98,24 @@ namespace utils
 			else{
 				auto itData = data_->find(key);
 				if (itData != data_->end()){
-					if (itData->second.type_ == DEL)
+					if (itData->second.type_ == DEL){
 						return false;
+					}
 
 					//can't be assigned directly, because itData->second.ptr_ is smart pointer
 					auto pv = std::make_shared<VALUE>(*(itData->second.ptr_));
-					if (!pv)
+					if (!pv){
 						return false;
+					}
 
 					buff_[key] = Record(pv, MOD);
 					ptr = pv;
 					ret = true;
 				}
 				else{
-					if (!GetFromDB(key, ptr))
+					if (!GetFromDB(key, ptr)){
 						return false;
+					}
 
 					buff_[key] = Record(ptr, ADD);
 					ret = true;
@@ -128,9 +136,10 @@ namespace utils
 		bool Set(const KEY& key, const VALUE_PTR& ptr){
 			bool ret = true;
 
-			try{ SetValue(key, ptr); }
-			catch(std::exception& e)
-			{ 
+			try{
+				SetValue(key, ptr);
+			}
+			catch(std::exception& e){ 
 				LOG_ERROR("Catched an set exception, detail: %s", e.what());
 				ret = false;
 			}
