@@ -194,8 +194,15 @@ namespace utils
 		}
 
 		bool DirectCommit(){
-			for (auto act : buff_){
-				(*data_)[act.first] = act.second;
+			try{
+				for (auto act : buff_){
+					(*data_)[act.first] = act.second;
+				}
+			}
+			catch (std::exception& e){
+				LOG_ERROR("Catched an assign exception, detail: %s", e.what());
+				buff_.clear();
+				return false;
 			}
 
 			//CAUTION: now the pointers in buff_ and copyBuf_ are overlapped with data_,
