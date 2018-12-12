@@ -66,7 +66,7 @@ namespace bumo {
 		if (db->Get(General::ABNORMAL_RECORDS, json_str)) {
 			abnormal_records_.clear();
 			Json::Value abnormal_json;
-			if (abnormal_json.fromString(json_str)) {
+			if (!abnormal_json.fromString(json_str)) {
 				LOG_ERROR("Failed to parse json string %s", json_str.c_str());
 				UpdateAbnormalRecords(); // reset validator abnormal records
 			}
@@ -84,13 +84,13 @@ namespace bumo {
 	}
 
 	bool ElectionManager::Exit() {
-		LOG_INFO("Election manager stoping...");
+		LOG_INFO("Election manager stopping ...");
 
 		if (candidate_mpt_) {
 			delete candidate_mpt_;
 			candidate_mpt_ = nullptr;
 		}
-		LOG_INFO("election manager stoped. [OK]");
+		LOG_INFO("Election manager stopped. [OK]");
 		return true;
 	}
 
@@ -105,14 +105,14 @@ namespace bumo {
 		data["configuration"] = Proto2Json(election_config_);
 		Json::Value candidates;
 
-		// sort candidate and update validators
+		// Candidates sort
 		std::multiset<CandidatePtr, PriorityCompare> sorted_candidates;
 		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
 		for (; it != validator_candidates_.end(); it++) {
 			sorted_candidates.insert(it->second);
 		}
 
-		// add candidates
+		// Add candidates
 		std::multiset<CandidatePtr, PriorityCompare> ::reverse_iterator sit = sorted_candidates.rbegin();
 		for (; sit != sorted_candidates.rend(); sit++) {
 			CandidatePtr item = *sit;
@@ -121,7 +121,7 @@ namespace bumo {
 		}
 		data["candidates"] = candidates;
 
-		// add abnormal records
+		// Add abnormal records
 		std::unordered_map<std::string, int64_t>::iterator ait = abnormal_records_.begin();
 		Json::Value records;
 		for (; ait != abnormal_records_.end(); ait++) {
@@ -161,7 +161,7 @@ namespace bumo {
 	}
 
 	bool ElectionManager::UpdateElectionConfig(const protocol::ElectionConfig& ecfg) {
-		// update coin votes
+		// Update coin votes
 		if (ecfg.coin_to_vote_rate() != election_config_.coin_to_vote_rate()) {
 			std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
 			for (; it != validator_candidates_.end(); it++) {
@@ -198,14 +198,6 @@ namespace bumo {
 		if (it != abnormal_records_.end()) {
 			abnormal_records_.erase(abnormal_node);
 			UpdateAbnormalRecords();
-		}
-	}
-
-	void ElectionManager::GetAbnormalRecords(Json::Value& records) {
-		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
-			it != abnormal_records_.end();
-			it++) {
-			records[it->first] = it->second;
 		}
 	}
 
@@ -353,7 +345,7 @@ namespace bumo {
 			}
 		}
 		catch (std::exception& e) {
-			LOG_ERROR("Caught an exception when load validator candidate, %s", e.what());
+			LOG_ERROR("Caught an exception when load validator candidates, %s", e.what());
 			return false;
 		}
 

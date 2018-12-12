@@ -74,7 +74,6 @@ namespace bumo {
 
 		uint32_t GetFeesSharerRate(FeeSharerType owner);
 
-		void GetAbnormalRecords(Json::Value& record);
 		void AddAbnormalRecord(const std::string& abnormal_node);
 		void DelAbnormalRecord(const std::string& abnormal_node);
 		void UpdateAbnormalRecords();
