@@ -9,7 +9,8 @@ const expiredTimeVar      = 'voting_expired_time';
 const proposalRecordsKey  = 'proposalRecordsKey';
 const voteRecordKeyPrefix = 'voteRecords_';
 const nonceKey            = 'nonce';
-const electionConfigKey   = 'configElection';
+const electionConfigKey   = 'configElection'; // configuration key will be read internal
+const withdrawKey		  = 'withdrawApplicationKey';
 
 let effectiveVoteInterval = 15 * 24 * 60 * 60 * 1000 * 1000;
 let proposalRecords = {};
@@ -90,15 +91,42 @@ function takebackCoin(tokenAmount){
 
     let left = int64Sub(candidate.pledge, tokenAmount);
     let com = int64Compare(left, configuration.pledge_amount);
-    if(com === -1){
-        setValidatorCandidate(sender, '-' + candidate.pledge);
-        transferCoin(sender, String(candidate.pledge));
-    }
-    else{
-        setValidatorCandidate(sender, '-' + tokenAmount);
-        transferCoin(sender, tokenAmount);
-    }
-    // bumo will update validator
+	assert(com === 1 || com === 0, 'The left pledge coin not enough for min pledge coin ' + configuration.pledge_amount);
+	setValidatorCandidate(sender, '-' + tokenAmount);
+	transferCoin(sender, tokenAmount);
+}
+
+function withdrawFromCandidates(){
+	let withdrawApplication = {};
+	let existed = false;
+	let update = false;
+	let withdrawApplicationStr = storageLoad(withdrawKey);
+	if(withdrawApplicationStr !== false){
+		withdrawApplication = JSON.parse(withdrawApplicationStr);
+		Object.keys(withdrawApplication).forEach(function(address) {
+			if(address === sender) {
+				existed = true;
+			}
+			
+			if(blockTimestamp > withdrawApplication[address]) {
+				let candidate = getValidatorCandidate(sender);
+				setValidatorCandidate(sender, '-' + candidate.pledge);
+				transferCoin(sender, String(candidate.pledge));
+				delete withdrawApplication[address];
+				update = true;
+			}
+		});
+	} else {
+		update = true;
+	}
+	
+	if(existed === false) {
+		withdrawApplication[sender] = blockTimestamp + effectiveVoteInterval;
+	}
+	if(update === true) {
+		storageStore(withdrawKey, JSON.stringify(withdrawApplication));
+	}
+	return;
 }
 
 function voteAbolishValidator(malicious){
@@ -344,7 +372,9 @@ function main(input_str){
 
     if(input.method === 'pledgeCoin'){
         applyAsCandidate();
-    }
+    } else if (input.method === 'withdrawCandidate') {
+		withdrawFromCandidates();
+	}
     else if(input.method === 'voteForCandidate'){
 		assert(typeof input.params.address === 'string', 'Arg-address should be string');
 		assert(typeof input.params.coinAmount === 'string', 'Arg-coinAmount should be string');
