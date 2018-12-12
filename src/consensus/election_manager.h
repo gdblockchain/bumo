@@ -79,7 +79,6 @@ namespace bumo {
 		void UpdateAbnormalRecords();
 
 		bool SetValidatorCandidate(const std::string& key, CandidatePtr value);
-		bool SetValidatorCandidate(const std::string& key, const protocol::ValidatorCandidate& value);
 		CandidatePtr GetValidatorCandidate(const std::string& key);
 		void DelValidatorCandidate(const std::string& key);
 

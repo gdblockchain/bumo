@@ -369,6 +369,11 @@ function query(input_str){
 
 function main(input_str){
     let input = JSON.parse(input_str);
+	
+	if(input.method !== 'pledgeCoin'){
+		let com = int64Compare(thisPayCoinAmount, 0);
+        assert(com === 0, 'Pay coin amount should be 0');
+	}
 
     if(input.method === 'pledgeCoin'){
         applyAsCandidate();

@@ -276,16 +276,11 @@ namespace bumo {
 			validator_candidates_[key] = value;
 		}
 		catch (std::exception& e) {
-			LOG_ERROR("Caught an exception when set validator candidate, %s", e.what());
+			LOG_ERROR("Caught an exception when set validator candidates, %s", e.what());
 			return false;
 		}
 
 		return true;
-	}
-
-	bool ElectionManager::SetValidatorCandidate(const std::string& key, const protocol::ValidatorCandidate& value) {
-		CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>(value);
-		return SetValidatorCandidate(key, candidate);
 	}
 
 	void ElectionManager::DelValidatorCandidate(const std::string& key) {
@@ -315,7 +310,7 @@ namespace bumo {
 			candidate_mpt_->UpdateHash();
 		}
 		catch (std::exception& e) {
-			LOG_ERROR("Caught an exception when store validator candidate, %s", e.what());
+			LOG_ERROR("Caught an exception when store validator candidates, %s", e.what());
 			return false;
 		}
 
@@ -361,7 +356,7 @@ namespace bumo {
 	bool ElectionManager::DynastyChange(Json::Value& validators_json) {
 		if (validator_candidates_.size() == 0) return false;
 
-		// sort candidates and update validators
+		// Sort candidates and update validators
 		std::multiset<CandidatePtr, PriorityCompare> new_validators;
 		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
 		for (; it != validator_candidates_.end(); it++) {
@@ -378,7 +373,7 @@ namespace bumo {
 			}
 		}
 		
-		// convert new validators to json object
+		// Convert new validators to json object
 		std::multiset<CandidatePtr, PriorityCompare>::reverse_iterator vit = new_validators.rbegin();
 		for (; vit != new_validators.rend(); vit++) 
 		{
@@ -388,7 +383,7 @@ namespace bumo {
 			validators_json.append(value);
 		}
 
-		// clear fee_votes
+		// Clear fee_votes
 		for (it = validator_candidates_.begin(); it != validator_candidates_.end(); it++) {
 			it->second->clear_fee_vote();
 		}
