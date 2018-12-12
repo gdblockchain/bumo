@@ -552,9 +552,10 @@ namespace bumo {
 		//for election configuration
 		protocol::ElectionConfig election_cfg;
 		if (ledger->environment_->GetVotedElectionConfig(election.GetProtoElectionCfg(), election_cfg)) {
-			election.ElectionConfigSet(election.GetCandidateMpt()->batch_, election_cfg);
-			election.SetProtoElectionCfg(election_cfg); // update election configuration
-			election.ReadSharerRate();
+			if (!election.UpdateElectionConfig(election_cfg)) {
+				LOG_ERROR("Failed to update configuration");
+				return false;
+			}
 			LOG_INFO("Update election configuration to %s", election_cfg.DebugString().c_str());
 		}
 

@@ -160,6 +160,28 @@ namespace bumo {
 		return validator_candidates_.size();
 	}
 
+	bool ElectionManager::UpdateElectionConfig(const protocol::ElectionConfig& ecfg) {
+		// update coin votes
+		if (ecfg.coin_to_vote_rate() != election_config_.coin_to_vote_rate()) {
+			std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
+			for (; it != validator_candidates_.end(); it++) {
+				int64_t total_votes_coin = 0;
+				if (!utils::SafeIntMul(election_config_.coin_to_vote_rate(), it->second->coin_vote(), total_votes_coin)) {
+					LOG_ERROR("Calculation overflowed when coin to vote rate(" FMT_I64 ") * coin vote(" FMT_I64 ").", election_config_.coin_to_vote_rate(), it->second->coin_vote());
+					return false;
+				}
+				it->second->set_coin_vote(total_votes_coin / ecfg.coin_to_vote_rate());
+			}
+		}
+
+		// Update election configuration storage
+		ElectionConfigSet(candidate_mpt_->batch_, ecfg);
+
+		election_config_ = ecfg;
+
+		return ReadSharerRate();
+	}
+
 	void ElectionManager::AddAbnormalRecord(const std::string& abnormal_node) {
 		std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.find(abnormal_node);
 		if (it != abnormal_records_.end()) {
