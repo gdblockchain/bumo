@@ -464,12 +464,6 @@ namespace bumo {
 				error_txs.size(), error_txs_check.size());
 		}
 		return true;
-
-	//	LOG_INFO("Check validation this size(%d,%d,%d), check size(%d,%d,%d), validation(%d,%d,%d) ",
-	//		expire_txs.size(), droped_txs.size(), error_txs.size(),
-	//		expire_txs_check.size(), droped_txs_check.size(), error_txs_check.size(),
-	//		validation.expire_tx_ids_size(), validation.droped_tx_ids_size(), validation.error_tx_ids_size());
-		//Check
 	}
 
 	Json::Value LedgerFrm::ToJson() {
