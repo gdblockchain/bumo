@@ -158,4 +158,3 @@ message ChainTxStatus {
 	string		error_desc = 8	;			//error desc
 	int64		timestamp = 9;			
 }
-
