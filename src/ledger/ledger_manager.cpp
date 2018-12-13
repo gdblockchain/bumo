@@ -894,7 +894,6 @@ namespace bumo {
 		top_tx->environment_->GetEntry(env.transaction().source_address(), source_account);
 		env.mutable_transaction()->set_nonce(source_account->GetAccountNonce() + 1);
 
-		//auto header = std::make_shared<protocol::LedgerHeader>(LedgerManager::Instance().closing_ledger_->GetProtoHeader());
 		auto header = std::make_shared<protocol::LedgerHeader>(ledger_context->closing_ledger_->GetProtoHeader());
 
 		TransactionFrm::pointer new_tx = std::make_shared<bumo::TransactionFrm >(env);
