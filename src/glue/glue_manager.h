@@ -43,10 +43,6 @@ namespace bumo {
 		//For getting module status
 		time_t process_uptime_;
 
-		//For temp validation storage, need implementation by ledger
-		//validations
-		protocol::ValidatorSet validations;
-
 		//Hardfork point
 		std::set<std::string> hardfork_points_;
 
