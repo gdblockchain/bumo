@@ -60,7 +60,6 @@ namespace bumo {
 		bool Exit();
 
 		bool StartConsensus(const std::string &last_consavlue); //Start to trigger consensus
-		bool CreateTableIfNotExist(); //Create the db.
 		int64_t GetIntervalTime(bool empty_block);
 
 		bool OnTransaction(TransactionFrm::pointer tx, Result &err);
