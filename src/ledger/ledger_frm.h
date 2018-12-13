@@ -88,8 +88,6 @@ namespace bumo {
 			return ope_count;
 		}
 
-		bool CheckValidation ();
-
 		static bool CheckConsValueValidation(const protocol::ConsensusValue& request,
 			std::set<int32_t> &expire_txs_status,
 			std::set<int32_t> &error_txs_status);

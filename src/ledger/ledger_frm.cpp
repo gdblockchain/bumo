@@ -472,10 +472,6 @@ namespace bumo {
 		//Check
 	}
 
-	bool LedgerFrm::CheckValidation() {
-		return true;
-	}
-
 	Json::Value LedgerFrm::ToJson() {
 		return bumo::Proto2Json(ledger_);
 	}
