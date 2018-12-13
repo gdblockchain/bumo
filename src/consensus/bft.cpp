@@ -1056,7 +1056,7 @@ namespace bumo {
 		view_number_ = new_view.view_number();
 		view_active_ = true;
 		saver.SaveValue(PbftDesc::VIEWNUMBER_NAME, view_number_);
-		saver.SaveValue(PbftDesc::VIEW_ACTIVE, view_active_ ? 1 : 0);
+		saver.SaveValue(PbftDesc::VIEW_ACTIVE, 1);
 
 		PbftVcInstanceMap::iterator iter = vc_instances_.find(view_number_);
 		if (iter != vc_instances_.end()) {
