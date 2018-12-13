@@ -71,8 +71,6 @@ namespace bumo {
 
 		bool Cancel();
 
-		// void GetSqlTx(std::string &sqltx, std::string &sql_account_tx);
-
 		bool AddToDb(WRITE_BATCH& batch);
 
 		bool LoadFromDb(int64_t seq);
