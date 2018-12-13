@@ -111,7 +111,6 @@ namespace bumo {
 		std::shared_ptr<protocol::ConsensusValue> value_;
 		std::vector<TransactionFrm::pointer> apply_tx_frms_;
 		std::vector<TransactionFrm::pointer> dropped_tx_frms_;
-		std::string sql_;
 		std::shared_ptr<Environment> environment_;
 		LedgerContext *lpledger_context_;
 		int64_t apply_time_;
