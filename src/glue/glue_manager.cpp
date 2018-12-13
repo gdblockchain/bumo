@@ -140,8 +140,7 @@ namespace bumo {
 
 			if (propose_result.block_timeout_) {
 				LOG_ERROR("Block pre-execution timeout, the number of transactions in consensus value is: (" FMT_I64 "), and block number is : (" FMT_I64 ")", txset_raw.txs_size(), propose_value.ledger_seq());
-				//Remove the timeout tx
-				//reduct to 1/2
+				//Remove the timeout tx, and reduct to 1/2
 				protocol::TransactionEnvSet tmp_raw;
 				for (int32_t i = 0; i < txset_raw.txs_size() / 2; i ++) {
 					*tmp_raw.add_txs() = txset_raw.txs(i);
