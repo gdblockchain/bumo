@@ -19,8 +19,8 @@
 
 namespace bumo{
 
-	Environment::Environment(mapKV* data, settingKV* settings) :
-		AtomMap<std::string, AccountFrm>(data), settings_(settings){}
+	Environment::Environment(Map* data, settingKV* settings) :
+		utils::AtomMap<std::string, AccountFrm>(data), settings_(settings){}
 
 	bool Environment::GetEntry(const std::string &key, AccountFrm::pointer &frm){
 		return Get(key, frm);
@@ -65,8 +65,8 @@ namespace bumo{
 	}
 
 	std::shared_ptr<Environment> Environment::NewStackFrameEnv(){
-		mapKV& data	= GetActionBuf();
-		settingKV& settings = settings_.GetActionBuf();
+		Map& data	= GetChangeBuf();
+		settingKV& settings = settings_.GetChangeBuf();
 		std::shared_ptr<Environment> next = std::make_shared<Environment>(&data, &settings);
 
 		return next;
