@@ -399,7 +399,7 @@ namespace bumo {
 			return true;
 		}
 
-		// all rest of share will be put in block reward if vote for not exist
+		// all rest of share will be put in block reward if vote for address not exist
 		// update fee votes by actual fee and allocate the fee share of user's part if vote for exist
 		CandidatePtr candidate = nullptr;
 		if (!environment_->GetValidatorCandidate(vote_for, candidate)) {
