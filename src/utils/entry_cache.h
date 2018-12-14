@@ -42,7 +42,6 @@ namespace utils {
 	public:
 		typedef std::shared_ptr<Value> pointer;
 
-
 		struct Record {
 			Record(pointer val, const ChangeAction &action) :value_(val), action_(action) {}
 			Record() {}
@@ -52,7 +51,6 @@ namespace utils {
 
 		std::map<Key, Record, Sort> entries_;
 		std::shared_ptr<EntryCache> parent_;
-
 
 	private:
 		bool GetRecord(const Key &key, Record &r) {
@@ -104,11 +102,6 @@ namespace utils {
 					else {
 						entries_.insert({ it->first, it->second });
 					}
-				}
-
-				case KEEP: {
-
-					break;
 				}
 				case MOD:{
 					auto x = entries_.find(it->first);
