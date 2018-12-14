@@ -156,9 +156,8 @@ namespace utils {
 					entries_.insert({ key, Record(pval, MOD) });
 					return true;
 				}
-				else {
-					return false;
-				}
+					
+				return false;
 			}
 
 			if (LoadValue(key, pval)) {
@@ -176,9 +175,8 @@ namespace utils {
 					it->second = Record(pval, MOD);
 					return true;
 				}
-				else {
-					return false;
-				}
+
+				return false;
 			}
 
 			Record r;
