@@ -1312,14 +1312,13 @@ namespace bumo{
 				break;
 			}
 			std::string vote_for_old = account_frm->GetVoteFor();
+			// Set vote for to empty
 			if (vote_for_new.empty()){
-				account_frm->SetVoteFor(vote_for_new);
 				int64_t frozen_coin = account_frm->GetFrozenCoin();
-				account_frm->UnfrozenCoin(frozen_coin);
+				int64_t votes = ElectionManager::Instance().CoinToVotes(frozen_coin);
 				
 				CandidatePtr candidate_old;
 				if (env->GetValidatorCandidate(vote_for_old, candidate_old)) {
-					int64_t votes = ElectionManager::Instance().CoinToVotes(frozen_coin);
 					int64_t frozen_votes_old = 0;
 					if (!utils::SafeIntSub(candidate_old->coin_vote(), votes, frozen_votes_old)) {
 						error_desc = utils::String::Format("The result overflowed when decrease votes for %s", vote_for_old.c_str());
@@ -1327,6 +1326,8 @@ namespace bumo{
 					}
 					candidate_old->set_coin_vote(frozen_votes_old);
 				}
+				account_frm->UnfrozenCoin(frozen_coin);
+				account_frm->SetVoteFor(vote_for_new);
 
 				args.GetReturnValue().Set(true);
 				return;
@@ -1338,6 +1339,7 @@ namespace bumo{
 				break;
 			}
 
+			// Update votes and vote for address
 			CandidatePtr candidate_old;
 			if (!vote_for_old.empty()) {
 				LOG_TRACE("The account try to vote for candidate %s instead of candidate %s", vote_for_new.c_str(), vote_for_old.c_str());
@@ -1360,8 +1362,8 @@ namespace bumo{
 						candidate_new->set_coin_vote(frozen_votes_new);
 					}
 					else {
-						// Ignore if vote_for_old not in candidate list
-						LOG_TRACE("The vote for address not in candidate list");
+						// ignore if vote_for_old not in candidate list
+						LOG_TRACE("The original vote for adddress not in candidate list");
 					}
 				}
 				else {
@@ -1372,7 +1374,9 @@ namespace bumo{
 			else {
 				LOG_TRACE("The account %s has no vote for address", source_addr.c_str());
 			}
-			
+			account_frm->SetVoteFor(vote_for_new);
+
+			// Vote by coin
 			if (coin_amount > 0) {
 				// if coin_amount > 0 frozen coin and increase votes
 				int64_t votes_amount_new = ElectionManager::Instance().CoinToVotes(coin_amount);
@@ -1407,7 +1411,6 @@ namespace bumo{
 					break;
 				}
 			}
-			account_frm->SetVoteFor(vote_for_new);
 
 			args.GetReturnValue().Set(true);
 			return;

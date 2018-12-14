@@ -76,11 +76,13 @@ function applyAsCandidate(){
 }
 
 function voteForCandidate(candidate, tokenAmount){
-	assert(addressCheck(candidate) === true, 'Invalid candidate address.');
-	assert(getValidatorCandidate(candidate) !== false, 'No such validator candidate');
+	if(candidate !== '') { 
+		assert(addressCheck(candidate) === true, 'Invalid candidate address.');
+		assert(getValidatorCandidate(candidate) !== false, 'No such validator candidate');
+	}
 	
 	setVoteForCandidate(candidate, tokenAmount);
-	log(sender + ' vote for ' + candidate.address + ', with token amount ' + tokenAmount);
+	log(sender + ' vote for ' + candidate + ', with token amount ' + tokenAmount);
     return;
 }
 
@@ -382,7 +384,11 @@ function main(input_str){
 	}
     else if(input.method === 'voteForCandidate'){
 		assert(typeof input.params.address === 'string', 'Arg-address should be string');
-		assert(typeof input.params.coinAmount === 'string', 'Arg-coinAmount should be string');
+		if(input.params.hasOwnProperty('coinAmount') === false) {
+			input.params.coinAmount = '0';
+		} else {
+			assert(typeof input.params.coinAmount === 'string', 'Arg-coinAmount should be string');
+		}
 	    voteForCandidate(input.params.address, input.params.coinAmount);
     }
     else if(input.method === 'takebackCoin'){
