@@ -193,9 +193,8 @@ namespace utils {
 				entries_.insert({ key, Record(pval, ADD) });
 				return true;
 			}
-			else {
-				return false;
-			}
+
+			return false;
 		}
 
 		bool DeleteEntry(const Key &key) {
