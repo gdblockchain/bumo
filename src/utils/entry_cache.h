@@ -46,7 +46,6 @@ namespace utils {
 		struct Record {
 			Record(pointer val, const ChangeAction &action) :value_(val), action_(action) {}
 			Record() {}
-			//Key key_;
 			std::shared_ptr<Value> value_;
 			ChangeAction action_;
 		};
@@ -87,8 +86,6 @@ namespace utils {
 
 		//Note that v_pt is created within the loadValue function
 		virtual bool LoadValue(const Key&, pointer &v_pt) = 0;
-		/*virtual bool commit() = 0;*/
-		//virtual EntryCache<Key,Value> newBranch();
 		bool MergeFromBranch(EntryCache &branch) {
 
 			auto &branch_entries = branch.entries_;
