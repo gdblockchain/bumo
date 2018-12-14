@@ -184,10 +184,9 @@ namespace utils {
 				if (parent_->GetRecord(key, r) && r.action_ != DEL) {
 					return false;
 				}
-				else {
-					entries_.insert({ key, Record(pval, ADD) });
-					return true;
-				}
+
+				entries_.insert({ key, Record(pval, ADD) });
+				return true;
 			}
 
 			if (!LoadValue(key, pval)) {
