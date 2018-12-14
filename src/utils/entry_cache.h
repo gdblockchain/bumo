@@ -37,7 +37,6 @@ namespace utils {
 
 	template <class Key, class Value, class Sort>
 	class EntryCache {
-		//Indicate an object has been added, deleted or modified
 	protected:
 	public:
 		typedef std::shared_ptr<Value> pointer;
@@ -82,7 +81,6 @@ namespace utils {
 
 		~EntryCache() {}
 
-		//Note that v_pt is created within the loadValue function
 		virtual bool LoadValue(const Key&, pointer &v_pt) = 0;
 		bool MergeFromBranch(EntryCache &branch) {
 
@@ -175,11 +173,11 @@ namespace utils {
 		bool AddEntry(const Key &key, pointer pval) {
 			auto it = entries_.find(key);
 			if (it != entries_.end()) {
-				if (it->second.action_ == DEL) {//Marked as deleted, added successfully
+				if (it->second.action_ == DEL) {
 					it->second = Record(pval, MOD);
 					return true;
 				}
-				else { //Already exited, fail
+				else {
 					return false;
 				}
 			}
@@ -195,13 +193,11 @@ namespace utils {
 				}
 			}
 
-			//If it has no parent level, then it is the top level. Just add it
 			if (!LoadValue(key, pval)) {
 				entries_.insert({ key, Record(pval, ADD) });
 				return true;
 			}
 			else {
-				//There is a same key, so it is repteated
 				return false;
 			}
 		}
