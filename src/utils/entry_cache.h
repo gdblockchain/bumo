@@ -148,15 +148,6 @@ namespace utils {
 			return true;
 		}
 
-		/*
-		usage:
-		pointer pt;
-		if(GetEntry(key,pv)){
-		//TODO modify the value which pt pointed to
-		ps!!!:
-		don't use pt=xxx
-		}
-		*/
 		bool GetEntry(const Key &key, pointer &pval) {
 			auto it = entries_.find(key);
 			if (it != entries_.end()) {
