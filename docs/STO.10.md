@@ -52,8 +52,8 @@ value: {
 - name: Token名称
 - symbol: Token符号
 - decimals: Token精度
-- totalSupply: Token已发行总量
-- scheduledTotalSupply: Token计划发行的总量, "0"表示不限制发行量， 大于0表示限制发行总量
+- totalSupply: Token已发行总量，其值等于10^decimals*已发行量。假如当前已发行总量是10000, 精度为8的Token，totalSupply = 10 ^ 8 * 10000, 结果是1000000000000。
+- scheduledTotalSupply: Token计划发行的总量, 0表示不限制发行量， 大于0表示限制发行总量。其值等于10^decimals*计划发行量。假如计划要发行总量是10000, 精度为8的Token，scheduledTotalSuppl = 10 ^ 8 * 10000, 结果是1000000000000。
 - owner: Token所有权拥有者
 
 
@@ -138,10 +138,12 @@ value: {
 
 
 ```
-key: controller_type
-value: address
+key: global_controller
+value: {
+			controllers: [address1, addres2, ...]
+		}
 ```
-- type: 控制者身份
+- controllers: 控制者列表
 - address: 控制者地址
 
 
@@ -210,13 +212,22 @@ value: {
     "params":{
         "name": "123",
         "symbol": "STP",
+        "description": "STP",
         "decimals": 8,
         "nowSupply": "10000000",
         "scheduledTotalSupply": "10000000",
-        "version": "1.0",
+        "icon": "",
         "controllers": ["buQnTmK9iBFHyG2oLce7vcejPQ1g5xLVycsj"]
     }
 }
+- name: Token名称，长度范围[1,64]
+- code: Token符号，长度范围[1,64]
+- description: Token描述，长度范围[1,64k]
+- decimals: Token符号，即能支持的小数点位置，大小范围[0,8]
+- nowSupply: Token当前发行量，大小范围[0,2^63-1]，其值等于10^decimals*发行量。假如当前要发行一笔数量是10000, 精度为8的Token，nowSupply = 10 ^ 8 * 10000, 结果是1000000000000。
+- scheduledTotalSuppl: Token计划发行总量，大小范围[0,2^63-1]，0表示不限量发行，大于0表示限量发行，其值等于10^decimals*计划发行量。假如计划要发行总量是10000, 精度为8的Token，scheduledTotalSuppl = 10 ^ 8 * 10000, 结果是1000000000000。
+- icon: base64位编码，图标文件大小是32k以内,推荐200*200像素。
+- controllers: Token的控制者列表，即监管者列表
 ```
 
 - 返回值
@@ -243,7 +254,7 @@ value: {
 
 ```json
 {
-    "method": "tokenInfo",
+    "method": "tokenInfo
 }
 ```
 
@@ -272,7 +283,7 @@ value: {
 
 ### setDocument
 
-
+​	仅限于Token的所有权拥有人和控制者使用。
 
 -   描述
 
@@ -294,9 +305,9 @@ value: {
         "documentHash": "ad67d57ae19de8068dbcd47282146bd553fe9f684c57c8c114453863ee41abc3"
     }
 }
-- name: 文档名称
-- url: 文档在线链接地址
-- hashType: 计算文档哈希的类型
+- name: 文档名称，长度范围[1,256]
+- url: 文档在线链接地址，长度范围[10,128k]
+- hashType: 计算文档哈希的类型，长度范围[1,16]
 - documentHash: 文档哈希的16进制字符串
 ```
 
@@ -359,7 +370,7 @@ value: {
 
 ### createTranche
 
-
+​	仅限于Token的所有权拥有者使用。
 
 -   描述
 
@@ -389,11 +400,11 @@ value: {
         }
     }
 }
-- id: trancheid
-- description: tranche描述
+- id: trancheid，大小范围[1,2^63-1]
+- description: tranche描述，长度范围[1,64k]
 - limits: 约束条件
-- name: 约束名称
-- value: 约束内容
+- name: 约束名称，长度范围[1,64]
+- value: 约束内容，长度范围[1,256]
 - tokenHolders: 分发的账户列表，最多支持8个
 ```
 > 注意: 最多只允许分配给8个tokenHolders
@@ -422,7 +433,7 @@ value: {
 
 ```json
 {
-    "method": "balanceOfByTranche",
+    "method": "balanceOfTranche",
     "params":{
         "address": "buQnTmK9iBFHyG2oLce7vcejPQ1g5xLVycsj"
     }
@@ -542,9 +553,10 @@ value: {
         "data": ""
     }
 }
+- to: Token收入方地址
+- value: Token数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,128k]
 ```
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
-
 -   返回值
 
 > 成功：true
@@ -575,10 +587,12 @@ value: {
         "data": ""
     }
 }
+- from: Token支出方地址
+- to: Token收入方地址
+- value: Token数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,128k]
 
 ```
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
-
 -   返回值
 
 > 成功：true
@@ -613,9 +627,13 @@ value: {
         "data": ""
     }
 }
+- from: Token支出方地址
+- fromTranche: Token支出方tranche的id，大小范围[0,2^63-1]
+- to: Token收入方地址
+- toTranche: Token收入方tranche的id，大小范围[0,2^63-1]
+- value: Token数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,128k]
 ```
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
-
 -   返回值
 
 > 成功：true
@@ -624,7 +642,8 @@ value: {
 > 
 
 
-### transferToTranche
+
+### transferTranche
 
 
 
@@ -640,18 +659,19 @@ value: {
 
 ```json
 {
-    "method": "transferToTranche",
+    "method": "transferTranche",
     "params":{
-        "fromTranche": "0",
+        "tranche": "0",
         "to": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
-        "toTranche": "1",
         "value": "100",
         "data": ""
     }
 }
+- tranche: Token支出方和收入方tranche的id，大小范围[0,2^63-1]
+- to: Token收入方地址
+- value: Token数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,128k]
 ```
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
-
 -   返回值
 
 > 成功：true
@@ -685,9 +705,12 @@ value: {
         "data": ""
     }
 }
+- fromTranche: Token支出方tranche的id，大小范围[0,2^63-1]
+- to: Token收入方地址
+- toTranche: Token收入方tranche的id，大小范围[0,2^63-1]
+- value: Token数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,128k]
 ```
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
-
 -   返回值
 
 > 成功：true
@@ -717,16 +740,20 @@ value: {
         "fromTranche": "0",
         "toTranche": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
         "tokenHolders": {
-            Address1: amount1,
-            Address2: amount2,
+            Address1: value1,
+            Address2: value2,
              …
         },
         "data": ""
     }
 }
+- fromTranche: Token支出方tranche的id，大小范围[0,2^63-1]
+- toTranche: Token收入方tranche的id，大小范围[0,2^63-1]
+- tokenHolders: Token收入方列表
+- Address1/Address2/...: Token收入方地址
+- value1/value2/...: Token转出数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,128k]
 ```
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
-
 -   返回值
 
 > 成功：返回目标账户的tranche
@@ -794,9 +821,14 @@ value: {
         "operatorData": ""
     }
 }
+- from: Token支出方地址
+- fromTranche: Token支出方tranche的id，大小范围[0,2^63-1]
+- to: Token收入方地址
+- toTranche: Token收入方tranche的id，大小范围[0,2^63-1]
+- value: Token数量，大小范围[0,2^63-1]
+- data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,64k]
+- operatorData: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是授权传输的签名数据（例如，动态白名单），但是足够灵活以适应其他用例。长度范围[0,64k]
 ```
-
-> data: 允许随传输一起提交任意数据，以便进行解释或记录。这可以是签名数据（例如，动态白名单），但是足够灵活以适应其他用例。
 
 -   返回值
 
