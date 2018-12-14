@@ -62,12 +62,11 @@ namespace utils {
 			if (parent_) {
 				return parent_->GetRecord(key, r);
 			}
-			else {
-				if (LoadValue(key, r.value_)) {
-					return true;
-				}
-				return false;
+
+			if (LoadValue(key, r.value_)) {
+				return true;
 			}
+			return false;
 		}
 
 	public:
