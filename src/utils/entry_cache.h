@@ -213,44 +213,6 @@ namespace utils {
 			}
 		}
 
-		//bool ModEntry(const Key &key, const Value &val) {
-		//	auto ptr = std::make_shared<Value>(val);
-		//	auto it = entries_.find(key);
-		//	if (it != entries_.end()) {
-		//		switch (it->second.action_) {
-		//			case ADD:{
-		//				it->second = Record(ptr, ADD);
-		//				return true;
-		//			}
-		//			case MOD:{
-		//				it->second = Record(ptr, MOD);
-		//				return true;
-		//			}
-		//			case DEL:{
-		//				return false;
-		//			}
-		//			case KEEP:{
-		//				it->second = Record(ptr, MOD);
-		//				return true;
-		//			}
-		//			default:{
-		//				return false;
-		//			}
-		//				
-		//		}
-		//	}
-		//	Record r;
-		//	if (getRecord(key, r)) {
-		//		if (r.action_ == DEL)
-		//			return false;
-		//		else {
-		//			entries_.insert({key, Record(ptr, MOD) });
-		//			return true;
-		//		}
-		//	}
-		//	return false;
-		//}
-
 		bool DeleteEntry(const Key &key) {
 			auto it = entries_.find(key);
 			if (it != entries_.end()) {
