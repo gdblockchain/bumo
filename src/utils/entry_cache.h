@@ -145,8 +145,8 @@ namespace utils {
 					pval = it->second.value_;
 					return true;
 				}
-				else
-					return false;
+
+				return false;
 			}
 
 			Record r;
