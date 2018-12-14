@@ -20,7 +20,6 @@
 #include <utils/crypto.h>
 #include <utils/logger.h>
 #include <proto/cpp/chain.pb.h>
-//#include <utils/entry_cache.h>
 #include "proto/cpp/merkeltrie.pb.h"
 #include <common/storage.h>
 #include "utils/atom_map.h"

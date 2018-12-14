@@ -18,7 +18,6 @@
 
 #include <proto/cpp/chain.pb.h>
 #include <proto/cpp/consensus.pb.h>
-//#include <utils/entry_cache.h>
 #include <utils/atom_map.h>
 #include <main/configure.h>
 #include <json/value.h>
