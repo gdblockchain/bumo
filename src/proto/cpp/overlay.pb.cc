@@ -70,7 +70,6 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::EnumDescriptor* ChainTxStatus_TxStatus_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
-const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor_ = NULL;
 
 }  // namespace
 
@@ -349,7 +348,6 @@ void protobuf_AssignDesc_overlay_2eproto() {
   ChainTxStatus_TxStatus_descriptor_ = ChainTxStatus_descriptor_->enum_type(0);
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
-  MESSAGE_CHANNEL_TYPE_descriptor_ = file->enum_type(2);
 }
 
 namespace {
@@ -495,23 +493,8 @@ void protobuf_AddDesc_overlay_2eproto() {
     "INE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022\033\n\027CHAIN_S"
     "UBMITTRANSACTION\020\017\022\027\n\023CHAIN_LEDGER_HEADE"
     "R\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n\022CHAIN_TX_"
-    "ENV_STORE\020\022*\343\004\n\024MESSAGE_CHANNEL_TYPE\022\035\n\031"
-    "MESSAGE_CHANNEL_TYPE_NONE\020\000\022&\n\"MESSAGE_C"
-    "HANNEL_CREATE_CHILD_CHAIN\020\001\022\034\n\030MESSAGE_C"
-    "HANNEL_MAIN_MIX\020\002\022\035\n\031MESSAGE_CHANNEL_CHI"
-    "LD_MIX\020\003\022\033\n\027MESSAGE_CHANNEL_DEPOSIT\020\004\022\036\n"
-    "\032MESSAGE_CHANNEL_WITHDRAWAL\020\005\022#\n\037MESSAGE"
-    "_CHANNEL_FAST_WITHDRAWAL\020\006\022\037\n\033MESSAGE_CH"
-    "ANNEL_SUBMIT_HEAD\020\007\022(\n$MESSAGE_CHANNEL_C"
-    "HALLENGE_WITHDRAWAL\020\010\022\"\n\036MESSAGE_CHANNEL"
-    "_CHALLENGE_HEAD\020\t\022)\n%MESSAGE_CHANNEL_CHI"
-    "LD_GENESES_REQUEST\020\n\022*\n&MESSAGE_CHANNEL_"
-    "CHILD_GENESES_RESPONSE\020\013\022\036\n\032MESSAGE_CHAN"
-    "NEL_QUERY_HEAD\020\014\022!\n\035MESSAGE_CHANNEL_QUER"
-    "Y_DEPOSIT\020\r\022*\n&MESSAGE_CHANNEL_CHANGE_CH"
-    "ILD_VALIDATOR\020\016\0220\n,MESSAGE_CHANNEL_QUERY"
-    "_CHANGE_CHILD_VALIDATOR\020\017B\"\n io.bumo.sdk"
-    ".core.extend.protobufb\006proto3", 2869);
+    "ENV_STORE\020\022B\"\n io.bumo.sdk.core.extend.p"
+    "rotobufb\006proto3", 2255);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -589,34 +572,6 @@ bool ChainMessageType_IsValid(int value) {
     case 16:
     case 17:
     case 18:
-      return true;
-    default:
-      return false;
-  }
-}
-
-const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return MESSAGE_CHANNEL_TYPE_descriptor_;
-}
-bool MESSAGE_CHANNEL_TYPE_IsValid(int value) {
-  switch(value) {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:
-    case 8:
-    case 9:
-    case 10:
-    case 11:
-    case 12:
-    case 13:
-    case 14:
-    case 15:
       return true;
     default:
       return false;
