@@ -179,10 +179,4 @@ enum MESSAGE_CHANNEL_TYPE{
 	MESSAGE_CHANNEL_QUERY_CHANGE_CHILD_VALIDATOR = 15;
 }
 
-message MessageChannel{
-    int64 target_chain_id = 1;
-    MESSAGE_CHANNEL_TYPE msg_type = 2;
-    bytes msg_data = 3;
-}
-
 
