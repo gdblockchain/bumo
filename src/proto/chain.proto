@@ -36,6 +36,10 @@ message ValidatorCandidate{
     int64  fee_vote  = 4;
 }
 
+message ValidatorCandidates {
+	repeated ValidatorCandidate candidates = 1;
+}
+
 message AssetProperty{
 	int32 decimal = 1;
 	string description = 2;

@@ -69,6 +69,7 @@ class TransactionEnvStore;
 class Trigger;
 class Trigger_OperationTrigger;
 class ValidatorCandidate;
+class ValidatorCandidates;
 
 enum Operation_Type {
   Operation_Type_UNKNOWN = 0,
@@ -684,6 +685,94 @@ class ValidatorCandidate : public ::google::protobuf::Message /* @@protoc_insert
 
   void InitAsDefaultInstance();
   static ValidatorCandidate* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ValidatorCandidates : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:protocol.ValidatorCandidates) */ {
+ public:
+  ValidatorCandidates();
+  virtual ~ValidatorCandidates();
+
+  ValidatorCandidates(const ValidatorCandidates& from);
+
+  inline ValidatorCandidates& operator=(const ValidatorCandidates& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ValidatorCandidates& default_instance();
+
+  void Swap(ValidatorCandidates* other);
+
+  // implements Message ----------------------------------------------
+
+  inline ValidatorCandidates* New() const { return New(NULL); }
+
+  ValidatorCandidates* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ValidatorCandidates& from);
+  void MergeFrom(const ValidatorCandidates& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(ValidatorCandidates* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .protocol.ValidatorCandidate candidates = 1;
+  int candidates_size() const;
+  void clear_candidates();
+  static const int kCandidatesFieldNumber = 1;
+  const ::protocol::ValidatorCandidate& candidates(int index) const;
+  ::protocol::ValidatorCandidate* mutable_candidates(int index);
+  ::protocol::ValidatorCandidate* add_candidates();
+  ::google::protobuf::RepeatedPtrField< ::protocol::ValidatorCandidate >*
+      mutable_candidates();
+  const ::google::protobuf::RepeatedPtrField< ::protocol::ValidatorCandidate >&
+      candidates() const;
+
+  // @@protoc_insertion_point(class_scope:protocol.ValidatorCandidates)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::RepeatedPtrField< ::protocol::ValidatorCandidate > candidates_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_chain_2eproto();
+  friend void protobuf_AssignDesc_chain_2eproto();
+  friend void protobuf_ShutdownFile_chain_2eproto();
+
+  void InitAsDefaultInstance();
+  static ValidatorCandidates* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -4511,6 +4600,40 @@ inline void ValidatorCandidate::set_fee_vote(::google::protobuf::int64 value) {
 
 // -------------------------------------------------------------------
 
+// ValidatorCandidates
+
+// repeated .protocol.ValidatorCandidate candidates = 1;
+inline int ValidatorCandidates::candidates_size() const {
+  return candidates_.size();
+}
+inline void ValidatorCandidates::clear_candidates() {
+  candidates_.Clear();
+}
+inline const ::protocol::ValidatorCandidate& ValidatorCandidates::candidates(int index) const {
+  // @@protoc_insertion_point(field_get:protocol.ValidatorCandidates.candidates)
+  return candidates_.Get(index);
+}
+inline ::protocol::ValidatorCandidate* ValidatorCandidates::mutable_candidates(int index) {
+  // @@protoc_insertion_point(field_mutable:protocol.ValidatorCandidates.candidates)
+  return candidates_.Mutable(index);
+}
+inline ::protocol::ValidatorCandidate* ValidatorCandidates::add_candidates() {
+  // @@protoc_insertion_point(field_add:protocol.ValidatorCandidates.candidates)
+  return candidates_.Add();
+}
+inline ::google::protobuf::RepeatedPtrField< ::protocol::ValidatorCandidate >*
+ValidatorCandidates::mutable_candidates() {
+  // @@protoc_insertion_point(field_mutable_list:protocol.ValidatorCandidates.candidates)
+  return &candidates_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::protocol::ValidatorCandidate >&
+ValidatorCandidates::candidates() const {
+  // @@protoc_insertion_point(field_list:protocol.ValidatorCandidates.candidates)
+  return candidates_;
+}
+
+// -------------------------------------------------------------------
+
 // AssetProperty
 
 // optional int32 decimal = 1;
@@ -7835,6 +7958,8 @@ inline void OperationSetMetadata::set_delete_flag(bool value) {
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------

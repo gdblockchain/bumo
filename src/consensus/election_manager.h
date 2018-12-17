@@ -26,7 +26,6 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 #include <common/storage.h>
 #include <common/pb2json.h>
 #include <main/configure.h>
-#include "ledger/kv_trie.h"
 
 namespace bumo {
 	typedef std::shared_ptr<protocol::ValidatorCandidate> CandidatePtr;
@@ -56,16 +55,12 @@ namespace bumo {
 			return update_validators_;
 		}
 
-		KVTrie* GetCandidateMpt(){
-			return candidate_mpt_;
-		}
-
 		bool ReadSharerRate();
 		const protocol::ElectionConfig& GetProtoElectionCfg();
 		void SetProtoElectionCfg(const protocol::ElectionConfig& ecfg);
 		bool ElectionConfigGet(protocol::ElectionConfig& ecfg);
 		int32_t GetCandidatesNumber();
-		static void ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg);
+		void ElectionConfigSet(const protocol::ElectionConfig &ecfg);
 		bool UpdateElectionConfig(const protocol::ElectionConfig& ecfg);
 		
 		int64_t CoinToVotes(int64_t coin);
@@ -82,11 +77,11 @@ namespace bumo {
 		CandidatePtr GetValidatorCandidate(const std::string& key);
 		void DelValidatorCandidate(const std::string& key);
 
-		bool ValidatorCandidatesStorage();
-		bool ValidatorCandidatesLoad();
+		void ValidatorCandidatesStorage();
+		bool ValidatorCandidatesLoad(bool& init_load);
 		bool DynastyChange(Json::Value& validators_json);
 
-		void UpdateToDB();
+		bool UpdateToDB(bool set_candidates);
 
 		virtual void OnTimer(int64_t current_time);
 		virtual void OnSlowTimer(int64_t current_time);
@@ -111,7 +106,7 @@ namespace bumo {
 		std::vector<std::string> to_delete_candidates_;
 		std::unordered_map<std::string, CandidatePtr> validator_candidates_;
 		bool update_validators_;
-		KVTrie* candidate_mpt_;
+		std::shared_ptr<WRITE_BATCH> batch_;
 
 		std::vector<uint32_t> fee_sharer_rate_;
 	};

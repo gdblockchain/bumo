@@ -530,7 +530,6 @@ namespace bumo {
 
 		//for validator candidate
 		ledger->environment_->UpdateValidatorCandidate();
-		election.ValidatorCandidatesStorage();
 
 		int64_t refresh_interval = election.GetValidatorsRefreshInterval();
 		int64_t interval_block = refresh_interval * utils::MICRO_UNITS_PER_SEC / Configure::Instance().ledger_configure_.close_interval_;
@@ -558,8 +557,7 @@ namespace bumo {
 			}
 			LOG_INFO("Update election configuration to %s", election_cfg.DebugString().c_str());
 		}
-
-		election.UpdateToDB();
+		election.UpdateToDB(true);
 
 		return true;
 	}

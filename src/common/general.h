@@ -100,6 +100,7 @@ namespace bumo {
 		const static char *CONTRACT_VALIDATOR_ADDRESS;
 		const static char *CONTRACT_VALIDATOR_ADDRESS_GT2000;
 		const static char *CONTRACT_FEE_ADDRESS;
+		const static char *VALIDATOR_CANDIDATES;
 		const static char *ABNORMAL_RECORDS;
 		const static char *ELECTION_CONFIG;
 

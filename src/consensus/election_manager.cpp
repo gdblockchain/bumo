@@ -17,23 +17,19 @@ along with bumo.  If not, see <http://www.gnu.org/licenses/>.
 #include "glue/glue_manager.h"
 
 namespace bumo {
-	ElectionManager::ElectionManager() : candidate_mpt_(nullptr), update_validators_(false) {
+	ElectionManager::ElectionManager() : batch_(nullptr), update_validators_(false) {
 	}
 
 	ElectionManager::~ElectionManager() {
-		if (candidate_mpt_){
-			delete candidate_mpt_;
-			candidate_mpt_ = nullptr;
-		}
 	}
 
 	bool ElectionManager::Initialize() {
+		batch_ = std::make_shared<WRITE_BATCH>();
 
-		candidate_mpt_ = new KVTrie();
-		auto batch = std::make_shared<WRITE_BATCH>();
-		candidate_mpt_->Init(Storage::Instance().account_db(), batch, General::VALIDATOR_CANDIDATE_PREFIX, 1);
-
-		ValidatorCandidatesLoad();
+		bool set_candidates = false;
+		if (!ValidatorCandidatesLoad(set_candidates)) {
+			return false;
+		}
 
 		// Election configuration
 		ElectionConfigure& ecfg = Configure::Instance().election_configure_;
@@ -47,12 +43,7 @@ namespace bumo {
 			election_config_.set_fee_to_vote_rate(ecfg.fee_to_vote_rate_);
 			election_config_.set_fee_distribution_rate(ecfg.fee_distribution_rate_);
 
-			ElectionConfigSet(batch, election_config_);
-			KeyValueDb *db = Storage::Instance().account_db();
-			if (!db->WriteBatch(*batch)) {
-				LOG_ERROR("Failed to write election configuration to database(%s)", db->error_desc().c_str());
-				return false;
-			}
+			ElectionConfigSet(election_config_);
 		}
 
 		if (!ReadSharerRate()) {
@@ -77,6 +68,9 @@ namespace bumo {
 				}
 			}
 		}
+		if (!UpdateToDB(set_candidates)) {
+			return false;
+		}
 
 		TimerNotify::RegisterModule(this);
 		StatusModule::RegisterModule(this);
@@ -84,13 +78,6 @@ namespace bumo {
 	}
 
 	bool ElectionManager::Exit() {
-		LOG_INFO("Election manager stopping ...");
-
-		if (candidate_mpt_) {
-			delete candidate_mpt_;
-			candidate_mpt_ = nullptr;
-		}
-		LOG_INFO("Election manager stopped. [OK]");
 		return true;
 	}
 
@@ -133,8 +120,8 @@ namespace bumo {
 		data["abnormal_records"] = records;
 	}
 
-	void ElectionManager::ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg) {
-		batch->Put(General::ELECTION_CONFIG, ecfg.SerializeAsString());
+	void ElectionManager::ElectionConfigSet(const protocol::ElectionConfig &ecfg) {
+		batch_->Put(General::ELECTION_CONFIG, ecfg.SerializeAsString());
 	}
 
 	const protocol::ElectionConfig& ElectionManager::GetProtoElectionCfg() {
@@ -175,7 +162,7 @@ namespace bumo {
 		}
 
 		// Update election configuration storage
-		ElectionConfigSet(candidate_mpt_->batch_, ecfg);
+		ElectionConfigSet(ecfg);
 
 		election_config_ = ecfg;
 
@@ -211,17 +198,7 @@ namespace bumo {
 			item["count"] = it->second;
 			abnormal_json.append(item);
 		}
-		auto batch = candidate_mpt_->batch_;
-		if (batch) {
-			batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
-		}
-		else {
-			LOG_ERROR("Failed to get batch of candidate MPT tree");
-		}
-		KeyValueDb *db = Storage::Instance().account_db();
-		if (!db->WriteBatch(*batch)){
-			LOG_ERROR("Failed to write validator abnormal records to database(%s)", db->error_desc().c_str());
-		}
+		batch_->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
 	}
 
 	int64_t ElectionManager::CoinToVotes(int64_t coin) {
@@ -285,7 +262,6 @@ namespace bumo {
 
 	void ElectionManager::DelValidatorCandidate(const std::string& key) {
 		validator_candidates_.erase(key);
-		to_delete_candidates_.push_back(key);
 		DelAbnormalRecord(key);
 
 		protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
@@ -296,61 +272,64 @@ namespace bumo {
 		}
 	}
 
-	bool ElectionManager::ValidatorCandidatesStorage() {
-		try {
-			for (auto kv : validator_candidates_) {
-				candidate_mpt_->Set(kv.first, kv.second->SerializeAsString());
+	bool ElectionManager::ValidatorCandidatesLoad(bool& set_candidates) {
+		auto db = Storage::Instance().account_db();
+		std::string str;
+
+		int32_t ret = db->Get(General::VALIDATOR_CANDIDATES, str);
+		if (ret == 0) { // not exist
+			protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
+			for (int i = 0; i < set.validators_size(); i++) {
+				CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
+				candidate->set_address(set.validators(i).address());
+				candidate->set_pledge(set.validators(i).pledge_coin_amount());
+				validator_candidates_[candidate->address()] = candidate;
+			}
+			ValidatorCandidatesStorage();
+			set_candidates = true;
+		} 
+		else if (ret == 1) {
+			protocol::ValidatorCandidates candidates;
+			if (!candidates.ParseFromString(str)) {
+				LOG_ERROR("Failed to parse validator candidates from string");
+				return false;
 			}
 
-			for (auto node : to_delete_candidates_) {
-				candidate_mpt_->Delete(node);
+			for (int i = 0; i < candidates.candidates_size(); i++)
+			{
+				protocol::ValidatorCandidate* candidate = candidates.mutable_candidates(i);
+				CandidatePtr candidate_ptr = std::make_shared<protocol::ValidatorCandidate>(*candidate);
+				validator_candidates_[candidate->address()] = candidate_ptr;
 			}
-
-			to_delete_candidates_.clear();
-			candidate_mpt_->UpdateHash();
 		}
-		catch (std::exception& e) {
-			LOG_ERROR("Caught an exception when store validator candidates, %s", e.what());
+		else {
+			LOG_ERROR("Failed to get validator candidates from database(%s)", db->error_desc().c_str());
 			return false;
 		}
-
 		return true;
 	}
 
-	bool ElectionManager::ValidatorCandidatesLoad() {
+	void ElectionManager::ValidatorCandidatesStorage() {
+		protocol::ValidatorCandidates candidates;
 
-		try {
-			std::vector<std::string> entries;
-			candidate_mpt_->GetAll("", entries);
-			if (!entries.empty()) {
-				for (size_t i = 0; i < entries.size(); i++) {
-					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
-					candidate->ParseFromString(entries[i]);
-					validator_candidates_[candidate->address()] = candidate;
-				}
-			}
-			else{
-				protocol::ValidatorSet set = GlueManager::Instance().GetCurrentValidatorSet();
-				for (int i = 0; i < set.validators_size(); i++) {
-					CandidatePtr candidate = std::make_shared<protocol::ValidatorCandidate>();
-					candidate->set_address(set.validators(i).address());
-					candidate->set_pledge(set.validators(i).pledge_coin_amount());
-					validator_candidates_[candidate->address()] = candidate;
-				}
-			}
-		}
-		catch (std::exception& e) {
-			LOG_ERROR("Caught an exception when load validator candidates, %s", e.what());
-			return false;
+		std::unordered_map<std::string, CandidatePtr>::iterator it = validator_candidates_.begin();
+		for (; it != validator_candidates_.end(); it++) {
+			protocol::ValidatorCandidate* candidate = candidates.add_candidates();
+			*candidate = *(it->second);
 		}
 
-		return true;
+		batch_->Put(General::VALIDATOR_CANDIDATES, candidates.SerializeAsString());
 	}
 
-	void ElectionManager::UpdateToDB() {
-		if (!Storage::Instance().account_db()->WriteBatch(*(candidate_mpt_->batch_))) {
-			PROCESS_EXIT("Failed to write accounts to database: %s", Storage::Instance().account_db()->error_desc().c_str());
+	bool ElectionManager::UpdateToDB(bool set_candidates) {
+		if (set_candidates) ValidatorCandidatesStorage();
+
+		KeyValueDb *db = Storage::Instance().account_db();
+		if (!db->WriteBatch(*batch_)) {
+			LOG_ERROR("Failed to write validator candidates to database(%s)", db->error_desc().c_str());
+			return false;
 		}
+		return true;
 	}
 
 	bool ElectionManager::DynastyChange(Json::Value& validators_json) {
