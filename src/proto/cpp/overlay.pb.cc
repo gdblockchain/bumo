@@ -68,8 +68,12 @@ const ::google::protobuf::Descriptor* ChainTxStatus_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ChainTxStatus_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainTxStatus_TxStatus_descriptor_ = NULL;
+const ::google::protobuf::Descriptor* MessageChannel_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MessageChannel_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor_ = NULL;
 
 }  // namespace
 
@@ -346,8 +350,26 @@ void protobuf_AssignDesc_overlay_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainTxStatus, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainTxStatus, _is_default_instance_));
   ChainTxStatus_TxStatus_descriptor_ = ChainTxStatus_descriptor_->enum_type(0);
+  MessageChannel_descriptor_ = file->message_type(15);
+  static const int MessageChannel_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannel, target_chain_id_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannel, msg_type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannel, msg_data_),
+  };
+  MessageChannel_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      MessageChannel_descriptor_,
+      MessageChannel::default_instance_,
+      MessageChannel_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(MessageChannel),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannel, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannel, _is_default_instance_));
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
+  MESSAGE_CHANNEL_TYPE_descriptor_ = file->enum_type(2);
 }
 
 namespace {
@@ -391,6 +413,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
       ChainResponse_descriptor_, &ChainResponse::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       ChainTxStatus_descriptor_, &ChainTxStatus::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      MessageChannel_descriptor_, &MessageChannel::default_instance());
 }
 
 }  // namespace
@@ -426,6 +450,8 @@ void protobuf_ShutdownFile_overlay_2eproto() {
   delete ChainResponse_reflection_;
   delete ChainTxStatus::default_instance_;
   delete ChainTxStatus_reflection_;
+  delete MessageChannel::default_instance_;
+  delete MessageChannel_reflection_;
 }
 
 void protobuf_AddDesc_overlay_2eproto() GOOGLE_ATTRIBUTE_COLD;
@@ -480,21 +506,39 @@ void protobuf_AddDesc_overlay_2eproto() {
     "tocol.ERRORCODE\022\022\n\nerror_desc\030\010 \001(\t\022\021\n\tt"
     "imestamp\030\t \001(\003\"P\n\010TxStatus\022\r\n\tUNDEFINED\020"
     "\000\022\r\n\tCONFIRMED\020\001\022\013\n\007PENDING\020\002\022\014\n\010COMPLET"
-    "E\020\003\022\013\n\007FAILURE\020\004*\203\002\n\024OVERLAY_MESSAGE_TYP"
-    "E\022\030\n\024OVERLAY_MSGTYPE_NONE\020\000\022\030\n\024OVERLAY_M"
-    "SGTYPE_PING\020\001\022\031\n\025OVERLAY_MSGTYPE_HELLO\020\002"
-    "\022\031\n\025OVERLAY_MSGTYPE_PEERS\020\003\022\037\n\033OVERLAY_M"
-    "SGTYPE_TRANSACTION\020\004\022\033\n\027OVERLAY_MSGTYPE_"
-    "LEDGERS\020\005\022\030\n\024OVERLAY_MSGTYPE_PBFT\020\006\022)\n%O"
-    "VERLAY_MSGTYPE_LEDGER_UPGRADE_NOTIFY\020\007*\372"
-    "\001\n\020ChainMessageType\022\023\n\017CHAIN_TYPE_NONE\020\000"
-    "\022\017\n\013CHAIN_HELLO\020\n\022\023\n\017CHAIN_TX_STATUS\020\013\022\025"
-    "\n\021CHAIN_PEER_ONLINE\020\014\022\026\n\022CHAIN_PEER_OFFL"
-    "INE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022\033\n\027CHAIN_S"
-    "UBMITTRANSACTION\020\017\022\027\n\023CHAIN_LEDGER_HEADE"
-    "R\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n\022CHAIN_TX_"
-    "ENV_STORE\020\022B\"\n io.bumo.sdk.core.extend.p"
-    "rotobufb\006proto3", 2255);
+    "E\020\003\022\013\n\007FAILURE\020\004\"m\n\016MessageChannel\022\027\n\017ta"
+    "rget_chain_id\030\001 \001(\003\0220\n\010msg_type\030\002 \001(\0162\036."
+    "protocol.MESSAGE_CHANNEL_TYPE\022\020\n\010msg_dat"
+    "a\030\003 \001(\014*\203\002\n\024OVERLAY_MESSAGE_TYPE\022\030\n\024OVER"
+    "LAY_MSGTYPE_NONE\020\000\022\030\n\024OVERLAY_MSGTYPE_PI"
+    "NG\020\001\022\031\n\025OVERLAY_MSGTYPE_HELLO\020\002\022\031\n\025OVERL"
+    "AY_MSGTYPE_PEERS\020\003\022\037\n\033OVERLAY_MSGTYPE_TR"
+    "ANSACTION\020\004\022\033\n\027OVERLAY_MSGTYPE_LEDGERS\020\005"
+    "\022\030\n\024OVERLAY_MSGTYPE_PBFT\020\006\022)\n%OVERLAY_MS"
+    "GTYPE_LEDGER_UPGRADE_NOTIFY\020\007*\372\001\n\020ChainM"
+    "essageType\022\023\n\017CHAIN_TYPE_NONE\020\000\022\017\n\013CHAIN"
+    "_HELLO\020\n\022\023\n\017CHAIN_TX_STATUS\020\013\022\025\n\021CHAIN_P"
+    "EER_ONLINE\020\014\022\026\n\022CHAIN_PEER_OFFLINE\020\r\022\026\n\022"
+    "CHAIN_PEER_MESSAGE\020\016\022\033\n\027CHAIN_SUBMITTRAN"
+    "SACTION\020\017\022\027\n\023CHAIN_LEDGER_HEADER\020\020\022\026\n\022CH"
+    "AIN_SUBSCRIBE_TX\020\021\022\026\n\022CHAIN_TX_ENV_STORE"
+    "\020\022*\343\004\n\024MESSAGE_CHANNEL_TYPE\022\035\n\031MESSAGE_C"
+    "HANNEL_TYPE_NONE\020\000\022&\n\"MESSAGE_CHANNEL_CR"
+    "EATE_CHILD_CHAIN\020\001\022\034\n\030MESSAGE_CHANNEL_MA"
+    "IN_MIX\020\002\022\035\n\031MESSAGE_CHANNEL_CHILD_MIX\020\003\022"
+    "\033\n\027MESSAGE_CHANNEL_DEPOSIT\020\004\022\036\n\032MESSAGE_"
+    "CHANNEL_WITHDRAWAL\020\005\022#\n\037MESSAGE_CHANNEL_"
+    "FAST_WITHDRAWAL\020\006\022\037\n\033MESSAGE_CHANNEL_SUB"
+    "MIT_HEAD\020\007\022(\n$MESSAGE_CHANNEL_CHALLENGE_"
+    "WITHDRAWAL\020\010\022\"\n\036MESSAGE_CHANNEL_CHALLENG"
+    "E_HEAD\020\t\022)\n%MESSAGE_CHANNEL_CHILD_GENESE"
+    "S_REQUEST\020\n\022*\n&MESSAGE_CHANNEL_CHILD_GEN"
+    "ESES_RESPONSE\020\013\022\036\n\032MESSAGE_CHANNEL_QUERY"
+    "_HEAD\020\014\022!\n\035MESSAGE_CHANNEL_QUERY_DEPOSIT"
+    "\020\r\022*\n&MESSAGE_CHANNEL_CHANGE_CHILD_VALID"
+    "ATOR\020\016\0220\n,MESSAGE_CHANNEL_QUERY_CHANGE_C"
+    "HILD_VALIDATOR\020\017B\"\n io.bumo.sdk.core.ext"
+    "end.protobufb\006proto3", 2980);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -512,6 +556,7 @@ void protobuf_AddDesc_overlay_2eproto() {
   ChainSubscribeTx::default_instance_ = new ChainSubscribeTx();
   ChainResponse::default_instance_ = new ChainResponse();
   ChainTxStatus::default_instance_ = new ChainTxStatus();
+  MessageChannel::default_instance_ = new MessageChannel();
   Hello::default_instance_->InitAsDefaultInstance();
   HelloResponse::default_instance_->InitAsDefaultInstance();
   Peer::default_instance_->InitAsDefaultInstance();
@@ -527,6 +572,7 @@ void protobuf_AddDesc_overlay_2eproto() {
   ChainSubscribeTx::default_instance_->InitAsDefaultInstance();
   ChainResponse::default_instance_->InitAsDefaultInstance();
   ChainTxStatus::default_instance_->InitAsDefaultInstance();
+  MessageChannel::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_overlay_2eproto);
 }
 
@@ -572,6 +618,34 @@ bool ChainMessageType_IsValid(int value) {
     case 16:
     case 17:
     case 18:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MESSAGE_CHANNEL_TYPE_descriptor_;
+}
+bool MESSAGE_CHANNEL_TYPE_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
       return true;
     default:
       return false;
@@ -7269,6 +7343,386 @@ void ChainTxStatus::clear_timestamp() {
   
   timestamp_ = value;
   // @@protoc_insertion_point(field_set:protocol.ChainTxStatus.timestamp)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int MessageChannel::kTargetChainIdFieldNumber;
+const int MessageChannel::kMsgTypeFieldNumber;
+const int MessageChannel::kMsgDataFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+MessageChannel::MessageChannel()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:protocol.MessageChannel)
+}
+
+void MessageChannel::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+MessageChannel::MessageChannel(const MessageChannel& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:protocol.MessageChannel)
+}
+
+void MessageChannel::SharedCtor() {
+    _is_default_instance_ = false;
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  target_chain_id_ = GOOGLE_LONGLONG(0);
+  msg_type_ = 0;
+  msg_data_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+
+MessageChannel::~MessageChannel() {
+  // @@protoc_insertion_point(destructor:protocol.MessageChannel)
+  SharedDtor();
+}
+
+void MessageChannel::SharedDtor() {
+  msg_data_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (this != default_instance_) {
+  }
+}
+
+void MessageChannel::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MessageChannel::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MessageChannel_descriptor_;
+}
+
+const MessageChannel& MessageChannel::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_overlay_2eproto();
+  return *default_instance_;
+}
+
+MessageChannel* MessageChannel::default_instance_ = NULL;
+
+MessageChannel* MessageChannel::New(::google::protobuf::Arena* arena) const {
+  MessageChannel* n = new MessageChannel;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void MessageChannel::Clear() {
+// @@protoc_insertion_point(message_clear_start:protocol.MessageChannel)
+  target_chain_id_ = GOOGLE_LONGLONG(0);
+  msg_type_ = 0;
+  msg_data_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+
+bool MessageChannel::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:protocol.MessageChannel)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int64 target_chain_id = 1;
+      case 1: {
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &target_chain_id_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_msg_type;
+        break;
+      }
+
+      // optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_msg_type:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_msg_type(static_cast< ::protocol::MESSAGE_CHANNEL_TYPE >(value));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(26)) goto parse_msg_data;
+        break;
+      }
+
+      // optional bytes msg_data = 3;
+      case 3: {
+        if (tag == 26) {
+         parse_msg_data:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->mutable_msg_data()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:protocol.MessageChannel)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:protocol.MessageChannel)
+  return false;
+#undef DO_
+}
+
+void MessageChannel::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:protocol.MessageChannel)
+  // optional int64 target_chain_id = 1;
+  if (this->target_chain_id() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->target_chain_id(), output);
+  }
+
+  // optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
+  if (this->msg_type() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      2, this->msg_type(), output);
+  }
+
+  // optional bytes msg_data = 3;
+  if (this->msg_data().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
+      3, this->msg_data(), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:protocol.MessageChannel)
+}
+
+::google::protobuf::uint8* MessageChannel::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:protocol.MessageChannel)
+  // optional int64 target_chain_id = 1;
+  if (this->target_chain_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->target_chain_id(), target);
+  }
+
+  // optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
+  if (this->msg_type() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      2, this->msg_type(), target);
+  }
+
+  // optional bytes msg_data = 3;
+  if (this->msg_data().size() > 0) {
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
+        3, this->msg_data(), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:protocol.MessageChannel)
+  return target;
+}
+
+int MessageChannel::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:protocol.MessageChannel)
+  int total_size = 0;
+
+  // optional int64 target_chain_id = 1;
+  if (this->target_chain_id() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
+        this->target_chain_id());
+  }
+
+  // optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
+  if (this->msg_type() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->msg_type());
+  }
+
+  // optional bytes msg_data = 3;
+  if (this->msg_data().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
+        this->msg_data());
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MessageChannel::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:protocol.MessageChannel)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const MessageChannel* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const MessageChannel>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:protocol.MessageChannel)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:protocol.MessageChannel)
+    MergeFrom(*source);
+  }
+}
+
+void MessageChannel::MergeFrom(const MessageChannel& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:protocol.MessageChannel)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.target_chain_id() != 0) {
+    set_target_chain_id(from.target_chain_id());
+  }
+  if (from.msg_type() != 0) {
+    set_msg_type(from.msg_type());
+  }
+  if (from.msg_data().size() > 0) {
+
+    msg_data_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.msg_data_);
+  }
+}
+
+void MessageChannel::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:protocol.MessageChannel)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MessageChannel::CopyFrom(const MessageChannel& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:protocol.MessageChannel)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MessageChannel::IsInitialized() const {
+
+  return true;
+}
+
+void MessageChannel::Swap(MessageChannel* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MessageChannel::InternalSwap(MessageChannel* other) {
+  std::swap(target_chain_id_, other->target_chain_id_);
+  std::swap(msg_type_, other->msg_type_);
+  msg_data_.Swap(&other->msg_data_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata MessageChannel::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MessageChannel_descriptor_;
+  metadata.reflection = MessageChannel_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MessageChannel
+
+// optional int64 target_chain_id = 1;
+void MessageChannel::clear_target_chain_id() {
+  target_chain_id_ = GOOGLE_LONGLONG(0);
+}
+ ::google::protobuf::int64 MessageChannel::target_chain_id() const {
+  // @@protoc_insertion_point(field_get:protocol.MessageChannel.target_chain_id)
+  return target_chain_id_;
+}
+ void MessageChannel::set_target_chain_id(::google::protobuf::int64 value) {
+  
+  target_chain_id_ = value;
+  // @@protoc_insertion_point(field_set:protocol.MessageChannel.target_chain_id)
+}
+
+// optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
+void MessageChannel::clear_msg_type() {
+  msg_type_ = 0;
+}
+ ::protocol::MESSAGE_CHANNEL_TYPE MessageChannel::msg_type() const {
+  // @@protoc_insertion_point(field_get:protocol.MessageChannel.msg_type)
+  return static_cast< ::protocol::MESSAGE_CHANNEL_TYPE >(msg_type_);
+}
+ void MessageChannel::set_msg_type(::protocol::MESSAGE_CHANNEL_TYPE value) {
+  
+  msg_type_ = value;
+  // @@protoc_insertion_point(field_set:protocol.MessageChannel.msg_type)
+}
+
+// optional bytes msg_data = 3;
+void MessageChannel::clear_msg_data() {
+  msg_data_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& MessageChannel::msg_data() const {
+  // @@protoc_insertion_point(field_get:protocol.MessageChannel.msg_data)
+  return msg_data_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MessageChannel::set_msg_data(const ::std::string& value) {
+  
+  msg_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.MessageChannel.msg_data)
+}
+ void MessageChannel::set_msg_data(const char* value) {
+  
+  msg_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.MessageChannel.msg_data)
+}
+ void MessageChannel::set_msg_data(const void* value, size_t size) {
+  
+  msg_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.MessageChannel.msg_data)
+}
+ ::std::string* MessageChannel::mutable_msg_data() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.MessageChannel.msg_data)
+  return msg_data_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MessageChannel::release_msg_data() {
+  // @@protoc_insertion_point(field_release:protocol.MessageChannel.msg_data)
+  
+  return msg_data_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MessageChannel::set_allocated_msg_data(::std::string* msg_data) {
+  if (msg_data != NULL) {
+    
+  } else {
+    
+  }
+  msg_data_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), msg_data);
+  // @@protoc_insertion_point(field_set_allocated:protocol.MessageChannel.msg_data)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
