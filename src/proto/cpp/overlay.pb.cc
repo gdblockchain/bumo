@@ -350,8 +350,9 @@ void protobuf_AssignDesc_overlay_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainTxStatus, _is_default_instance_));
   ChainTxStatus_TxStatus_descriptor_ = ChainTxStatus_descriptor_->enum_type(0);
   ChainInfoMessage_descriptor_ = file->message_type(15);
-  static const int ChainInfoMessage_offsets_[1] = {
+  static const int ChainInfoMessage_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainInfoMessage, seq_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainInfoMessage, address_),
   };
   ChainInfoMessage_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -502,22 +503,22 @@ void protobuf_AddDesc_overlay_2eproto() {
     "tocol.ERRORCODE\022\022\n\nerror_desc\030\010 \001(\t\022\021\n\tt"
     "imestamp\030\t \001(\003\"P\n\010TxStatus\022\r\n\tUNDEFINED\020"
     "\000\022\r\n\tCONFIRMED\020\001\022\013\n\007PENDING\020\002\022\014\n\010COMPLET"
-    "E\020\003\022\013\n\007FAILURE\020\004\"\037\n\020ChainInfoMessage\022\013\n\003"
-    "seq\030\001 \001(\003*\203\002\n\024OVERLAY_MESSAGE_TYPE\022\030\n\024OV"
-    "ERLAY_MSGTYPE_NONE\020\000\022\030\n\024OVERLAY_MSGTYPE_"
-    "PING\020\001\022\031\n\025OVERLAY_MSGTYPE_HELLO\020\002\022\031\n\025OVE"
-    "RLAY_MSGTYPE_PEERS\020\003\022\037\n\033OVERLAY_MSGTYPE_"
-    "TRANSACTION\020\004\022\033\n\027OVERLAY_MSGTYPE_LEDGERS"
-    "\020\005\022\030\n\024OVERLAY_MSGTYPE_PBFT\020\006\022)\n%OVERLAY_"
-    "MSGTYPE_LEDGER_UPGRADE_NOTIFY\020\007*\372\001\n\020Chai"
-    "nMessageType\022\023\n\017CHAIN_TYPE_NONE\020\000\022\017\n\013CHA"
-    "IN_HELLO\020\n\022\023\n\017CHAIN_TX_STATUS\020\013\022\025\n\021CHAIN"
-    "_PEER_ONLINE\020\014\022\026\n\022CHAIN_PEER_OFFLINE\020\r\022\026"
-    "\n\022CHAIN_PEER_MESSAGE\020\016\022\033\n\027CHAIN_SUBMITTR"
-    "ANSACTION\020\017\022\027\n\023CHAIN_LEDGER_HEADER\020\020\022\026\n\022"
-    "CHAIN_SUBSCRIBE_TX\020\021\022\026\n\022CHAIN_TX_ENV_STO"
-    "RE\020\022B\"\n io.bumo.sdk.core.extend.protobuf"
-    "b\006proto3", 2288);
+    "E\020\003\022\013\n\007FAILURE\020\004\"0\n\020ChainInfoMessage\022\013\n\003"
+    "seq\030\001 \001(\003\022\017\n\007address\030\002 \001(\003*\203\002\n\024OVERLAY_M"
+    "ESSAGE_TYPE\022\030\n\024OVERLAY_MSGTYPE_NONE\020\000\022\030\n"
+    "\024OVERLAY_MSGTYPE_PING\020\001\022\031\n\025OVERLAY_MSGTY"
+    "PE_HELLO\020\002\022\031\n\025OVERLAY_MSGTYPE_PEERS\020\003\022\037\n"
+    "\033OVERLAY_MSGTYPE_TRANSACTION\020\004\022\033\n\027OVERLA"
+    "Y_MSGTYPE_LEDGERS\020\005\022\030\n\024OVERLAY_MSGTYPE_P"
+    "BFT\020\006\022)\n%OVERLAY_MSGTYPE_LEDGER_UPGRADE_"
+    "NOTIFY\020\007*\372\001\n\020ChainMessageType\022\023\n\017CHAIN_T"
+    "YPE_NONE\020\000\022\017\n\013CHAIN_HELLO\020\n\022\023\n\017CHAIN_TX_"
+    "STATUS\020\013\022\025\n\021CHAIN_PEER_ONLINE\020\014\022\026\n\022CHAIN"
+    "_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022"
+    "\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHAIN_LE"
+    "DGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n"
+    "\022CHAIN_TX_ENV_STORE\020\022B\"\n io.bumo.sdk.cor"
+    "e.extend.protobufb\006proto3", 2305);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -7302,6 +7303,7 @@ void ChainTxStatus::clear_timestamp() {
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int ChainInfoMessage::kSeqFieldNumber;
+const int ChainInfoMessage::kAddressFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 ChainInfoMessage::ChainInfoMessage()
@@ -7326,6 +7328,7 @@ void ChainInfoMessage::SharedCtor() {
     _is_default_instance_ = false;
   _cached_size_ = 0;
   seq_ = GOOGLE_LONGLONG(0);
+  address_ = GOOGLE_LONGLONG(0);
 }
 
 ChainInfoMessage::~ChainInfoMessage() {
@@ -7365,7 +7368,27 @@ ChainInfoMessage* ChainInfoMessage::New(::google::protobuf::Arena* arena) const 
 
 void ChainInfoMessage::Clear() {
 // @@protoc_insertion_point(message_clear_start:protocol.ChainInfoMessage)
-  seq_ = GOOGLE_LONGLONG(0);
+#if defined(__clang__)
+#define ZR_HELPER_(f) \
+  _Pragma("clang diagnostic push") \
+  _Pragma("clang diagnostic ignored \"-Winvalid-offsetof\"") \
+  __builtin_offsetof(ChainInfoMessage, f) \
+  _Pragma("clang diagnostic pop")
+#else
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<ChainInfoMessage*>(16)->f)
+#endif
+
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
+
+  ZR_(seq_, address_);
+
+#undef ZR_HELPER_
+#undef ZR_
+
 }
 
 bool ChainInfoMessage::MergePartialFromCodedStream(
@@ -7384,6 +7407,21 @@ bool ChainInfoMessage::MergePartialFromCodedStream(
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &seq_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_address;
+        break;
+      }
+
+      // optional int64 address = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_address:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &address_)));
 
         } else {
           goto handle_unusual;
@@ -7421,6 +7459,11 @@ void ChainInfoMessage::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->seq(), output);
   }
 
+  // optional int64 address = 2;
+  if (this->address() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->address(), output);
+  }
+
   // @@protoc_insertion_point(serialize_end:protocol.ChainInfoMessage)
 }
 
@@ -7430,6 +7473,11 @@ void ChainInfoMessage::SerializeWithCachedSizes(
   // optional int64 seq = 1;
   if (this->seq() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->seq(), target);
+  }
+
+  // optional int64 address = 2;
+  if (this->address() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->address(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:protocol.ChainInfoMessage)
@@ -7445,6 +7493,13 @@ int ChainInfoMessage::ByteSize() const {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int64Size(
         this->seq());
+  }
+
+  // optional int64 address = 2;
+  if (this->address() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
+        this->address());
   }
 
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
@@ -7478,6 +7533,9 @@ void ChainInfoMessage::MergeFrom(const ChainInfoMessage& from) {
   if (from.seq() != 0) {
     set_seq(from.seq());
   }
+  if (from.address() != 0) {
+    set_address(from.address());
+  }
 }
 
 void ChainInfoMessage::CopyFrom(const ::google::protobuf::Message& from) {
@@ -7505,6 +7563,7 @@ void ChainInfoMessage::Swap(ChainInfoMessage* other) {
 }
 void ChainInfoMessage::InternalSwap(ChainInfoMessage* other) {
   std::swap(seq_, other->seq_);
+  std::swap(address_, other->address_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
@@ -7532,6 +7591,20 @@ void ChainInfoMessage::clear_seq() {
   
   seq_ = value;
   // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.seq)
+}
+
+// optional int64 address = 2;
+void ChainInfoMessage::clear_address() {
+  address_ = GOOGLE_LONGLONG(0);
+}
+ ::google::protobuf::int64 ChainInfoMessage::address() const {
+  // @@protoc_insertion_point(field_get:protocol.ChainInfoMessage.address)
+  return address_;
+}
+ void ChainInfoMessage::set_address(::google::protobuf::int64 value) {
+  
+  address_ = value;
+  // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.address)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
