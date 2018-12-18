@@ -40,6 +40,7 @@ void protobuf_AssignDesc_overlay_2eproto();
 void protobuf_ShutdownFile_overlay_2eproto();
 
 class ChainHello;
+class ChainInfoMessage;
 class ChainPeerMessage;
 class ChainResponse;
 class ChainStatus;
@@ -1850,6 +1851,88 @@ class ChainTxStatus : public ::google::protobuf::Message /* @@protoc_insertion_p
   void InitAsDefaultInstance();
   static ChainTxStatus* default_instance_;
 };
+// -------------------------------------------------------------------
+
+class ChainInfoMessage : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:protocol.ChainInfoMessage) */ {
+ public:
+  ChainInfoMessage();
+  virtual ~ChainInfoMessage();
+
+  ChainInfoMessage(const ChainInfoMessage& from);
+
+  inline ChainInfoMessage& operator=(const ChainInfoMessage& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ChainInfoMessage& default_instance();
+
+  void Swap(ChainInfoMessage* other);
+
+  // implements Message ----------------------------------------------
+
+  inline ChainInfoMessage* New() const { return New(NULL); }
+
+  ChainInfoMessage* New(::google::protobuf::Arena* arena) const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ChainInfoMessage& from);
+  void MergeFrom(const ChainInfoMessage& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
+      bool deterministic, ::google::protobuf::uint8* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
+    return InternalSerializeWithCachedSizesToArray(false, output);
+  }
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  void InternalSwap(ChainInfoMessage* other);
+  private:
+  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
+    return _internal_metadata_.arena();
+  }
+  inline void* MaybeArenaPtr() const {
+    return _internal_metadata_.raw_arena_ptr();
+  }
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int64 seq = 1;
+  void clear_seq();
+  static const int kSeqFieldNumber = 1;
+  ::google::protobuf::int64 seq() const;
+  void set_seq(::google::protobuf::int64 value);
+
+  // @@protoc_insertion_point(class_scope:protocol.ChainInfoMessage)
+ private:
+
+  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
+  bool _is_default_instance_;
+  ::google::protobuf::int64 seq_;
+  mutable int _cached_size_;
+  friend void  protobuf_AddDesc_overlay_2eproto();
+  friend void protobuf_AssignDesc_overlay_2eproto();
+  friend void protobuf_ShutdownFile_overlay_2eproto();
+
+  void InitAsDefaultInstance();
+  static ChainInfoMessage* default_instance_;
+};
 // ===================================================================
 
 
@@ -3325,7 +3408,27 @@ inline void ChainTxStatus::set_timestamp(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:protocol.ChainTxStatus.timestamp)
 }
 
+// -------------------------------------------------------------------
+
+// ChainInfoMessage
+
+// optional int64 seq = 1;
+inline void ChainInfoMessage::clear_seq() {
+  seq_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 ChainInfoMessage::seq() const {
+  // @@protoc_insertion_point(field_get:protocol.ChainInfoMessage.seq)
+  return seq_;
+}
+inline void ChainInfoMessage::set_seq(::google::protobuf::int64 value) {
+  
+  seq_ = value;
+  // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.seq)
+}
+
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
+// -------------------------------------------------------------------
+
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
