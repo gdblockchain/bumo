@@ -161,5 +161,6 @@ message ChainTxStatus {
 
 message ChainInfoMessage{
 	int64 seq = 1;
+	int64 address = 2;
 }
 
