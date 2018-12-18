@@ -1919,11 +1919,16 @@ class ChainInfoMessage : public ::google::protobuf::Message /* @@protoc_insertio
   ::google::protobuf::int64 seq() const;
   void set_seq(::google::protobuf::int64 value);
 
-  // optional int64 address = 2;
+  // optional string address = 2;
   void clear_address();
   static const int kAddressFieldNumber = 2;
-  ::google::protobuf::int64 address() const;
-  void set_address(::google::protobuf::int64 value);
+  const ::std::string& address() const;
+  void set_address(const ::std::string& value);
+  void set_address(const char* value);
+  void set_address(const char* value, size_t size);
+  ::std::string* mutable_address();
+  ::std::string* release_address();
+  void set_allocated_address(::std::string* address);
 
   // @@protoc_insertion_point(class_scope:protocol.ChainInfoMessage)
  private:
@@ -1931,7 +1936,7 @@ class ChainInfoMessage : public ::google::protobuf::Message /* @@protoc_insertio
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
   ::google::protobuf::int64 seq_;
-  ::google::protobuf::int64 address_;
+  ::google::protobuf::internal::ArenaStringPtr address_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_overlay_2eproto();
   friend void protobuf_AssignDesc_overlay_2eproto();
@@ -3433,18 +3438,48 @@ inline void ChainInfoMessage::set_seq(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.seq)
 }
 
-// optional int64 address = 2;
+// optional string address = 2;
 inline void ChainInfoMessage::clear_address() {
-  address_ = GOOGLE_LONGLONG(0);
+  address_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline ::google::protobuf::int64 ChainInfoMessage::address() const {
+inline const ::std::string& ChainInfoMessage::address() const {
   // @@protoc_insertion_point(field_get:protocol.ChainInfoMessage.address)
-  return address_;
+  return address_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void ChainInfoMessage::set_address(::google::protobuf::int64 value) {
+inline void ChainInfoMessage::set_address(const ::std::string& value) {
   
-  address_ = value;
+  address_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
   // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.address)
+}
+inline void ChainInfoMessage::set_address(const char* value) {
+  
+  address_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.ChainInfoMessage.address)
+}
+inline void ChainInfoMessage::set_address(const char* value, size_t size) {
+  
+  address_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.ChainInfoMessage.address)
+}
+inline ::std::string* ChainInfoMessage::mutable_address() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.ChainInfoMessage.address)
+  return address_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* ChainInfoMessage::release_address() {
+  // @@protoc_insertion_point(field_release:protocol.ChainInfoMessage.address)
+  
+  return address_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void ChainInfoMessage::set_allocated_address(::std::string* address) {
+  if (address != NULL) {
+    
+  } else {
+    
+  }
+  address_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), address);
+  // @@protoc_insertion_point(field_set_allocated:protocol.ChainInfoMessage.address)
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
