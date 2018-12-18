@@ -159,5 +159,7 @@ message ChainTxStatus {
 	int64		timestamp = 9;			
 }
 
-
+message ChainInfoMessage{
+	int64 seq = 1;
+}
 
