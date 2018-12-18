@@ -1919,12 +1919,19 @@ class ChainInfoMessage : public ::google::protobuf::Message /* @@protoc_insertio
   ::google::protobuf::int64 seq() const;
   void set_seq(::google::protobuf::int64 value);
 
+  // optional int64 address = 2;
+  void clear_address();
+  static const int kAddressFieldNumber = 2;
+  ::google::protobuf::int64 address() const;
+  void set_address(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:protocol.ChainInfoMessage)
  private:
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
   ::google::protobuf::int64 seq_;
+  ::google::protobuf::int64 address_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_overlay_2eproto();
   friend void protobuf_AssignDesc_overlay_2eproto();
@@ -3424,6 +3431,20 @@ inline void ChainInfoMessage::set_seq(::google::protobuf::int64 value) {
   
   seq_ = value;
   // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.seq)
+}
+
+// optional int64 address = 2;
+inline void ChainInfoMessage::clear_address() {
+  address_ = GOOGLE_LONGLONG(0);
+}
+inline ::google::protobuf::int64 ChainInfoMessage::address() const {
+  // @@protoc_insertion_point(field_get:protocol.ChainInfoMessage.address)
+  return address_;
+}
+inline void ChainInfoMessage::set_address(::google::protobuf::int64 value) {
+  
+  address_ = value;
+  // @@protoc_insertion_point(field_set:protocol.ChainInfoMessage.address)
 }
 
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
