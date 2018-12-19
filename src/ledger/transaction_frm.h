@@ -60,6 +60,8 @@ namespace bumo {
 		bool SignerHashPriv(AccountFrm::pointer account_ptr, int32_t type) const;
 		Result GetResult() const;
 
+		std::string GetOperatingSourceAddress() const;
+
 		void Initialize();
 
 		uint32_t LoadFromDb(const std::string &hash);
