@@ -15,7 +15,7 @@
 
 #include "ledgercontext_manager.h"
 #include "ledger_manager.h"
-#include "contract_manager.h"
+#include <contract/contract_manager.h>
 
 namespace bumo {
 	//For synchronizing blocks.
