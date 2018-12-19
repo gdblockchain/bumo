@@ -17,7 +17,7 @@
 #include <ledger/ledger_manager.h>
 #include "transaction_frm.h"
 #include "operation_frm.h"
-#include "contract_manager.h"
+#include <contract/contract_manager.h>
 #include "fee_calculate.h"
 
 
@@ -569,14 +569,18 @@ namespace bumo {
 				parameter.init_ = true;
 
 				std::string err_msg;
-				Json::Value json_return; //
-				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, json_return);
+				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter);
 
 				if (result_.code() == 0){
 					Json::Value contract_result;
 					contract_result["contract_address"] = dest_address;
 					contract_result["operation_index"] = index_;
 					result_.set_desc(contract_result.toFastString());
+
+					Json::Value temp = Json::Value(Json::objectValue);
+					temp["type"] = "address";
+					temp["value"] = dest_address;
+					result_.set_contract_result(temp);
 				}
 			}
 
@@ -687,8 +691,7 @@ namespace bumo {
 				parameter.ledger_context_ = transaction_->ledger_->lpledger_context_;
 				parameter.pay_asset_amount_ = payAsset.asset();
 
-				Json::Value json_return;
-				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, json_return);
+				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter);
 			}
 		} while (false);
 	}
@@ -869,10 +872,8 @@ namespace bumo {
 				parameter.ledger_context_ = transaction_->ledger_->lpledger_context_;
 				parameter.pay_coin_amount_ = ope.amount();
 
-				std::string err_msg;
-				Json::Value json_return;
-				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter, json_return);
-
+				result_ = ContractManager::Instance().Execute(Contract::TYPE_V8, parameter);
+				LOG_TRACE("%s", result_.contract_result().toFastString().c_str());
 			}
 		} while (false);
 	}
