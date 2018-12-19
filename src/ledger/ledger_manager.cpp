@@ -18,7 +18,7 @@
 #include <api/websocket_server.h>
 #include <monitor/monitor_manager.h>
 #include "ledger_manager.h"
-#include "contract_manager.h"
+#include <contract/contract_manager.h>
 #include "fee_calculate.h"
 
 namespace bumo {
