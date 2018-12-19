@@ -1840,6 +1840,23 @@ function query(input)
     */
     ```
 
+- ##### 获取合约账户属性
+
+    `getContractProperty(contract_address);`
+
+    - contract_address: 合约地址
+
+    例如
+    ```javascript
+    let value = getContractProperty('buQcFSxQP6RV9vnFagZ31SEGh55YMkakBSGW');
+
+    /*
+      权限：只读
+      返回：成功返回JSON对象，如 {"type":0, "length" : 416},  type 指合约类型， length 指合约代码长度，如果该账户不是合约则，length 为0.
+      失败返回false
+    */
+    ```
+
 - ##### 获取区块信息
 
     `getBlockHash(offset_seq);`
