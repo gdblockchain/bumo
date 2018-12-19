@@ -137,6 +137,9 @@ namespace bumo {
 		int32_t code_;
 		std::string desc_;
 
+		//if has value, must a json, OR nullValue
+		//if has value, like, code_ == 0, {"type": bool/string, "value":true/"hello the world"}
+		Json::Value contract_result_; 
 	public:
 		Result();
 		Result(const Result &result);
@@ -144,9 +147,11 @@ namespace bumo {
 
 		int32_t code() const;
 		std::string desc() const;
+		const Json::Value &contract_result() const;
 
 		void set_code(int32_t code);
 		void set_desc(const std::string desc);
+		void set_contract_result(const Json::Value &contract_result);
 
 		bool operator=(const Result &result);
 	};
