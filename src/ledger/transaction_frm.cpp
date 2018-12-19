@@ -19,7 +19,7 @@
 #include <main/configure.h>
 #include <ledger/ledger_manager.h>
 #include "transaction_frm.h"
-#include "contract_manager.h"
+#include <contract/contract_manager.h>
 #include "fee_calculate.h"
 #include "ledger_frm.h"
 namespace bumo {
@@ -132,6 +132,21 @@ namespace bumo {
 
 	std::string TransactionFrm::GetSourceAddress() const {
 		const protocol::Transaction &tran = transaction_env_.transaction();
+		return tran.source_address();
+	}
+
+
+	std::string TransactionFrm::GetOperatingSourceAddress() const {
+		const protocol::Transaction &tran = transaction_env_.transaction();
+		if (processing_operation_ < 0 || processing_operation_ >= tran.operations_size()) {
+			return "";
+		}
+
+		const protocol::Operation &ope = tran.operations(processing_operation_);
+		if (ope.source_address() != "") {
+			return ope.source_address();
+		}
+		
 		return tran.source_address();
 	}
 
@@ -777,11 +792,13 @@ namespace bumo {
 				break;
 			}
 			else if (!result.desc().empty()) {
+				//for contract address creation
 				Json::Value opt_result;
 				opt_result.fromString(result.desc());
 				apply_success_desc[apply_success_desc.size()] = opt_result;
 				result_.set_desc(apply_success_desc.toFastString());
 			}
+			result_.set_contract_result(opt->GetResult().contract_result());
 		}
 		
 		return bSucess;
