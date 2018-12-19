@@ -2086,6 +2086,46 @@ function query(input)
 
     ```
 
+ - ##### contractCall
+    `contractCall(contractAddress, asset, amount, input);`
+
+    - contractAddress: 被调用的合约地址。
+    - asset : 资产类别，true代表BU，对象{"issue": buxxx, "code" : USDT} 代表资产。
+    - amount: 资产数量。
+    - input：调用参数。
+    
+    contractCall 函数会触发被调用的合约main函数入口。
+    
+    例如
+    ```javascript
+    let ret = contractCall('buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY'，true, toBaseUnit("10"), "");
+    /*
+      权限：可写
+      返回：如果目标账户为普通账户，则返回true，如果目标账户为合约，调用成功则返回main函数的返回值，调用失败则抛出异常
+    */
+
+    ```
+
+ - ##### contractCreate
+    `contractCreate(balance, type, code, input);`
+
+    - balance: 字符串类型，转移给被创建的合约的资产。
+    - type : 整型，0代表javascript。
+    - code: 字符串类型， 合约代码。
+    - input：init函数初始化参数。
+    
+    contractCreate 创建合约。
+    
+    例如
+    ```javascript
+    let ret = contractCreate(toBaseUnit("10"), "'use strict';function init(input){return input;} function main(input){return input;} function query(input){return input;} ", "");
+    /*
+      权限：可写
+      返回：创建成功返回合约地址，失败则抛出异常
+    */
+
+    ```
+
 - ##### 输出日志
 
     `log(info);`
@@ -2208,6 +2248,11 @@ function query(input)
  
 - ##### 当前区块时间戳
     blockTimestamp
+
+- ##### 原始调用者地址
+    originSender
+
+    当合约嵌套调用时，在任一深度的合约里都可以获取到原始的调用者地址
 
 - ##### 调用者的地址
     sender
