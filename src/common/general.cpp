@@ -101,11 +101,13 @@ namespace bumo {
 
 	Result::Result(){
 		code_ = protocol::ERRCODE_SUCCESS;
+		contract_result_ = Json::Value(Json::nullValue);
 	}
 
 	Result::Result(const Result &result) {
 		code_ = result.code_;
 		desc_ = result.desc_;
+		contract_result_ = result.contract_result_;
 	}
 
 	Result::~Result(){};
@@ -118,6 +120,10 @@ namespace bumo {
 		return desc_;
 	}
 
+	const Json::Value &Result::contract_result() const {
+		return contract_result_;
+	}
+
 	void Result::set_code(int32_t code){
 		code_ = code;
 	}
@@ -126,9 +132,14 @@ namespace bumo {
 		desc_ = desc;
 	}
 
+	void Result::set_contract_result(const Json::Value &contract_result) {
+		contract_result_ = contract_result;
+	}
+
 	bool Result::operator=(const Result &result){
 		code_ = result.code();
 		desc_ = result.desc();
+		contract_result_ = result.contract_result();
 		return true;
 	}
 
