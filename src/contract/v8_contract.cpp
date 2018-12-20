@@ -15,6 +15,8 @@ namespace bumo {
 
 	const std::string V8Contract::sender_name_ = "sender";
 	const std::string V8Contract::origin_sender_name_ = "originSender";
+	const std::string V8Contract::tx_initiator_name_ = "txInitiator";
+	const std::string V8Contract::origin_tx_initiator_name_ = "originTxInitiator";
 	const std::string V8Contract::this_address_ = "thisAddress";
 	const char* V8Contract::main_name_ = "main";
 	const char* V8Contract::query_name_ = "query";
@@ -142,6 +144,8 @@ namespace bumo {
 		//for gt1001
 		user_global_string_gt1001_ = user_global_string_;
 		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", origin_sender_name_.c_str());
+		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", tx_initiator_name_.c_str());
+		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", origin_tx_initiator_name_.c_str());
 
 		for (itr = js_func_read_gt1001_.begin(); itr != js_func_read_gt1001_.end(); itr++) {
 			user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", itr->first.c_str());
@@ -194,11 +198,6 @@ namespace bumo {
 			v8::String::NewFromUtf8(isolate_, sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
 			string_sender);
 
-		auto string_origin_sender = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetOperatingSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, origin_sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			string_origin_sender);
-
 		auto string_contractor = v8::String::NewFromUtf8(isolate_, parameter_.this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
 		context->Global()->Set(context,
 			v8::String::NewFromUtf8(isolate_, this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
@@ -237,6 +236,23 @@ namespace bumo {
 		context->Global()->Set(context,
 			v8::String::NewFromUtf8(isolate_, block_timestamp_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
 			timestamp_v8);
+
+		if (CHECK_VERSION_GT_1001) {
+			auto string_origin_sender = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetOperatingSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8(isolate_, origin_sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+				string_origin_sender);
+
+			auto tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.tx_initiator_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8(isolate_, tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+				tx_initiator);
+
+			auto string_origin_tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8(isolate_, origin_tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+				string_origin_tx_initiator);
+		}
 
 		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str());
 		v8::Local<v8::Script> compiled_script;
@@ -445,11 +461,6 @@ namespace bumo {
 			v8::String::NewFromUtf8(isolate_, sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
 			string_sender);
 
-		auto string_origin_sender = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetOperatingSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, origin_sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			string_origin_sender);
-
 		auto string_contractor = v8::String::NewFromUtf8(isolate_, parameter_.this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
 		context->Global()->Set(context,
 			v8::String::NewFromUtf8(isolate_, this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
@@ -470,6 +481,22 @@ namespace bumo {
 			v8::String::NewFromUtf8(isolate_, block_timestamp_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
 			timestamp_v8);
 
+		if (CHECK_VERSION_GT_1001) {
+			auto string_origin_sender = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetOperatingSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8(isolate_, origin_sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+				string_origin_sender);
+
+			auto tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.tx_initiator_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8(isolate_, tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+				tx_initiator);
+
+			auto string_origin_tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			context->Global()->Set(context,
+				v8::String::NewFromUtf8(isolate_, origin_tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
+				string_origin_tx_initiator);
+		}
 
 		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str());
 		v8::Local<v8::Script> compiled_script;

@@ -38,6 +38,10 @@ namespace bumo {
 
 		static const std::string sender_name_;
 		static const std::string origin_sender_name_;
+
+		static const std::string tx_initiator_name_;
+		static const std::string origin_tx_initiator_name_;
+
 		static const std::string this_address_;
 		static const char* main_name_;
 		static const char* query_name_;

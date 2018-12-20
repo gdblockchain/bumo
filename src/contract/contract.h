@@ -13,7 +13,6 @@ namespace bumo {
 		~ContractParameter();
 
 		bool init_;
-		std::string originSender;
 		std::string code_;
 		std::string input_;
 		std::string this_address_;
@@ -26,6 +25,7 @@ namespace bumo {
 		LedgerContext *ledger_context_;
 		int64_t pay_coin_amount_;
 		protocol::Asset pay_asset_amount_;
+		std::string tx_initiator_;
 	};
 
 	class TestParameter {};
