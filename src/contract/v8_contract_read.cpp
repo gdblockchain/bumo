@@ -217,6 +217,7 @@ namespace bumo {
 			ContractParameter parameter;
 			parameter.code_ = contract.payload();
 			parameter.sender_ = v8_contract->GetParameter().this_address_;
+			parameter.tx_initiator_ = v8_contract->GetParameter().tx_initiator_;
 			parameter.this_address_ = address;
 			parameter.input_ = input;
 			parameter.ope_index_ = 0;

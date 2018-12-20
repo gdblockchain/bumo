@@ -561,6 +561,7 @@ namespace bumo {
 				parameter.input_ = create_account.init_input();
 				parameter.this_address_ = dest_address;
 				parameter.sender_ = source_account_->GetAccountAddress();
+				parameter.tx_initiator_ = transaction_->GetSourceAddress();
 				parameter.ope_index_ = index_;
 				parameter.timestamp_ = transaction_->ledger_->value_->close_time();
 				parameter.blocknumber_ = transaction_->ledger_->value_->ledger_seq();
@@ -685,6 +686,7 @@ namespace bumo {
 				parameter.input_ = payAsset.input();
 				parameter.this_address_ = payAsset.dest_address();
 				parameter.sender_ = source_account_->GetAccountAddress();
+				parameter.tx_initiator_ = transaction_->GetSourceAddress();
 				parameter.ope_index_ = index_;
 				parameter.timestamp_ = transaction_->ledger_->value_->close_time();
 				parameter.blocknumber_ = transaction_->ledger_->value_->ledger_seq();
@@ -866,6 +868,7 @@ namespace bumo {
 				parameter.input_ = ope.input();
 				parameter.this_address_ = ope.dest_address();
 				parameter.sender_ = source_account_->GetAccountAddress();
+				parameter.tx_initiator_ = transaction_->GetSourceAddress();
 				parameter.ope_index_ = index_;
 				parameter.timestamp_ = transaction_->ledger_->value_->close_time();
 				parameter.blocknumber_ = transaction_->ledger_->value_->ledger_seq();

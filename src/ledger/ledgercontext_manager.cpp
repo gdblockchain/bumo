@@ -242,6 +242,7 @@ namespace bumo {
 			ContractParameter parameter;
 			parameter.code_ = parameter_.code_;
 			parameter.sender_ = parameter_.source_address_;
+			parameter.tx_initiator_ = parameter_.source_address_;
 			parameter.this_address_ = parameter_.contract_address_;
 			parameter.input_ = parameter_.input_;
 			parameter.ope_index_ = 0;
