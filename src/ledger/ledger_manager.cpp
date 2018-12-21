@@ -557,6 +557,8 @@ namespace bumo {
 			}
 			LOG_INFO("Update election configuration to %s", election_cfg.DebugString().c_str());
 		}
+
+		// write abnormal records, election configuration and validator candidates to database
 		election.UpdateToDB(true);
 
 		return true;
