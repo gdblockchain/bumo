@@ -52,43 +52,38 @@ namespace bumo {
 	}
 
 	bool LedgerManager::CheckAndRepairLedgerSeq(){
-		bool os_flag = false;
-#ifndef OS_LINUX
-		os_flag = true;
+#ifdef OS_LINUX
+		return true;
 #endif
-		if (!os_flag){
-			return true;
-		}
-
 		auto ledger_db = Storage::Instance().ledger_db();
 		auto account_db = Storage::Instance().account_db();
 
 		std::string ledger_db_seq;
 		std::string account_db_seq;
 		if (!ledger_db->Get(General::KEY_LEDGER_SEQ, ledger_db_seq)) {
-			LOG_ERROR("Failed to get ledger seq from ledger-db\n");
+			LOG_ERROR("Failed to get ledger seq from ledger-db");
 			return false;
 		}
 
 		if (!account_db->Get(General::KEY_LEDGER_SEQ, account_db_seq)) {
-			LOG_ERROR("Failed to get ledger seq from account-db\n");
+			LOG_ERROR("Failed to get ledger seq from account-db");
 			return false;
 		}
 
 		int64_t int_ledger_db_seq = utils::String::Stoi64(ledger_db_seq);
 		int64_t int_account_db_seq = utils::String::Stoi64(account_db_seq);
-
-		if (int_account_db_seq != int_ledger_db_seq - 1) {
-			LOG_INFO("ledger seq (%s) from ledger-db not equal with seq (%s) + 1 from account-db\n",
-				ledger_db_seq.c_str(), account_db_seq.c_str());
+		if (int_account_db_seq == int_ledger_db_seq){
 			return true;
 		}
 
-		LOG_INFO("Input y to continue(ledger db seq(" FMT_I64 "), account db seq(" FMT_I64 "):",
-			int_ledger_db_seq, int_account_db_seq);
+		if (int_account_db_seq != int_ledger_db_seq - 1) {
+			LOG_ERROR("Ledger seq (%s) from ledger-db not equal with seq (%s) + 1 from account-db",
+				ledger_db_seq.c_str(), account_db_seq.c_str());
+			return false;
+		}
 
 		if (!ledger_db->Put(General::KEY_LEDGER_SEQ, account_db_seq)) {
-			LOG_ERROR("Failed to get ledger seq from account-db\n");
+			LOG_ERROR("Failed to get ledger seq from account-db");
 			return false;
 		}
 
@@ -98,7 +93,7 @@ namespace bumo {
 
 	bool LedgerManager::Initialize() {
 		if (!CheckAndRepairLedgerSeq()){
-			LOG_ERROR("fatal error:CheckAndRepairLedgerSeq");
+			LOG_ERROR("Failed to CheckAndRepairLedgerSeq");
 			return false;
 		}
 
@@ -117,7 +112,7 @@ namespace bumo {
 			seq_kvdb = utils::String::Stoi64(str_max_seq);
 			int64_t seq_rational = GetMaxLedger();
 			if (seq_kvdb != seq_rational) {
-				LOG_ERROR("fatal error:ledger_seq from kvdb(" FMT_I64 ") != ledger_seq from rational db(" FMT_I64 ")",
+				LOG_ERROR("Failed to ledger_seq from kvdb(" FMT_I64 ") != ledger_seq from rational db(" FMT_I64 ")",
 					seq_kvdb, seq_rational);
 			}
 
