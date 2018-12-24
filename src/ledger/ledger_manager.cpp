@@ -52,6 +52,13 @@ namespace bumo {
 	}
 
 	bool LedgerManager::CheckAndRepairLedgerSeq(){
+		bool os_flag = false;
+#ifndef OS_LINUX
+		os_flag = true;
+#endif
+		if (!os_flag){
+			return true;
+		}
 
 		auto ledger_db = Storage::Instance().ledger_db();
 		auto account_db = Storage::Instance().account_db();
