@@ -3,33 +3,43 @@ const globalAttributeKey = 'global_attribute';
 const 1BU = 100000000;
 
 function makeOrder(own, target, fee, expiration){
-    assert(
-        (own.issuer === undefined && target.issuer !== undefined) ||
-        (own.issuer !== undefined && target.issuer === undefined) ,
-        'There must be BU in the transaction pair.');
+    assert(blockTimestamp < expiration, 'Order date has expired.');
+    assert(stoI64Check(target.value), 'Target value must be alphanumeric.');
 
-    if(own.issuer === undefined){ //BU
-        assert((own.value + fee) === thisPayCoinAmount, 'Insufficient BU paid.');
+    if(own.issuer === undefined){ /* BU */
+        assert(addressCheck(target.issuer), 'The peer asset issuance address is invalid.');
 
-        let amount = int64Sub(thisPayCoinAmount, fee);
-        let realFee = int64Mul(exAmount, globalAttribute.feeRate) / 1BU;
+        assert(int64Add(own.value, fee) === thisPayCoinAmount, 'Insufficient BU paid.');
 
+        let amount  = int64Sub(thisPayCoinAmount, fee);
+        let realFee = int64Mul(amount, globalAttribute.feeRate) / 1BU;
         assert(realFee === fee,'Insufficient fee.');
         
     }
-    else if(own.code === undefined){ //CTP
-        let param = { 'method':'allowance', 'params':{ 'owner':sender, 'spender':thisAddress } };
-        let res = payCoin(own.issuer, '0', param);
+    else if(own.code === undefined){ /* CTP */
+        assert(target.issuer === undefined, 'Must have a party asset is BU.');
+
+        let checkParam = { 'method':'allowance', 'params':{ 'owner':sender, 'spender':thisAddress } };
+        let res = payCoin(own.issuer, '0', checkParam);
         assert(own.value === res.allowance, 'Insufficient CTP(contract address:' + own.issuer + ') paid.');
     }
-    else{ //ATP
-        assert((own.value === thisPayAsset.amount) &&
-               (own.issuer === thisPayAsset.key.issuer)&&
-               (own.code === thisPayAsset.key.code)),
+    else{ /* ATP */
+        assert(target.issuer === undefined, 'Must have a party asset is BU.');
+
+        assert((own.issuer === thisPayAsset.key.issuer) &&
+               (own.code === thisPayAsset.key.code)) &&
+               (own.value === thisPayAsset.amount),
                'Insufficient ATP( issuer:' + own.issuer + ', code:' + own.code + ' ) paid.');
     }
+    
+    let orderKey   = 'order_' + (globalAttribute.orderInterval[1] + 1);
+    let orderValue = {'own':own, 'target':target, 'fee':fee, 'expiration':expiration};
+    storageStore(orderKey, JSON.stringify(orderValue));
 
+    globalAttribute.orderInterval[1] = globalAttribute.orderInterval[1] + 1;
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
+
 
 function init(input_str){
     let params = JSON.parse(input_str).params;
@@ -37,10 +47,14 @@ function init(input_str){
     globalAttribute.owner = params.owner || sender;
     globalAttribute.feeRate = params.feeRate || 50000;
     globalAttribute.version = params.version || '1.0';
+    globalAttribute.orderInterval = [0, 0];
+
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 function main(input_str){
     let input = JSON.parse(input_str);
+    globalAttribute = JSON.parse(storageLoad(globalAttributeKey));
 
     if(input.method === 'makeOrder'){
         makeOrder(input.params.own, input.params.target, input.params.fee, input.params.expiration);
