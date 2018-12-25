@@ -74,6 +74,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor_ = NULL;
 
 }  // namespace
 
@@ -369,6 +370,7 @@ void protobuf_AssignDesc_overlay_2eproto() {
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
   MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = file->enum_type(2);
+  MESSAGE_CHANNEL_TYPE_descriptor_ = file->enum_type(3);
 }
 
 namespace {
@@ -523,8 +525,27 @@ void protobuf_AddDesc_overlay_2eproto() {
     "L_NODE_TYPE\022\"\n\036MESSAGE_CHANNEL_NODE_TYPE"
     "_NONE\020\000\022 \n\034MESSAGE_CHANNEL_NODE_PACKAGE\020"
     "\036\022\036\n\032MESSAGE_CHANNEL_NODE_HELLO\020\037\022\024\n\020EVE"
-    "NT_WITHDRAWAL\020 B\"\n io.bumo.sdk.core.exte"
-    "nd.protobufb\006proto3", 2459);
+    "NT_WITHDRAWAL\020 *\212\006\n\024MESSAGE_CHANNEL_TYPE"
+    "\022\035\n\031MESSAGE_CHANNEL_TYPE_NONE\020\000\022&\n\"MESSA"
+    "GE_CHANNEL_CREATE_CHILD_CHAIN\020\001\022\034\n\030MESSA"
+    "GE_CHANNEL_MAIN_MIX\020\002\022\035\n\031MESSAGE_CHANNEL"
+    "_CHILD_MIX\020\003\022\033\n\027MESSAGE_CHANNEL_DEPOSIT\020"
+    "\004\022\036\n\032MESSAGE_CHANNEL_WITHDRAWAL\020\005\022#\n\037MES"
+    "SAGE_CHANNEL_FAST_WITHDRAWAL\020\006\022\037\n\033MESSAG"
+    "E_CHANNEL_SUBMIT_HEAD\020\007\022(\n$MESSAGE_CHANN"
+    "EL_CHALLENGE_WITHDRAWAL\020\010\022\"\n\036MESSAGE_CHA"
+    "NNEL_CHALLENGE_HEAD\020\t\022)\n%MESSAGE_CHANNEL"
+    "_CHILD_GENESES_REQUEST\020\n\022*\n&MESSAGE_CHAN"
+    "NEL_CHILD_GENESES_RESPONSE\020\013\022\036\n\032MESSAGE_"
+    "CHANNEL_QUERY_HEAD\020\014\022!\n\035MESSAGE_CHANNEL_"
+    "QUERY_DEPOSIT\020\r\022*\n&MESSAGE_CHANNEL_CHANG"
+    "E_CHILD_VALIDATOR\020\016\0220\n,MESSAGE_CHANNEL_Q"
+    "UERY_CHANGE_CHILD_VALIDATOR\020\017\022%\n!MESSAGE"
+    "_CHANNEL_QUERY_SUBMIT_HEAD\020\020\022$\n MESSAGE_"
+    "CHANNEL_QUERY_WITHDRAWAL\020\021\022(\n$MESSAGE_CH"
+    "ANNEL_CHILD_CHALLENGE_HEAD\020\022\022.\n*MESSAGE_"
+    "CHANNEL_CHILD_CHALLENGE_WITHDRAWAL\020\023B\"\n "
+    "io.bumo.sdk.core.extend.protobufb\006proto3", 3240);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -620,6 +641,38 @@ bool MESSAGE_CHANNEL_NODE_TYPE_IsValid(int value) {
     case 30:
     case 31:
     case 32:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MESSAGE_CHANNEL_TYPE_descriptor_;
+}
+bool MESSAGE_CHANNEL_TYPE_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 6:
+    case 7:
+    case 8:
+    case 9:
+    case 10:
+    case 11:
+    case 12:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+    case 18:
+    case 19:
       return true;
     default:
       return false;
