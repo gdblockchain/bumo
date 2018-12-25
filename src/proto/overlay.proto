@@ -214,3 +214,10 @@ message MessageChannelQueryDeposit{
     int64 chain_id = 1;
 	int64 seq = 2;
 }
+
+message MessageChannelHello {
+    int64 network_id = 1;
+    string node_address = 2;
+    int64 chain_id = 3;
+	string round_string = 4;
+}
