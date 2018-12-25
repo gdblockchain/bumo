@@ -234,10 +234,6 @@ message MessageChannel{
     bytes msg_data = 3;
 }
 
-message MessageChannelResponse {
-	 ERRORCODE error_code = 1;
-	 string error_desc = 2;
-}
 
 
 
