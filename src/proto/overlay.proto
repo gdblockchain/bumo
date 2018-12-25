@@ -246,9 +246,5 @@ message MessageChannelProposer{
    bytes  header_hash= 4;
 }
 
-message BlockReward{
-	int64 amount = 1;
-	int64 period = 2;
-	double ratio = 3;
-}
+
 
