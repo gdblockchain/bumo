@@ -75,7 +75,6 @@ const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NUL
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_TYPE_descriptor_ = NULL;
-const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_descriptor_ = NULL;
 
 }  // namespace
 
@@ -372,7 +371,6 @@ void protobuf_AssignDesc_overlay_2eproto() {
   ChainMessageType_descriptor_ = file->enum_type(1);
   MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = file->enum_type(2);
   MESSAGE_CHANNEL_TYPE_descriptor_ = file->enum_type(3);
-  MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_descriptor_ = file->enum_type(4);
 }
 
 namespace {
@@ -546,13 +544,8 @@ void protobuf_AddDesc_overlay_2eproto() {
     "_CHANNEL_QUERY_SUBMIT_HEAD\020\020\022$\n MESSAGE_"
     "CHANNEL_QUERY_WITHDRAWAL\020\021\022(\n$MESSAGE_CH"
     "ANNEL_CHILD_CHALLENGE_HEAD\020\022\022.\n*MESSAGE_"
-    "CHANNEL_CHILD_CHALLENGE_WITHDRAWAL\020\023*\272\001\n"
-    "#MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE\022/\n+"
-    "MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_SUCC"
-    "ESS\020\000\0220\n,MESSAGE_CHANNEL_CHALLENGE_HEAD_"
-    "TYPE_NONEXIST\020\001\0220\n,MESSAGE_CHANNEL_CHALL"
-    "ENGE_HEAD_TYPE_DOCTORED\020\002B\"\n io.bumo.sdk"
-    ".core.extend.protobufb\006proto3", 3429);
+    "CHANNEL_CHILD_CHALLENGE_WITHDRAWAL\020\023B\"\n "
+    "io.bumo.sdk.core.extend.protobufb\006proto3", 3240);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -680,21 +673,6 @@ bool MESSAGE_CHANNEL_TYPE_IsValid(int value) {
     case 17:
     case 18:
     case 19:
-      return true;
-    default:
-      return false;
-  }
-}
-
-const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_descriptor() {
-  protobuf_AssignDescriptorsOnce();
-  return MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_descriptor_;
-}
-bool MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_IsValid(int value) {
-  switch(value) {
-    case 0:
-    case 1:
-    case 2:
       return true;
     default:
       return false;
