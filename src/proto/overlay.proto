@@ -238,3 +238,10 @@ message MessageChannelResponse {
 	 ERRORCODE error_code = 1;
 	 string error_desc = 2;
 }
+
+message MessageChannelProposer{
+   LedgerHeader header = 1;
+   string proposer_address = 2;
+   bytes  proposer_signature = 3;
+   bytes  header_hash= 4;
+}
