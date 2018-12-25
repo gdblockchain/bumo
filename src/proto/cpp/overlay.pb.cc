@@ -73,6 +73,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
   ChainInfoMessage_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = NULL;
 
 }  // namespace
 
@@ -367,6 +368,7 @@ void protobuf_AssignDesc_overlay_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainInfoMessage, _is_default_instance_));
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
+  MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = file->enum_type(2);
 }
 
 namespace {
@@ -517,8 +519,12 @@ void protobuf_AddDesc_overlay_2eproto() {
     "_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022"
     "\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHAIN_LE"
     "DGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n"
-    "\022CHAIN_TX_ENV_STORE\020\022B\"\n io.bumo.sdk.cor"
-    "e.extend.protobufb\006proto3", 2305);
+    "\022CHAIN_TX_ENV_STORE\020\022*\227\001\n\031MESSAGE_CHANNE"
+    "L_NODE_TYPE\022\"\n\036MESSAGE_CHANNEL_NODE_TYPE"
+    "_NONE\020\000\022 \n\034MESSAGE_CHANNEL_NODE_PACKAGE\020"
+    "\036\022\036\n\032MESSAGE_CHANNEL_NODE_HELLO\020\037\022\024\n\020EVE"
+    "NT_WITHDRAWAL\020 B\"\n io.bumo.sdk.core.exte"
+    "nd.protobufb\006proto3", 2459);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -598,6 +604,22 @@ bool ChainMessageType_IsValid(int value) {
     case 16:
     case 17:
     case 18:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_NODE_TYPE_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MESSAGE_CHANNEL_NODE_TYPE_descriptor_;
+}
+bool MESSAGE_CHANNEL_NODE_TYPE_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 30:
+    case 31:
+    case 32:
       return true;
     default:
       return false;
