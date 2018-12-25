@@ -39,7 +39,6 @@ void protobuf_AddDesc_overlay_2eproto();
 void protobuf_AssignDesc_overlay_2eproto();
 void protobuf_ShutdownFile_overlay_2eproto();
 
-class BlockReward;
 class ChainHello;
 class ChainInfoMessage;
 class ChainPeerMessage;
@@ -2682,102 +2681,6 @@ class MessageChannelProposer : public ::google::protobuf::Message /* @@protoc_in
   void InitAsDefaultInstance();
   static MessageChannelProposer* default_instance_;
 };
-// -------------------------------------------------------------------
-
-class BlockReward : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:protocol.BlockReward) */ {
- public:
-  BlockReward();
-  virtual ~BlockReward();
-
-  BlockReward(const BlockReward& from);
-
-  inline BlockReward& operator=(const BlockReward& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const BlockReward& default_instance();
-
-  void Swap(BlockReward* other);
-
-  // implements Message ----------------------------------------------
-
-  inline BlockReward* New() const { return New(NULL); }
-
-  BlockReward* New(::google::protobuf::Arena* arena) const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const BlockReward& from);
-  void MergeFrom(const BlockReward& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
-    return InternalSerializeWithCachedSizesToArray(false, output);
-  }
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  void InternalSwap(BlockReward* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return _internal_metadata_.arena();
-  }
-  inline void* MaybeArenaPtr() const {
-    return _internal_metadata_.raw_arena_ptr();
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional int64 amount = 1;
-  void clear_amount();
-  static const int kAmountFieldNumber = 1;
-  ::google::protobuf::int64 amount() const;
-  void set_amount(::google::protobuf::int64 value);
-
-  // optional int64 period = 2;
-  void clear_period();
-  static const int kPeriodFieldNumber = 2;
-  ::google::protobuf::int64 period() const;
-  void set_period(::google::protobuf::int64 value);
-
-  // optional double ratio = 3;
-  void clear_ratio();
-  static const int kRatioFieldNumber = 3;
-  double ratio() const;
-  void set_ratio(double value);
-
-  // @@protoc_insertion_point(class_scope:protocol.BlockReward)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  bool _is_default_instance_;
-  ::google::protobuf::int64 amount_;
-  ::google::protobuf::int64 period_;
-  double ratio_;
-  mutable int _cached_size_;
-  friend void  protobuf_AddDesc_overlay_2eproto();
-  friend void protobuf_AssignDesc_overlay_2eproto();
-  friend void protobuf_ShutdownFile_overlay_2eproto();
-
-  void InitAsDefaultInstance();
-  static BlockReward* default_instance_;
-};
 // ===================================================================
 
 
@@ -4879,55 +4782,7 @@ inline void MessageChannelProposer::set_allocated_header_hash(::std::string* hea
   // @@protoc_insertion_point(field_set_allocated:protocol.MessageChannelProposer.header_hash)
 }
 
-// -------------------------------------------------------------------
-
-// BlockReward
-
-// optional int64 amount = 1;
-inline void BlockReward::clear_amount() {
-  amount_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 BlockReward::amount() const {
-  // @@protoc_insertion_point(field_get:protocol.BlockReward.amount)
-  return amount_;
-}
-inline void BlockReward::set_amount(::google::protobuf::int64 value) {
-  
-  amount_ = value;
-  // @@protoc_insertion_point(field_set:protocol.BlockReward.amount)
-}
-
-// optional int64 period = 2;
-inline void BlockReward::clear_period() {
-  period_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 BlockReward::period() const {
-  // @@protoc_insertion_point(field_get:protocol.BlockReward.period)
-  return period_;
-}
-inline void BlockReward::set_period(::google::protobuf::int64 value) {
-  
-  period_ = value;
-  // @@protoc_insertion_point(field_set:protocol.BlockReward.period)
-}
-
-// optional double ratio = 3;
-inline void BlockReward::clear_ratio() {
-  ratio_ = 0;
-}
-inline double BlockReward::ratio() const {
-  // @@protoc_insertion_point(field_get:protocol.BlockReward.ratio)
-  return ratio_;
-}
-inline void BlockReward::set_ratio(double value) {
-  
-  ratio_ = value;
-  // @@protoc_insertion_point(field_set:protocol.BlockReward.ratio)
-}
-
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
