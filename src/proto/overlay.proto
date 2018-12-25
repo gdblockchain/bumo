@@ -251,3 +251,15 @@ message BlockReward{
 	int64 period = 2;
 	double ratio = 3;
 }
+
+message MessageChannelCreateChildChain{
+	string genesis_account = 1;
+	string slogan = 2;
+	FeeConfig fee = 3;
+	repeated string reserve_validator = 4;
+	string chain_name = 5;
+	int64 chain_id = 6;
+	string genesis_token_amount = 7;
+	BlockReward block_reward = 8;
+	int64 cost = 9;
+}
