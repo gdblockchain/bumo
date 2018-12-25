@@ -53,7 +53,6 @@ class Hello;
 class HelloResponse;
 class LedgerUpgradeNotify;
 class Ledgers;
-class MessageChannel;
 class MessageChannelHello;
 class MessageChannelHelloResponse;
 class MessageChannelQueryDeposit;
@@ -2363,107 +2362,6 @@ class MessageChannelHelloResponse : public ::google::protobuf::Message /* @@prot
   void InitAsDefaultInstance();
   static MessageChannelHelloResponse* default_instance_;
 };
-// -------------------------------------------------------------------
-
-class MessageChannel : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:protocol.MessageChannel) */ {
- public:
-  MessageChannel();
-  virtual ~MessageChannel();
-
-  MessageChannel(const MessageChannel& from);
-
-  inline MessageChannel& operator=(const MessageChannel& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const MessageChannel& default_instance();
-
-  void Swap(MessageChannel* other);
-
-  // implements Message ----------------------------------------------
-
-  inline MessageChannel* New() const { return New(NULL); }
-
-  MessageChannel* New(::google::protobuf::Arena* arena) const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const MessageChannel& from);
-  void MergeFrom(const MessageChannel& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* InternalSerializeWithCachedSizesToArray(
-      bool deterministic, ::google::protobuf::uint8* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const {
-    return InternalSerializeWithCachedSizesToArray(false, output);
-  }
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  void InternalSwap(MessageChannel* other);
-  private:
-  inline ::google::protobuf::Arena* GetArenaNoVirtual() const {
-    return _internal_metadata_.arena();
-  }
-  inline void* MaybeArenaPtr() const {
-    return _internal_metadata_.raw_arena_ptr();
-  }
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional int64 target_chain_id = 1;
-  void clear_target_chain_id();
-  static const int kTargetChainIdFieldNumber = 1;
-  ::google::protobuf::int64 target_chain_id() const;
-  void set_target_chain_id(::google::protobuf::int64 value);
-
-  // optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
-  void clear_msg_type();
-  static const int kMsgTypeFieldNumber = 2;
-  ::protocol::MESSAGE_CHANNEL_TYPE msg_type() const;
-  void set_msg_type(::protocol::MESSAGE_CHANNEL_TYPE value);
-
-  // optional bytes msg_data = 3;
-  void clear_msg_data();
-  static const int kMsgDataFieldNumber = 3;
-  const ::std::string& msg_data() const;
-  void set_msg_data(const ::std::string& value);
-  void set_msg_data(const char* value);
-  void set_msg_data(const void* value, size_t size);
-  ::std::string* mutable_msg_data();
-  ::std::string* release_msg_data();
-  void set_allocated_msg_data(::std::string* msg_data);
-
-  // @@protoc_insertion_point(class_scope:protocol.MessageChannel)
- private:
-
-  ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
-  bool _is_default_instance_;
-  ::google::protobuf::int64 target_chain_id_;
-  ::google::protobuf::internal::ArenaStringPtr msg_data_;
-  int msg_type_;
-  mutable int _cached_size_;
-  friend void  protobuf_AddDesc_overlay_2eproto();
-  friend void protobuf_AssignDesc_overlay_2eproto();
-  friend void protobuf_ShutdownFile_overlay_2eproto();
-
-  void InitAsDefaultInstance();
-  static MessageChannel* default_instance_;
-};
 // ===================================================================
 
 
@@ -4253,85 +4151,7 @@ inline void MessageChannelHelloResponse::set_allocated_round_signature(::protoco
   // @@protoc_insertion_point(field_set_allocated:protocol.MessageChannelHelloResponse.round_signature)
 }
 
-// -------------------------------------------------------------------
-
-// MessageChannel
-
-// optional int64 target_chain_id = 1;
-inline void MessageChannel::clear_target_chain_id() {
-  target_chain_id_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 MessageChannel::target_chain_id() const {
-  // @@protoc_insertion_point(field_get:protocol.MessageChannel.target_chain_id)
-  return target_chain_id_;
-}
-inline void MessageChannel::set_target_chain_id(::google::protobuf::int64 value) {
-  
-  target_chain_id_ = value;
-  // @@protoc_insertion_point(field_set:protocol.MessageChannel.target_chain_id)
-}
-
-// optional .protocol.MESSAGE_CHANNEL_TYPE msg_type = 2;
-inline void MessageChannel::clear_msg_type() {
-  msg_type_ = 0;
-}
-inline ::protocol::MESSAGE_CHANNEL_TYPE MessageChannel::msg_type() const {
-  // @@protoc_insertion_point(field_get:protocol.MessageChannel.msg_type)
-  return static_cast< ::protocol::MESSAGE_CHANNEL_TYPE >(msg_type_);
-}
-inline void MessageChannel::set_msg_type(::protocol::MESSAGE_CHANNEL_TYPE value) {
-  
-  msg_type_ = value;
-  // @@protoc_insertion_point(field_set:protocol.MessageChannel.msg_type)
-}
-
-// optional bytes msg_data = 3;
-inline void MessageChannel::clear_msg_data() {
-  msg_data_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline const ::std::string& MessageChannel::msg_data() const {
-  // @@protoc_insertion_point(field_get:protocol.MessageChannel.msg_data)
-  return msg_data_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void MessageChannel::set_msg_data(const ::std::string& value) {
-  
-  msg_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:protocol.MessageChannel.msg_data)
-}
-inline void MessageChannel::set_msg_data(const char* value) {
-  
-  msg_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:protocol.MessageChannel.msg_data)
-}
-inline void MessageChannel::set_msg_data(const void* value, size_t size) {
-  
-  msg_data_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:protocol.MessageChannel.msg_data)
-}
-inline ::std::string* MessageChannel::mutable_msg_data() {
-  
-  // @@protoc_insertion_point(field_mutable:protocol.MessageChannel.msg_data)
-  return msg_data_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* MessageChannel::release_msg_data() {
-  // @@protoc_insertion_point(field_release:protocol.MessageChannel.msg_data)
-  
-  return msg_data_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void MessageChannel::set_allocated_msg_data(::std::string* msg_data) {
-  if (msg_data != NULL) {
-    
-  } else {
-    
-  }
-  msg_data_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), msg_data);
-  // @@protoc_insertion_point(field_set_allocated:protocol.MessageChannel.msg_data)
-}
-
 #endif  // !PROTOBUF_INLINE_NOT_IN_HEADERS
-// -------------------------------------------------------------------
-
 // -------------------------------------------------------------------
 
 // -------------------------------------------------------------------
