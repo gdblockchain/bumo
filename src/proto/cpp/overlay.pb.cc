@@ -89,6 +89,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* MessageChannelProposer_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   MessageChannelProposer_reflection_ = NULL;
+const ::google::protobuf::Descriptor* BlockReward_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  BlockReward_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = NULL;
@@ -489,6 +492,23 @@ void protobuf_AssignDesc_overlay_2eproto() {
       sizeof(MessageChannelProposer),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannelProposer, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannelProposer, _is_default_instance_));
+  BlockReward_descriptor_ = file->message_type(22);
+  static const int BlockReward_offsets_[3] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockReward, amount_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockReward, period_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockReward, ratio_),
+  };
+  BlockReward_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      BlockReward_descriptor_,
+      BlockReward::default_instance_,
+      BlockReward_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(BlockReward),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockReward, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BlockReward, _is_default_instance_));
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
   MESSAGE_CHANNEL_NODE_TYPE_descriptor_ = file->enum_type(2);
@@ -552,6 +572,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
       MessageChannelResponse_descriptor_, &MessageChannelResponse::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       MessageChannelProposer_descriptor_, &MessageChannelProposer::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      BlockReward_descriptor_, &BlockReward::default_instance());
 }
 
 }  // namespace
@@ -601,6 +623,8 @@ void protobuf_ShutdownFile_overlay_2eproto() {
   delete MessageChannelResponse_reflection_;
   delete MessageChannelProposer::default_instance_;
   delete MessageChannelProposer_reflection_;
+  delete BlockReward::default_instance_;
+  delete BlockReward_reflection_;
 }
 
 void protobuf_AddDesc_overlay_2eproto() GOOGLE_ATTRIBUTE_COLD;
@@ -672,58 +696,60 @@ void protobuf_AddDesc_overlay_2eproto() {
     "esc\030\002 \001(\t\"\213\001\n\026MessageChannelProposer\022&\n\006"
     "header\030\001 \001(\0132\026.protocol.LedgerHeader\022\030\n\020"
     "proposer_address\030\002 \001(\t\022\032\n\022proposer_signa"
-    "ture\030\003 \001(\014\022\023\n\013header_hash\030\004 \001(\014*\203\002\n\024OVER"
-    "LAY_MESSAGE_TYPE\022\030\n\024OVERLAY_MSGTYPE_NONE"
-    "\020\000\022\030\n\024OVERLAY_MSGTYPE_PING\020\001\022\031\n\025OVERLAY_"
-    "MSGTYPE_HELLO\020\002\022\031\n\025OVERLAY_MSGTYPE_PEERS"
-    "\020\003\022\037\n\033OVERLAY_MSGTYPE_TRANSACTION\020\004\022\033\n\027O"
-    "VERLAY_MSGTYPE_LEDGERS\020\005\022\030\n\024OVERLAY_MSGT"
-    "YPE_PBFT\020\006\022)\n%OVERLAY_MSGTYPE_LEDGER_UPG"
-    "RADE_NOTIFY\020\007*\372\001\n\020ChainMessageType\022\023\n\017CH"
-    "AIN_TYPE_NONE\020\000\022\017\n\013CHAIN_HELLO\020\n\022\023\n\017CHAI"
-    "N_TX_STATUS\020\013\022\025\n\021CHAIN_PEER_ONLINE\020\014\022\026\n\022"
-    "CHAIN_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSA"
-    "GE\020\016\022\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHA"
-    "IN_LEDGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX"
-    "\020\021\022\026\n\022CHAIN_TX_ENV_STORE\020\022*\227\001\n\031MESSAGE_C"
-    "HANNEL_NODE_TYPE\022\"\n\036MESSAGE_CHANNEL_NODE"
-    "_TYPE_NONE\020\000\022 \n\034MESSAGE_CHANNEL_NODE_PAC"
-    "KAGE\020\036\022\036\n\032MESSAGE_CHANNEL_NODE_HELLO\020\037\022\024"
-    "\n\020EVENT_WITHDRAWAL\020 *\212\006\n\024MESSAGE_CHANNEL"
-    "_TYPE\022\035\n\031MESSAGE_CHANNEL_TYPE_NONE\020\000\022&\n\""
-    "MESSAGE_CHANNEL_CREATE_CHILD_CHAIN\020\001\022\034\n\030"
-    "MESSAGE_CHANNEL_MAIN_MIX\020\002\022\035\n\031MESSAGE_CH"
-    "ANNEL_CHILD_MIX\020\003\022\033\n\027MESSAGE_CHANNEL_DEP"
-    "OSIT\020\004\022\036\n\032MESSAGE_CHANNEL_WITHDRAWAL\020\005\022#"
-    "\n\037MESSAGE_CHANNEL_FAST_WITHDRAWAL\020\006\022\037\n\033M"
-    "ESSAGE_CHANNEL_SUBMIT_HEAD\020\007\022(\n$MESSAGE_"
-    "CHANNEL_CHALLENGE_WITHDRAWAL\020\010\022\"\n\036MESSAG"
-    "E_CHANNEL_CHALLENGE_HEAD\020\t\022)\n%MESSAGE_CH"
-    "ANNEL_CHILD_GENESES_REQUEST\020\n\022*\n&MESSAGE"
-    "_CHANNEL_CHILD_GENESES_RESPONSE\020\013\022\036\n\032MES"
-    "SAGE_CHANNEL_QUERY_HEAD\020\014\022!\n\035MESSAGE_CHA"
-    "NNEL_QUERY_DEPOSIT\020\r\022*\n&MESSAGE_CHANNEL_"
-    "CHANGE_CHILD_VALIDATOR\020\016\0220\n,MESSAGE_CHAN"
-    "NEL_QUERY_CHANGE_CHILD_VALIDATOR\020\017\022%\n!ME"
-    "SSAGE_CHANNEL_QUERY_SUBMIT_HEAD\020\020\022$\n MES"
-    "SAGE_CHANNEL_QUERY_WITHDRAWAL\020\021\022(\n$MESSA"
-    "GE_CHANNEL_CHILD_CHALLENGE_HEAD\020\022\022.\n*MES"
-    "SAGE_CHANNEL_CHILD_CHALLENGE_WITHDRAWAL\020"
-    "\023*\272\001\n#MESSAGE_CHANNEL_CHALLENGE_HEAD_TYP"
-    "E\022/\n+MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE"
-    "_SUCCESS\020\000\0220\n,MESSAGE_CHANNEL_CHALLENGE_"
-    "HEAD_TYPE_NONEXIST\020\001\0220\n,MESSAGE_CHANNEL_"
-    "CHALLENGE_HEAD_TYPE_DOCTORED\020\002*\331\002\n)MESSA"
-    "GE_CHANNEL_CHALLENGE_WITHDRAWAL_TYPE\0225\n1"
-    "MESSAGE_CHANNEL_CHALLENGE_WITHDRAWAL_TYP"
-    "E_SUCCESS\020\000\0226\n2MESSAGE_CHANNEL_CHALLENGE"
-    "_WITHDRAWAL_TYPE_NONEXIST\020\001\0226\n2MESSAGE_C"
-    "HANNEL_CHALLENGE_WITHDRAWAL_TYPE_DOCTORE"
-    "D\020\002\022@\n<MESSAGE_CHANNEL_CHALLENGE_WITHDRA"
-    "WAL_TYPE_CONTRACT_CPC_QUERY\020\003\022C\n\?MESSAGE"
-    "_CHANNEL_CHALLENGE_WITHDRAWAL_TYPE_CONTR"
-    "ACT_CPC_DOCTORED\020\004B\"\n io.bumo.sdk.core.e"
-    "xtend.protobufb\006proto3", 4422);
+    "ture\030\003 \001(\014\022\023\n\013header_hash\030\004 \001(\014\"<\n\013Block"
+    "Reward\022\016\n\006amount\030\001 \001(\003\022\016\n\006period\030\002 \001(\003\022\r"
+    "\n\005ratio\030\003 \001(\001*\203\002\n\024OVERLAY_MESSAGE_TYPE\022\030"
+    "\n\024OVERLAY_MSGTYPE_NONE\020\000\022\030\n\024OVERLAY_MSGT"
+    "YPE_PING\020\001\022\031\n\025OVERLAY_MSGTYPE_HELLO\020\002\022\031\n"
+    "\025OVERLAY_MSGTYPE_PEERS\020\003\022\037\n\033OVERLAY_MSGT"
+    "YPE_TRANSACTION\020\004\022\033\n\027OVERLAY_MSGTYPE_LED"
+    "GERS\020\005\022\030\n\024OVERLAY_MSGTYPE_PBFT\020\006\022)\n%OVER"
+    "LAY_MSGTYPE_LEDGER_UPGRADE_NOTIFY\020\007*\372\001\n\020"
+    "ChainMessageType\022\023\n\017CHAIN_TYPE_NONE\020\000\022\017\n"
+    "\013CHAIN_HELLO\020\n\022\023\n\017CHAIN_TX_STATUS\020\013\022\025\n\021C"
+    "HAIN_PEER_ONLINE\020\014\022\026\n\022CHAIN_PEER_OFFLINE"
+    "\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022\033\n\027CHAIN_SUBM"
+    "ITTRANSACTION\020\017\022\027\n\023CHAIN_LEDGER_HEADER\020\020"
+    "\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n\022CHAIN_TX_ENV"
+    "_STORE\020\022*\227\001\n\031MESSAGE_CHANNEL_NODE_TYPE\022\""
+    "\n\036MESSAGE_CHANNEL_NODE_TYPE_NONE\020\000\022 \n\034ME"
+    "SSAGE_CHANNEL_NODE_PACKAGE\020\036\022\036\n\032MESSAGE_"
+    "CHANNEL_NODE_HELLO\020\037\022\024\n\020EVENT_WITHDRAWAL"
+    "\020 *\212\006\n\024MESSAGE_CHANNEL_TYPE\022\035\n\031MESSAGE_C"
+    "HANNEL_TYPE_NONE\020\000\022&\n\"MESSAGE_CHANNEL_CR"
+    "EATE_CHILD_CHAIN\020\001\022\034\n\030MESSAGE_CHANNEL_MA"
+    "IN_MIX\020\002\022\035\n\031MESSAGE_CHANNEL_CHILD_MIX\020\003\022"
+    "\033\n\027MESSAGE_CHANNEL_DEPOSIT\020\004\022\036\n\032MESSAGE_"
+    "CHANNEL_WITHDRAWAL\020\005\022#\n\037MESSAGE_CHANNEL_"
+    "FAST_WITHDRAWAL\020\006\022\037\n\033MESSAGE_CHANNEL_SUB"
+    "MIT_HEAD\020\007\022(\n$MESSAGE_CHANNEL_CHALLENGE_"
+    "WITHDRAWAL\020\010\022\"\n\036MESSAGE_CHANNEL_CHALLENG"
+    "E_HEAD\020\t\022)\n%MESSAGE_CHANNEL_CHILD_GENESE"
+    "S_REQUEST\020\n\022*\n&MESSAGE_CHANNEL_CHILD_GEN"
+    "ESES_RESPONSE\020\013\022\036\n\032MESSAGE_CHANNEL_QUERY"
+    "_HEAD\020\014\022!\n\035MESSAGE_CHANNEL_QUERY_DEPOSIT"
+    "\020\r\022*\n&MESSAGE_CHANNEL_CHANGE_CHILD_VALID"
+    "ATOR\020\016\0220\n,MESSAGE_CHANNEL_QUERY_CHANGE_C"
+    "HILD_VALIDATOR\020\017\022%\n!MESSAGE_CHANNEL_QUER"
+    "Y_SUBMIT_HEAD\020\020\022$\n MESSAGE_CHANNEL_QUERY"
+    "_WITHDRAWAL\020\021\022(\n$MESSAGE_CHANNEL_CHILD_C"
+    "HALLENGE_HEAD\020\022\022.\n*MESSAGE_CHANNEL_CHILD"
+    "_CHALLENGE_WITHDRAWAL\020\023*\272\001\n#MESSAGE_CHAN"
+    "NEL_CHALLENGE_HEAD_TYPE\022/\n+MESSAGE_CHANN"
+    "EL_CHALLENGE_HEAD_TYPE_SUCCESS\020\000\0220\n,MESS"
+    "AGE_CHANNEL_CHALLENGE_HEAD_TYPE_NONEXIST"
+    "\020\001\0220\n,MESSAGE_CHANNEL_CHALLENGE_HEAD_TYP"
+    "E_DOCTORED\020\002*\331\002\n)MESSAGE_CHANNEL_CHALLEN"
+    "GE_WITHDRAWAL_TYPE\0225\n1MESSAGE_CHANNEL_CH"
+    "ALLENGE_WITHDRAWAL_TYPE_SUCCESS\020\000\0226\n2MES"
+    "SAGE_CHANNEL_CHALLENGE_WITHDRAWAL_TYPE_N"
+    "ONEXIST\020\001\0226\n2MESSAGE_CHANNEL_CHALLENGE_W"
+    "ITHDRAWAL_TYPE_DOCTORED\020\002\022@\n<MESSAGE_CHA"
+    "NNEL_CHALLENGE_WITHDRAWAL_TYPE_CONTRACT_"
+    "CPC_QUERY\020\003\022C\n\?MESSAGE_CHANNEL_CHALLENGE"
+    "_WITHDRAWAL_TYPE_CONTRACT_CPC_DOCTORED\020\004"
+    "B\"\n io.bumo.sdk.core.extend.protobufb\006pr"
+    "oto3", 4484);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -748,6 +774,7 @@ void protobuf_AddDesc_overlay_2eproto() {
   MessageChannel::default_instance_ = new MessageChannel();
   MessageChannelResponse::default_instance_ = new MessageChannelResponse();
   MessageChannelProposer::default_instance_ = new MessageChannelProposer();
+  BlockReward::default_instance_ = new BlockReward();
   Hello::default_instance_->InitAsDefaultInstance();
   HelloResponse::default_instance_->InitAsDefaultInstance();
   Peer::default_instance_->InitAsDefaultInstance();
@@ -770,6 +797,7 @@ void protobuf_AddDesc_overlay_2eproto() {
   MessageChannel::default_instance_->InitAsDefaultInstance();
   MessageChannelResponse::default_instance_->InitAsDefaultInstance();
   MessageChannelProposer::default_instance_->InitAsDefaultInstance();
+  BlockReward::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_overlay_2eproto);
 }
 
@@ -10403,6 +10431,366 @@ void MessageChannelProposer::clear_header_hash() {
   }
   header_hash_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), header_hash);
   // @@protoc_insertion_point(field_set_allocated:protocol.MessageChannelProposer.header_hash)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int BlockReward::kAmountFieldNumber;
+const int BlockReward::kPeriodFieldNumber;
+const int BlockReward::kRatioFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+BlockReward::BlockReward()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:protocol.BlockReward)
+}
+
+void BlockReward::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+BlockReward::BlockReward(const BlockReward& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:protocol.BlockReward)
+}
+
+void BlockReward::SharedCtor() {
+    _is_default_instance_ = false;
+  _cached_size_ = 0;
+  amount_ = GOOGLE_LONGLONG(0);
+  period_ = GOOGLE_LONGLONG(0);
+  ratio_ = 0;
+}
+
+BlockReward::~BlockReward() {
+  // @@protoc_insertion_point(destructor:protocol.BlockReward)
+  SharedDtor();
+}
+
+void BlockReward::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void BlockReward::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* BlockReward::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return BlockReward_descriptor_;
+}
+
+const BlockReward& BlockReward::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_overlay_2eproto();
+  return *default_instance_;
+}
+
+BlockReward* BlockReward::default_instance_ = NULL;
+
+BlockReward* BlockReward::New(::google::protobuf::Arena* arena) const {
+  BlockReward* n = new BlockReward;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void BlockReward::Clear() {
+// @@protoc_insertion_point(message_clear_start:protocol.BlockReward)
+#if defined(__clang__)
+#define ZR_HELPER_(f) \
+  _Pragma("clang diagnostic push") \
+  _Pragma("clang diagnostic ignored \"-Winvalid-offsetof\"") \
+  __builtin_offsetof(BlockReward, f) \
+  _Pragma("clang diagnostic pop")
+#else
+#define ZR_HELPER_(f) reinterpret_cast<char*>(\
+  &reinterpret_cast<BlockReward*>(16)->f)
+#endif
+
+#define ZR_(first, last) do {\
+  ::memset(&first, 0,\
+           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
+} while (0)
+
+  ZR_(amount_, ratio_);
+
+#undef ZR_HELPER_
+#undef ZR_
+
+}
+
+bool BlockReward::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:protocol.BlockReward)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int64 amount = 1;
+      case 1: {
+        if (tag == 8) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &amount_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_period;
+        break;
+      }
+
+      // optional int64 period = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_period:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                 input, &period_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(25)) goto parse_ratio;
+        break;
+      }
+
+      // optional double ratio = 3;
+      case 3: {
+        if (tag == 25) {
+         parse_ratio:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &ratio_)));
+
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:protocol.BlockReward)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:protocol.BlockReward)
+  return false;
+#undef DO_
+}
+
+void BlockReward::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:protocol.BlockReward)
+  // optional int64 amount = 1;
+  if (this->amount() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->amount(), output);
+  }
+
+  // optional int64 period = 2;
+  if (this->period() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->period(), output);
+  }
+
+  // optional double ratio = 3;
+  if (this->ratio() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(3, this->ratio(), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:protocol.BlockReward)
+}
+
+::google::protobuf::uint8* BlockReward::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:protocol.BlockReward)
+  // optional int64 amount = 1;
+  if (this->amount() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->amount(), target);
+  }
+
+  // optional int64 period = 2;
+  if (this->period() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->period(), target);
+  }
+
+  // optional double ratio = 3;
+  if (this->ratio() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(3, this->ratio(), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:protocol.BlockReward)
+  return target;
+}
+
+int BlockReward::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:protocol.BlockReward)
+  int total_size = 0;
+
+  // optional int64 amount = 1;
+  if (this->amount() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
+        this->amount());
+  }
+
+  // optional int64 period = 2;
+  if (this->period() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::Int64Size(
+        this->period());
+  }
+
+  // optional double ratio = 3;
+  if (this->ratio() != 0) {
+    total_size += 1 + 8;
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void BlockReward::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:protocol.BlockReward)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const BlockReward* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const BlockReward>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:protocol.BlockReward)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:protocol.BlockReward)
+    MergeFrom(*source);
+  }
+}
+
+void BlockReward::MergeFrom(const BlockReward& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:protocol.BlockReward)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.amount() != 0) {
+    set_amount(from.amount());
+  }
+  if (from.period() != 0) {
+    set_period(from.period());
+  }
+  if (from.ratio() != 0) {
+    set_ratio(from.ratio());
+  }
+}
+
+void BlockReward::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:protocol.BlockReward)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void BlockReward::CopyFrom(const BlockReward& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:protocol.BlockReward)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool BlockReward::IsInitialized() const {
+
+  return true;
+}
+
+void BlockReward::Swap(BlockReward* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void BlockReward::InternalSwap(BlockReward* other) {
+  std::swap(amount_, other->amount_);
+  std::swap(period_, other->period_);
+  std::swap(ratio_, other->ratio_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata BlockReward::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = BlockReward_descriptor_;
+  metadata.reflection = BlockReward_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// BlockReward
+
+// optional int64 amount = 1;
+void BlockReward::clear_amount() {
+  amount_ = GOOGLE_LONGLONG(0);
+}
+ ::google::protobuf::int64 BlockReward::amount() const {
+  // @@protoc_insertion_point(field_get:protocol.BlockReward.amount)
+  return amount_;
+}
+ void BlockReward::set_amount(::google::protobuf::int64 value) {
+  
+  amount_ = value;
+  // @@protoc_insertion_point(field_set:protocol.BlockReward.amount)
+}
+
+// optional int64 period = 2;
+void BlockReward::clear_period() {
+  period_ = GOOGLE_LONGLONG(0);
+}
+ ::google::protobuf::int64 BlockReward::period() const {
+  // @@protoc_insertion_point(field_get:protocol.BlockReward.period)
+  return period_;
+}
+ void BlockReward::set_period(::google::protobuf::int64 value) {
+  
+  period_ = value;
+  // @@protoc_insertion_point(field_set:protocol.BlockReward.period)
+}
+
+// optional double ratio = 3;
+void BlockReward::clear_ratio() {
+  ratio_ = 0;
+}
+ double BlockReward::ratio() const {
+  // @@protoc_insertion_point(field_get:protocol.BlockReward.ratio)
+  return ratio_;
+}
+ void BlockReward::set_ratio(double value) {
+  
+  ratio_ = value;
+  // @@protoc_insertion_point(field_set:protocol.BlockReward.ratio)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
