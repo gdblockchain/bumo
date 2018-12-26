@@ -297,6 +297,16 @@ namespace bumo {
 			LOG_INFO("Send new view message again actively: view number(" FMT_I64 "), round number(%u)",
 				lastvc_instance->view_number_, lastvc_instance->new_view_round_);
 		}
+
+		//Check the view change object that should be teminated
+		//for (PbftVcInstanceMap::iterator iter_vc = vc_instances_.begin(); iter_vc != vc_instances_.end(); ){
+		//	if (iter_vc->second.ShouldTeminated(current_time, g_pbft_vcinstance_terminatedtime_)){
+		//		vc_instances_.erase(iter_vc++);
+		//	}
+		//	else{
+		//		iter_vc++;
+		//	}
+		//}
 	}
 
 	bool Pbft::InWaterMark(int64_t seq) {
@@ -307,7 +317,6 @@ namespace bumo {
 		if (view_number_ % validators_.size() != replica_id_) {
 			return false;
 		}
-
 		LOG_INFO("Start to request value(%s)", notify_->DescConsensusValue(value).c_str());
 
 		if (!view_active_) {
@@ -317,6 +326,7 @@ namespace bumo {
 
 		//Lock the instances
 		utils::MutexGuard lock_guad(lock_);
+		ValueSaver saver;
 
 		//Delete the last uncommitted logs
 		for (PbftInstanceMap::iterator iter_inst = instances_.begin();
@@ -344,7 +354,9 @@ namespace bumo {
 		pinstance.pre_prepare_ = env->pbft().pre_prepare();
 		pinstance.msg_buf_[env->pbft().type()].push_back(*env);
 		instances_[index] = pinstance;
+		//SaveInstance(saver);
 
+		saver.Commit();
 		LOG_INFO("Send pre-prepare message: view number(" FMT_I64 "), sequence(" FMT_I64 "), consensus value(%s)", 
 			view_number_, index.sequence_, notify_->DescConsensusValue(value).c_str());
 		//Broadcast the message to other nodes
@@ -723,6 +735,7 @@ namespace bumo {
 			return false;
 		}
 
+
 		bool doret = false;
 		switch (pbft.type()) {
 		case protocol::PBFT_TYPE_PREPREPARE:
@@ -822,7 +835,7 @@ namespace bumo {
 
 		LOG_INFO("Send prepare message: view number(" FMT_I64 "), replica id(" FMT_I64 "), sequence(" FMT_I64 "), round number(1), value(%s)",
 			pre_prepare.view_number(), replica_id_, pre_prepare.sequence(), notify_->DescConsensusValue(pre_prepare.value()).c_str());
-
+		//NewPrepare();
 		PbftEnvPointer prepare_msg = NewPrepare(pre_prepare, 1);
 		if (!SendMessage(prepare_msg)) {
 			return false;
@@ -940,6 +953,8 @@ namespace bumo {
 
 		//Insert into the msg need to be sent again for timeout
 		if (view_change.replica_id() == replica_id_ && !vc_instance.view_change_msg_.has_pbft()) {
+			//PbftEnvPointer msg = NewViewChange(view_number_ + 1);
+			//*((protocol::PbftEnv *)msg->data_) = pbft_env;
 			vc_instance.view_change_msg_ = pbft_env;
 		}
 
@@ -1050,13 +1065,24 @@ namespace bumo {
 			}
 		}
 
+		//Get max sequence
+		int64_t max_seq = last_exe_seq_;
+		for (PbftInstanceMap::iterator iter_inst = instances_.begin();
+			iter_inst != instances_.end();
+			iter_inst++
+			) {
+			if (iter_inst->first.sequence_ > max_seq) {
+				max_seq = iter_inst->first.sequence_;
+			}
+		}
+
 		LOG_INFO("Replica(id: " FMT_I64 ") enter the new view(number:" FMT_I64 ")", replica_id_, new_view.view_number());
 		//Enter the new view
 		ValueSaver saver;
 		view_number_ = new_view.view_number();
 		view_active_ = true;
 		saver.SaveValue(PbftDesc::VIEWNUMBER_NAME, view_number_);
-		saver.SaveValue(PbftDesc::VIEW_ACTIVE, 1);
+		saver.SaveValue(PbftDesc::VIEW_ACTIVE, view_active_ ? 1 : 0);
 
 		PbftVcInstanceMap::iterator iter = vc_instances_.find(view_number_);
 		if (iter != vc_instances_.end()) {

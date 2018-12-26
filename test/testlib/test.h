@@ -3,7 +3,6 @@
 
 int TestLevelDbWin();
 void TestJson();
-//test database sqlite
 int TestSqlite3();
 int TestEd25519();
 void TestWebsocket();

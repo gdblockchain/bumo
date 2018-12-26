@@ -71,6 +71,8 @@ namespace bumo {
 
 		bool Cancel();
 
+		// void GetSqlTx(std::string &sqltx, std::string &sql_account_tx);
+
 		bool AddToDb(WRITE_BATCH& batch);
 
 		bool LoadFromDb(int64_t seq);
@@ -87,6 +89,8 @@ namespace bumo {
 			}
 			return ope_count;
 		}
+
+		bool CheckValidation ();
 
 		static bool CheckConsValueValidation(const protocol::ConsensusValue& request,
 			std::set<int32_t> &expire_txs_status,
@@ -111,6 +115,7 @@ namespace bumo {
 		std::shared_ptr<protocol::ConsensusValue> value_;
 		std::vector<TransactionFrm::pointer> apply_tx_frms_;
 		std::vector<TransactionFrm::pointer> dropped_tx_frms_;
+		std::string sql_;
 		std::shared_ptr<Environment> environment_;
 		LedgerContext *lpledger_context_;
 		int64_t apply_time_;

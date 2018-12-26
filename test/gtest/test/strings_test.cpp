@@ -1,11 +1,19 @@
 #include "gtest/gtest.h"
 #include "utils/base_int.h"
 
-class UtilsStringsTest : public testing::Test{
+class UtilsStringsTest : public testing::Test
+{
 protected:
-	virtual void SetUp(){
+
+	// Sets up the test fixture.
+	virtual void SetUp()
+	{
 	}
-	virtual void TearDown(){
+
+	// Tears down the test fixture.
+	virtual void TearDown()
+	{
+
 	}
 
 protected:
@@ -20,7 +28,8 @@ TEST_F(UtilsStringsTest, UT_SafeStoui64){ UT_SafeStoui64(); }
 TEST_F(UtilsStringsTest, UT_SafeStoi){ UT_SafeStoi(); }
 TEST_F(UtilsStringsTest, UT_SafeStoui){ UT_SafeStoui(); }
 
-void UtilsStringsTest::UT_SafeStoi64(){
+void UtilsStringsTest::UT_SafeStoi64()
+{
 	int64_t num = 0;
 	EXPECT_EQ(utils::String::SafeStoi64("92233720368547758070", num), false);
 	printf("num = %lld\n", num);
@@ -46,7 +55,8 @@ void UtilsStringsTest::UT_SafeStoi64(){
 	printf("num = %lld\n", num);
 }
 
-void UtilsStringsTest::UT_SafeStoui64(){
+void UtilsStringsTest::UT_SafeStoui64()
+{
 	uint64_t num = 0;
 	EXPECT_EQ(utils::String::SafeStoui64("18446744073709551615", num), true);
 	printf("num = %llu\n", num);
@@ -68,7 +78,8 @@ void UtilsStringsTest::UT_SafeStoui64(){
 	printf("num = %llu\n", num);
 }
 
-void UtilsStringsTest::UT_SafeStoi(){
+void UtilsStringsTest::UT_SafeStoi()
+{
 	int num = 0;
 	EXPECT_EQ(utils::String::SafeStoi("2147483647", num), true);
 	printf("num = %d\n", num);
@@ -94,7 +105,8 @@ void UtilsStringsTest::UT_SafeStoi(){
 	printf("num = %d\n", num);
 }
 
-void UtilsStringsTest::UT_SafeStoui(){
+void UtilsStringsTest::UT_SafeStoui()
+{
 	unsigned int num = 0;
 	EXPECT_EQ(utils::String::SafeStoui("4294967295", num), true);
 	printf("num = %u\n", num);

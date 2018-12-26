@@ -17,7 +17,9 @@
 
 namespace bumo{
 
+
 	MsgProcessor::MsgProcessor(){
+		
 		rcv_message_lists_.clear();
 		send_message_lists_.clear();
 	}
@@ -38,7 +40,6 @@ namespace bumo{
 			bret = true;		
 		return bret;
 	}
-	
 	void MsgProcessor::Run(utils::Thread *thread) {
 		while (thread->enabled()) {
 			// process request message
@@ -86,7 +87,8 @@ namespace bumo{
 
 	bool MsgProcessor::Exit() {
 		try {
-			if (thread_ptr_){
+			if (thread_ptr_)
+			{
 				thread_ptr_->JoinWithStop();
 				delete thread_ptr_;
 				thread_ptr_ = NULL;
@@ -108,7 +110,6 @@ namespace bumo{
 	WebSocketServer::WebSocketServer(){
 
 	}
-	
 	WebSocketServer::~WebSocketServer(){
 		msg_processor_.Exit();		
 	}
@@ -183,6 +184,7 @@ namespace bumo{
 
 	void WebSocketServer::on_error(connection_hdl hdl){
 		utils::MutexGuard guard(connet_clients_mutex_);
+
 		std::string endpoint_key = server_ptr_->get_con_from_hdl(hdl)->get_remote_endpoint();
 		connet_clients_.erase(endpoint_key);
 	}
@@ -190,23 +192,28 @@ namespace bumo{
 	//send to client
 	void WebSocketServer::Send(std::string &data){
 		utils::MutexGuard guard(connet_clients_mutex_);
-		for (auto i : connet_clients_){
+		for (auto i : connet_clients_)
+		{
 			server_ptr_->send(i.second, data, websocketpp::frame::opcode::value::text);
 		}
 	}
 	
 
-	bool MsgProcessor::ProcessSendMessages(const std::string& msg){
+	bool MsgProcessor::ProcessSendMessages(const std::string& msg)
+	{
 		bool bret = false;
 		try {
 			do {
 				//first to check if need conversion
 				Json::Value content;
 				content.fromString(msg);
-				if (content.isMember("parameter") || content.isMember("result")){
+				if (content.isMember("parameter") || content.isMember("result"))
+				{
 					Json::Value parameter_or_result = content.isMember("parameter") ? content["parameter"] : content["result"];
-					if (parameter_or_result.isMember("session_id")) {
-						if (parameter_or_result["session_id"].asString() == "random_key"){
+					if (parameter_or_result.isMember("session_id"))
+					{
+						if (parameter_or_result["session_id"].asString() == "random_key")
+						{
 							parameter_or_result["session_id"] = random_key_;
 						}
 						if (content.isMember("parameter"))
@@ -217,7 +224,8 @@ namespace bumo{
 					server_ptr_->send(connection_hdl_, content.toFastString(), websocketpp::frame::opcode::text);
 					
 				}
-				else{
+				else
+				{
 					//it is the abnormal message for abnormal test
 					server_ptr_->send(connection_hdl_,msg, websocketpp::frame::opcode::text);
 				}
@@ -230,7 +238,8 @@ namespace bumo{
 		return bret;
 
 	}
-	void MsgProcessor::SendRequestMessage(const std::string& method, const bool& request, const Json::Value& parameter){
+	void MsgProcessor::SendRequestMessage(const std::string& method, const bool& request, const Json::Value& parameter) 
+	{
 		do {
 			Json::Value message;
 			message["method"] = method;
@@ -252,7 +261,8 @@ namespace bumo{
 			send_message_lists_.push_back(message.toFastString());
 		} while (false);
 	}
-	void MsgProcessor::DetermineResponse(std::string method){
+	void MsgProcessor::DetermineResponse(std::string method)
+	{
 		Json::Value result;
 		int errcode;
 
@@ -261,7 +271,8 @@ namespace bumo{
 		else
 			result["session_id"] = random_key_;		
 
-		switch (current_condition_ & 0x3ff){
+		switch (current_condition_ & 0x3ff)
+		{
 		case GENERAL_CASE_RESPONSE_ERRCODE_0:
 			errcode = 0;
 			break;
@@ -293,16 +304,19 @@ namespace bumo{
 	
 	}
 	//no matter it is a request or response
-	bool MsgProcessor::ProcessRcvMessages(const std::string& msg){
+	bool MsgProcessor::ProcessRcvMessages(const std::string& msg)
+	{
 		Json::Value receive;
 		receive.fromString(msg);
-		if (receive["method"].asString() == "hello"){			
+		if (receive["method"].asString() == "hello")
+		{			
 			//check the content
 			if (CheckHello(msg))
 				test_output_ |= HELLO_VALID;
 			else
 				test_output_ &= ~HELLO_VALID;
-			if (!(test_input_&HELLO_RESP)){
+			if (!(test_input_&HELLO_RESP))
+			{
 				//dont response to hello
 				return false;
 			}
@@ -387,14 +401,16 @@ namespace bumo{
 			else
 				SendResponseMessage("hello", false, 0, result);			
 		}
-		else if (receive["method"].asString() == "register"){
+		else if (receive["method"].asString() == "register")
+		{
 			//check the content
 			if (CheckReg(msg))
 				test_output_ |= REG_VALID;
 			else
 				test_output_ &= ~REG_VALID;
 
-			if (!(test_input_&REG_RESP)){
+			if (!(test_input_&REG_RESP))
+			{
 				//dont response to register
 				return false;
 			}
@@ -416,14 +432,16 @@ namespace bumo{
 			else
 				SendResponseMessage("register", false, 0, result);
 		}
-		else if (receive["method"].asString() == "heartbeat"){
+		else if (receive["method"].asString() == "heartbeat")
+		{
 			//check the content
 			if (CheckHB(msg))
 				test_output_ |= HB_VALID;
 			else
 				test_output_ &= ~HB_VALID;
 
-			if (!(test_input_&HB_RESP)){
+			if (!(test_input_&HB_RESP))
+			{
 				//dont response to heartbeat
 				return false;
 			}
@@ -445,19 +463,22 @@ namespace bumo{
 				SendResponseMessage("heartbeat", false, 0, result);
 
 		}
-		else if (receive["method"].asString() == "logout"){
+		else if (receive["method"].asString() == "logout")
+		{
 			if (CheckLogout(msg))
 				test_output_ |= LOGOUT_VALID;
 			else
 				test_output_ &= ~LOGOUT_VALID;
 		}
-		else if (receive["method"].asString() == "warning"){
+		else if (receive["method"].asString() == "warning")
+		{
 			//result field
 			Json::Value result;
 			result["session_id"] = random_key_;			
 			SendResponseMessage("warning", false, 0, result);
 		}
-		else if (receive["method"].asString() == "bumo"){
+		else if (receive["method"].asString() == "bumo")
+		{
 			if (current_request_test_ != BUMO)
 				return true;
 			if (CheckBumo(msg))
@@ -465,48 +486,55 @@ namespace bumo{
 			
 			DetermineResponse("bumo");		
 		}
-		else if (receive["method"].asString() == "system"){
+		else if (receive["method"].asString() == "system")
+		{
 			if (current_request_test_ != SYSTEM)
 				return true;
 			if (CheckSystem(msg))
 				request_test_result_ = true;
 			DetermineResponse("system");
 		}
-		else if (receive["method"].asString() == "ledger"){
+		else if (receive["method"].asString() == "ledger")
+		{
 			if (current_request_test_ != LEDGER)
 				return true;
 			if (CheckLedger(msg))
 				request_test_result_ = true;
 			DetermineResponse("ledger");
 		}
-		else if (receive["method"].asString() == "account_exception"){
+		else if (receive["method"].asString() == "account_exception")
+		{
 			if (current_request_test_ != ACCTEXCP)
 				return true;
 			if (CheckAcctExcp(msg))
 				request_test_result_ = true;
 			DetermineResponse("account_exception");
 		}
-		else if (receive["method"].asString() == "error"){
+		else if (receive["method"].asString() == "error")
+		{
 			if (CheckError(msg))
 				test_output_ |= ERROR_VALID;
 			else
 				test_output_ &= ~ERROR_VALID;
 		}
-		else if (receive["method"].asString() == "upgrade"){
+		else if (receive["method"].asString() == "upgrade")
+		{
 			if (current_request_test_ != UPGRADE)
 				return true;
 			if (CheckUpgrade(msg))
 				request_test_result_ = true;
 			DetermineResponse("upgrade");
 		}
-		else if (receive["method"].asString() == "set_configure"){
+		else if (receive["method"].asString() == "set_configure")
+		{
 			if (current_request_test_ != SETCONFG)
 				return true;
 			if (CheckSetconfig(msg))
 				request_test_result_ = true;
 			DetermineResponse("set_configure");
 		}
-		else if (receive["method"].asString() == "get_configure"){
+		else if (receive["method"].asString() == "get_configure")
+		{
 			if (current_request_test_ != GETCONFG)
 				return true;
 			if (CheckGetconfig(msg))
@@ -516,13 +544,15 @@ namespace bumo{
 		return true;
 	}
 	//check logout content
-	bool MsgProcessor::CheckLogout(const std::string& msg){
+	bool MsgProcessor::CheckLogout(const std::string& msg)
+	{
 		Json::Value receive;
 		receive.fromString(msg);
 
 		Json::Value parameter = receive["result"];
 
-		if (parameter["session_id"] != random_key_){
+		if (parameter["session_id"] != random_key_)
+		{
 			//id error
 			return false;
 		}
@@ -534,7 +564,8 @@ namespace bumo{
 
 	}
 	//check request content
-	bool MsgProcessor::CheckHello(const std::string& msg){
+	bool MsgProcessor::CheckHello(const std::string& msg)
+	{
 		bool flag(false);
 
 		bool ret(true);
@@ -544,18 +575,21 @@ namespace bumo{
 		Json::Value parameter = receive["parameter"];
 
 #ifdef WIN32
-		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_.c_str(), monitor_id_.length())){
+		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_.c_str(), monitor_id_.length()))
+		{
 			//id error
 			current_monitor_id_ = monitor_id_;
 			flag = true;
 		}
 #else
-		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_1.c_str(), monitor_id_1.length())){
+		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_1.c_str(), monitor_id_1.length()))
+		{
 			//id error
 			current_monitor_id_= monitor_id_1;
 			flag = true;
 		}
-		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_2.c_str(), monitor_id_2.length())){
+		if (parameter["id_md"] == utils::MD5::GenerateMD5((unsigned char*)monitor_id_2.c_str(), monitor_id_2.length()))
+		{
 			//id error
 			current_monitor_id_ = monitor_id_2;
 			flag = true;
@@ -569,7 +603,8 @@ namespace bumo{
 			ret =  false;
 		return ret;
 	}
-	bool MsgProcessor::CheckReg(const std::string& msg){
+	bool MsgProcessor::CheckReg(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -577,7 +612,8 @@ namespace bumo{
 		Json::Value parameter = receive["parameter"];
 
 		EXPECT_STREQ(random_key_.c_str(), parameter["session_id"].asString().c_str()) << "reg request with bad session id\n";
-		if (parameter["session_id"].asString() != random_key_){
+		if (parameter["session_id"].asString() != random_key_)
+		{
 			//session id error
 			ret = false;
 		}
@@ -586,7 +622,8 @@ namespace bumo{
 			ret = false;
 		return ret;
 	}
-	bool MsgProcessor::CheckHB(const std::string& msg){
+	bool MsgProcessor::CheckHB(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -594,7 +631,8 @@ namespace bumo{
 		Json::Value parameter = receive["parameter"];
 
 		EXPECT_STREQ(random_key_.c_str(), parameter["session_id"].asString().c_str()) << "heartbeat request with bad session id\n";
-		if (parameter["session_id"].asString() != random_key_){
+		if (parameter["session_id"].asString() != random_key_)
+		{
 			//session id error
 			ret = false;
 		}
@@ -603,7 +641,8 @@ namespace bumo{
 		return ret;
 
 	}
-	bool MsgProcessor::CheckLedger(const std::string& msg){
+	bool MsgProcessor::CheckLedger(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -614,12 +653,14 @@ namespace bumo{
 		int seq = result["ledger_seq"].asInt();
 	
 
-		switch (current_condition_&(~0x3ff)){
+		switch (current_condition_&(~0x3ff))
+		{
 			case LEDGER_LATEST_20_LEDGER:
 				EXPECT_EQ(receive["error_code"].asInt(), 0);
 				{
 					Json::Value blocks = result["blocks"];
-					for (int k = 0; k < 20; ++k){
+					for (int k = 0; k < 20; ++k)
+					{
 						result_from_bumo = latest_ledger[k]["result"];
 						EXPECT_EQ(blocks[k]["ledger_seq"].asInt(), (result_from_bumo["ledger_seq"].asInt()));
 						EXPECT_STREQ(blocks[k]["hash"].asCString(), result_from_bumo["hash"].asCString())<<"index = "<<k;
@@ -658,7 +699,8 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckSystem(const std::string& msg){
+	bool MsgProcessor::CheckSystem(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -674,7 +716,8 @@ namespace bumo{
 		ret = CheckCommonResponse(msg);
 		return ret;
 	}
-	bool MsgProcessor::CheckAcctExcp(const std::string& msg){
+	bool MsgProcessor::CheckAcctExcp(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -685,14 +728,16 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckError(const std::string& msg){
+	bool MsgProcessor::CheckError(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
 
 		Json::Value result = receive["result"];
 
-		if (test_input_&ERR_ERRCODE_4){
+		if (test_input_&ERR_ERRCODE_4)
+		{
 			EXPECT_EQ(receive["error_code"].asInt(), 4) << "system response error code is not 4";
 			if (receive["error_code"].asInt() != 4)
 				ret = false;
@@ -711,7 +756,8 @@ namespace bumo{
 		return ret;
 	}
 
-	bool MsgProcessor::CheckUpgrade(const std::string& msg){
+	bool MsgProcessor::CheckUpgrade(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -719,7 +765,8 @@ namespace bumo{
 		int expected_errorcode;
 		static int errcode_last_time;
 
-		switch (current_condition_&(~0x3ff)){
+		switch (current_condition_&(~0x3ff))
+		{
 		case UPGRADE_NO_FILENAME:
 		case UPGRADE_NO_ITEM:			
 		case UPGRADE_NO_MD5:
@@ -751,12 +798,14 @@ namespace bumo{
 			break;
 
 		}
-		if ((current_condition_&(~0x3ff)) != UPGRADE_UPGRADING){
+		if ((current_condition_&(~0x3ff)) != UPGRADE_UPGRADING)
+		{
 			EXPECT_EQ(receive["error_code"].asInt(), expected_errorcode);
 			if (receive["error_code"].asInt() == expected_errorcode)
 				ret = true;
 		}		
-		else{
+		else
+		{
 			if (errcode_last_time != 12)
 				errcode_last_time = receive["error_code"].asInt();
 			if (errcode_last_time == expected_errorcode)
@@ -765,7 +814,8 @@ namespace bumo{
 		return ret;
 	}
 	
-	bool MsgProcessor::CheckGetconfig(const std::string& msg){
+	bool MsgProcessor::CheckGetconfig(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -777,7 +827,8 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckSetconfig(const std::string& msg){
+	bool MsgProcessor::CheckSetconfig(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -788,7 +839,8 @@ namespace bumo{
 
 		return ret;
 	}
-	bool MsgProcessor::CheckBumo(const std::string& msg){
+	bool MsgProcessor::CheckBumo(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -799,7 +851,8 @@ namespace bumo{
 
 		
 #if 0
-		if (result.isMember("api server")){
+		if (result.isMember("api server"))
+		{
 			Json::Value apiserver = result["api server"];
 			if (apiserver["web server"]["context"].asBool() != false)
 				ret = false;
@@ -810,7 +863,8 @@ namespace bumo{
 			if (apiserver["websocket server"]["listener_count"].asInt() != 0)
 				ret =  false;
 		}
-		if (result.isMember("glue manager")){
+		if (result.isMember("glue manager"))
+		{
 			Json::Value gluemanager = result["glue manager"];
 			if (gluemanager["consensus.slot.ballot.envSize"].asInt() != 5)
 				ret =  false;
@@ -820,7 +874,8 @@ namespace bumo{
 
 	}
 
-	bool MsgProcessor::CheckCommonResponse(const std::string& msg){
+	bool MsgProcessor::CheckCommonResponse(const std::string& msg)
+	{
 		bool ret(true);
 		Json::Value receive;
 		receive.fromString(msg);
@@ -844,19 +899,25 @@ namespace bumo{
 	}
 	
 
-	void WebSocketServer::Cleanoutput(void){
+	void WebSocketServer::Cleanoutput(void)
+	{
 		printf("clean all output!\n");
 		msg_processor_.SetTestOutput(0);		
 	}
 
-	 void WebSocketServer::IncompleteRequestGenerator(bool rqst_or_resp,uint32_t missing_part,Json::Value& msg){
-		 if (rqst_or_resp == IS_REQUEST){
-			 if (!(missing_part&NO_PARAMETER)){
+	 void WebSocketServer::IncompleteRequestGenerator(bool rqst_or_resp,uint32_t missing_part,Json::Value& msg)
+	{
+		 if (rqst_or_resp == IS_REQUEST)
+		 {
+			 if (!(missing_part&NO_PARAMETER))
+			 {
 				 if (missing_part&EMPTY_PARAM)
 					 msg["parameter"] = "";
-				 else{
+				 else
+				 {
 					 Json::Value parameter;
-					 if (!(missing_part&NO_SESSIONID)){
+					 if (!(missing_part&NO_SESSIONID))
+					 {
 						 if (missing_part&EMPTY_SESSIONID)
 							parameter["session_id"] = "";
 						 else
@@ -870,13 +931,15 @@ namespace bumo{
 				
 
 			 }
-			 if (!(missing_part&NO_METHOD)){
+			 if (!(missing_part&NO_METHOD))
+			 {
 				 if (missing_part&EMPTY_METHOD)
 					 msg["method"] = "";
 				 else
 					msg["method"] = "bumo";
 			 }
-			 if (!(missing_part&NO_REQUEST)) {
+			 if (!(missing_part&NO_REQUEST))
+			 {
 				 if (missing_part&EMPTY_REQUEST)
 					 msg["request"] = "";
 				 else
@@ -884,13 +947,16 @@ namespace bumo{
 			 }
 			 
 		 }
-		 else {
-			 if (!(missing_part&NO_RESULT)){
+		 else
+		 {
+			 if (!(missing_part&NO_RESULT))
+			 {
 				 if (missing_part&EMPTY_RESULT)
 					 msg["result"] = "";
 				 else{
 					 Json::Value result;
-					 if (!(missing_part&NO_SESSIONID)){
+					 if (!(missing_part&NO_SESSIONID))
+					 {
 						 if (missing_part&EMPTY_SESSIONID)
 							 result["session_id"] = "";
 						 else
@@ -899,19 +965,22 @@ namespace bumo{
 					 msg["result"] = result;						 
 				 }				
 			 }
-			 if (!(missing_part&NO_ERRORCODE)){
+			 if (!(missing_part&NO_ERRORCODE))
+			 {
 				 if (missing_part&EMPTY_ERRORCODE)
 					 msg["error_code"] = "";
 				 else
 					 msg["error_code"] = 0;
 			 }
-			 if (!(missing_part&NO_METHOD)){
+			 if (!(missing_part&NO_METHOD))
+			 {
 				 if (missing_part&EMPTY_METHOD)
 					 msg["method"] = "";
 				 else
 					msg["method"] = "register";
 			 }
-			 if (!(missing_part&NO_REQUEST)){
+			 if (!(missing_part&NO_REQUEST))
+			 {
 				 if (missing_part&EMPTY_REQUEST)
 					 msg["request"] = "";
 				 else
@@ -923,13 +992,16 @@ namespace bumo{
 
 	}
 	 
-	 void WebSocketServer::UpgradeLayout(Json::Value& param) {
+	 void WebSocketServer::UpgradeLayout(Json::Value& param)
+	 {
 		 uint32_t current_condition = msg_processor_.GetCurrentCondition()&(~0x3ff);
 		 Json::Value item;
-		 if (current_condition&UPGRADE_NO_ITEM){
+		 if (current_condition&UPGRADE_NO_ITEM)
+		 {
 			 return;//no item, directly return
 		 }
-		 switch (current_condition) {
+		 switch (current_condition)
+		 {
 		 case UPGRADE_NO_FILENAME:			 
 			 break;
 		 case UPGRADE_FILENAME_BUMO:
@@ -967,8 +1039,10 @@ namespace bumo{
 			 break;
 
 		 }
-		 if (!(current_condition&UPGRADE_NO_MD5)) {
-			 if (current_condition&UPGRADE_WRONG_MD5){
+		 if (!(current_condition&UPGRADE_NO_MD5))
+		 {
+			 if (current_condition&UPGRADE_WRONG_MD5)
+			 {
 				item["md5"] = "11111111111111111111111111";
 			 }
 
@@ -976,7 +1050,8 @@ namespace bumo{
 				 item["md5"] = "2885cdb57f913ed832df4a0731bdc765";
 		 }
 		 
-		 if (!(current_condition&UPGRADE_NO_URL)){
+		 if (!(current_condition&UPGRADE_NO_URL))
+		 {
 			 if (!(current_condition&UPGRADE_WRONG_URL))
 				 item["url"] = "https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png";
 			 else
@@ -986,9 +1061,11 @@ namespace bumo{
 
 		 param["items"].append(item);		
 	 }
-	 void WebSocketServer::SetConfigLayout(Json::Value& param){
+	 void WebSocketServer::SetConfigLayout(Json::Value& param)
+	 {
 		 uint32_t current_condition = msg_processor_.GetCurrentCondition()&(~0x3ff);
-		 switch (current_condition){
+		 switch (current_condition)
+		 {
 		 case SETCONFG_NORMAL:
 			 param["config_file"] = "";
 			 break;
@@ -999,7 +1076,8 @@ namespace bumo{
 		 }	
 		
 	 }
-	 void WebSocketServer::LedgerLayout(Json::Value& param){
+	 void WebSocketServer::LedgerLayout(Json::Value& param)
+	 {
 		 //get the latest seq
 		 bumo::HttpClient::RecvMessage rcv = msg_processor_.http_.http_request(bumo::HttpClient::HTTP_GET, "/getLedger", "");;
 		
@@ -1008,23 +1086,28 @@ namespace bumo{
 
 		 uint32_t current_condition = msg_processor_.GetCurrentCondition()&(~0x3ff);
 
-		 switch (current_condition) {
+		 switch (current_condition)
+		 {
 		 case LEDGER_LATEST_LEDGER:
-			 if (rcv.context.size() == 0) {
+			 if (rcv.context.size() == 0)
+			 {
 				 param["seq"] = 10;
 			 }
-			 else{
+			 else
+			 {
 				 param["seq"] = result["ledger_seq"].asInt();
 			 }
 			
 			 param["num"] = 1;
 			 break;
-		 case LEDGER_LATEST_20_LEDGER:{
+		 case LEDGER_LATEST_20_LEDGER:
+		 {
 										 
 			int current_height = result["ledger_seq"].asInt();
 			current_height = 0 ? 10 : current_height;
 
-			for (int i = 0; i <20; i++){
+			for (int i = 0; i <20; i++)
+			{
 				std::string param = "/getLedger?seq=";
 				char t[128] = { 0 };
 				sprintf(t, "%d", current_height - i);
@@ -1073,7 +1156,8 @@ namespace bumo{
 			 param["seq"] = (result["ledger_seq"].asInt() > 0 ? result["ledger_seq"].asInt() : 10);
 		 }
 	 }
-	 void WebSocketServer::RequestTest() {
+	 void WebSocketServer::RequestTest()
+	 {
 
 		 if (connet_clients_.size() != 0)
 			 connet_clients_.clear();
@@ -1099,7 +1183,8 @@ namespace bumo{
 
 		 std::string method;
 
-		 switch (msg_processor_.GetCurrentRequestTest()) {
+		 switch (msg_processor_.GetCurrentRequestTest())
+		 {
 		 case BUMO:
 			 method = "bumo";
 			 break;
@@ -1127,13 +1212,16 @@ namespace bumo{
 		 default:
 			 break;
 		 }
-		 if (msg_processor_.GetCurrentRequestTest() == UPGRADE){
+		 if (msg_processor_.GetCurrentRequestTest() == UPGRADE)
+		 {
 			 UpgradeLayout(parameter);
 		 }
-		 if (msg_processor_.GetCurrentRequestTest() == LEDGER) {
+		 if (msg_processor_.GetCurrentRequestTest() == LEDGER)
+		 {
 			 LedgerLayout(parameter);
 		 }
-		 if (msg_processor_.GetCurrentRequestTest() == SETCONFG){
+		 if (msg_processor_.GetCurrentRequestTest() == SETCONFG)
+		 {
 			SetConfigLayout(parameter);
 		 }
 		 msg_processor_.SendRequestMessage(method, true, parameter);
@@ -1147,10 +1235,12 @@ namespace bumo{
 	 }
 	
 #ifdef WIN32
-	bool WebSocketServer::IsLaterThan(WIN32_FIND_DATA wfd1, WIN32_FIND_DATA wfd2){
+	bool WebSocketServer::IsLaterThan(WIN32_FIND_DATA wfd1, WIN32_FIND_DATA wfd2)
+	{
 		if (wfd1.ftLastWriteTime.dwHighDateTime > wfd2.ftLastWriteTime.dwHighDateTime)
 			return true;
-		if (wfd1.ftLastWriteTime.dwHighDateTime == wfd2.ftLastWriteTime.dwHighDateTime){
+		if (wfd1.ftLastWriteTime.dwHighDateTime == wfd2.ftLastWriteTime.dwHighDateTime)
+		{
 			if (wfd1.ftLastWriteTime.dwLowDateTime > wfd2.ftLastWriteTime.dwLowDateTime)
 				return true;			
 		}
@@ -1158,7 +1248,8 @@ namespace bumo{
 	}
 #endif
 	
-	bool WebSocketServer::RecordErrorLogLatestTime(){
+	bool WebSocketServer::RecordErrorLogLatestTime()
+	{
 		
 		
 #ifdef WIN32
@@ -1171,14 +1262,16 @@ namespace bumo{
 		WIN32_FIND_DATA wfd;
 		HANDLE hFind;		
 		hFind = FindFirstFile(logpath.c_str(), &wfd);
-		if ( hFind == INVALID_HANDLE_VALUE){
+		if ( hFind == INVALID_HANDLE_VALUE)
+		{
 			printf("no log file in log folder!\n");
 			return false;
 		}
 			
 		WIN32_FIND_DATA latest_log = wfd;
 		
-		do{
+		do
+		{
 			latest_log = IsLaterThan(latest_log, wfd)?latest_log:wfd;
 
 		} while (FindNextFile(hFind, &wfd));
@@ -1211,14 +1304,16 @@ namespace bumo{
 
 		dir = opendir( logpath2.c_str() );  
 		
-		if (dir == NULL){
+		if (dir == NULL)
+		{
 			printf("log path %s does not exist!\n",logpath2.c_str())	;
 			return false;
 		}
 		std::string root = logpath2+"/";
 		printf("root = %s \n",root.c_str());
 		
-		while ((filename = readdir(dir)) != NULL){
+		while ((filename = readdir(dir)) != NULL)
+		{
 			
 			std::string str1 = "monitor-err";
 			std::string filename1 = (std::string)filename->d_name;
@@ -1228,26 +1323,31 @@ namespace bumo{
 			logpath2 = root + filename1;
 			
 			struct stat statbuf;
-			if (stat (logpath2.c_str(), &statbuf) == -1){
+			if (stat (logpath2.c_str(), &statbuf) == -1)
+			{
 				printf ("Get stat on %s Error %s\n", logpath2.c_str(), strerror (errno));
 				return false;
 			}
 			if (S_ISDIR(statbuf.st_mode))
 				return false;
-			if (S_ISREG(statbuf.st_mode)){
-				if(statbuf.st_mtime>latest_time){
+			if (S_ISREG(statbuf.st_mode))
+			{
+				if(statbuf.st_mtime>latest_time)
+				{
 					latest_log = filename;
 					latest_time = statbuf.st_mtime;
 					printf("find a newer file,replace\n");
 				}
 			}			
 		}
-		if(latest_log!=NULL){
+		if(latest_log!=NULL)
+		{
 			printf("latest_log is %s", latest_log->d_name);
 
 			logpath2 = root + (std::string)latest_log->d_name;
 		}
-		else{
+		else
+		{
 			printf("no file found in path %s", root.c_str());
 		}
 
@@ -1264,7 +1364,8 @@ namespace bumo{
 		char ch = fgetc(pfile);
 		int i = 0;
 		
-		while (ch != '['){
+		while (ch != '[')
+		{
 
 			i--;
 			fseek(pfile, i, SEEK_END);
@@ -1274,7 +1375,8 @@ namespace bumo{
 		i = 1;
 		fpos_t temp;
 		fgetpos(pfile, &temp);
-		while (ch != ']'){
+		while (ch != ']')
+		{
 			ch = fgetc(pfile);
 			pre_err_log_timestamp_[i++] = ch;	
 					
@@ -1287,7 +1389,8 @@ namespace bumo{
 	}
 
 
-	bool WebSocketServer::VerifyErrorLog(int err_code){
+	bool WebSocketServer::VerifyErrorLog(int err_code)
+	{
 		//find all file name under logpath	
 		int i = 0;
 #ifdef WIN32
@@ -1302,8 +1405,10 @@ namespace bumo{
 		WIN32_FIND_DATA latest_log = wfd;
 		WIN32_FIND_DATA second_latest_log = wfd;
 
-		do{
-			if (IsLaterThan(wfd, latest_log)==1){
+		do
+		{
+			if (IsLaterThan(wfd, latest_log)==1)
+			{
 				second_latest_log = latest_log;
 				latest_log = wfd;
 				
@@ -1346,7 +1451,8 @@ namespace bumo{
 
 		dir = opendir( logpath2.c_str() );  
 		
-		if (dir == NULL){
+		if (dir == NULL)
+		{
 			printf("log path %s does not exist!\n",logpath2.c_str())	;
 			return false;
 		}
@@ -1354,7 +1460,8 @@ namespace bumo{
 		std::string root = logpath2+"/";
 		printf("root = %s \n",root.c_str());
 		
-		while ((filename = readdir(dir)) != NULL){
+		while ((filename = readdir(dir)) != NULL)
+		{
 			
 			std::string str1 = "monitor-err";
 			std::string filename1 = (std::string)filename->d_name;
@@ -1364,7 +1471,8 @@ namespace bumo{
 			logpath2 = root + filename1;
 			
 			struct stat statbuf;
-			if (stat (logpath2.c_str(), &statbuf) == -1){
+			if (stat (logpath2.c_str(), &statbuf) == -1)
+			{
 
 				printf ("Get stat on %s Error %s\n", logpath2.c_str(), strerror (errno));
 
@@ -1376,9 +1484,12 @@ namespace bumo{
 
 				return false;
 
-			if (S_ISREG(statbuf.st_mode)){
+			if (S_ISREG(statbuf.st_mode))
 
-				if(statbuf.st_mtime>latest_time){
+			{
+
+				if(statbuf.st_mtime>latest_time)
+				{
 					latest_log = filename;
 					latest_time = statbuf.st_mtime;
 					printf("find a newer file,replace\n");
@@ -1402,10 +1513,12 @@ namespace bumo{
 
 		char actual_err_log_timestamp[40] = { 0 };
 		
-		if (!fsetpos(pfile, &pos_of_end_of_err_log)){
+		if (!fsetpos(pfile, &pos_of_end_of_err_log))
+		{
 			char ch = fgetc(pfile);
 			int i = 0;
-			while (ch != '['){		
+			while (ch != '[')
+			{		
 				i++;
 #ifdef WIN32
 				fpos_t pos = pos_of_end_of_err_log - i;
@@ -1424,7 +1537,8 @@ namespace bumo{
 			i = 1;
 			fpos_t temp;
 			fgetpos(pfile, &temp);
-			while (ch != ']'){
+			while (ch != ']')
+			{
 				ch = fgetc(pfile);
 				actual_err_log_timestamp[i++] = ch;
 
@@ -1434,22 +1548,26 @@ namespace bumo{
 		
 		//compare the actual one with the previous one
 		bool flag = true;
-		for (int i = 0; i < 40; ++i){
-			if (actual_err_log_timestamp[i] != pre_err_log_timestamp_[i]){
+		for (int i = 0; i < 40; ++i)
+		{
+			if (actual_err_log_timestamp[i] != pre_err_log_timestamp_[i])
+			{
 				flag = false;
 				break;
 			}			
 
 		}
 		
-		if (flag){
+		if (flag)
+		{
 			//start to read the content and compare
 			fsetpos(pfile, &pos_of_end_of_err_log);
 			char buffer_temp[1028] = {0};
 			int i = fread(buffer_temp, 1, 1028, pfile);
 			std::string a = buffer_temp;
 			std::string target;
-			switch (err_code){
+			switch (err_code)
+			{
 			case 0:
 				target = "";
 				break;
@@ -1501,7 +1619,8 @@ namespace bumo{
 
 			}
 			
-			if (a.find(target) != std::string::npos){
+			if (a.find(target) != std::string::npos)
+			{
 				printf("found error log!\n");
 				return true;
 			}			
@@ -1514,7 +1633,8 @@ namespace bumo{
 	}
 
 	//to generate a random value
-	std::string MsgProcessor::generateRandom(){
+	std::string MsgProcessor::generateRandom()
+	{
 		srand((int)time(0));
 		uint64_t rad =  random(999999999);
 
@@ -1526,7 +1646,8 @@ namespace bumo{
 
 	//All test interface	
 
-	void WebSocketServer::NormalResponseTest1(){
+	void WebSocketServer::NormalResponseTest1()
+	{
 		printf("do nothing");
 		printf("**Test Start**this is a test for normal condition!\n");
 		if (connet_clients_.size() != 0)
@@ -1544,8 +1665,10 @@ namespace bumo{
 
 		bool flag(false);
 		//wait for a connection
-		while (utils::Timestamp::HighResolution() - start_time < 10000000){
-			if (connet_clients_.size() == 1){
+		while (utils::Timestamp::HighResolution() - start_time < 10000000)
+		{
+			if (connet_clients_.size() == 1)
+			{
 				flag = true;
 				break;
 			}
@@ -1574,15 +1697,18 @@ namespace bumo{
 		start_time = utils::Timestamp::HighResolution();
 
 		//wait for a connection
-		while (utils::Timestamp::HighResolution() - start_time < 10000000){
-			if (connet_clients_.size() == 0){
+		while (utils::Timestamp::HighResolution() - start_time < 10000000)
+		{
+			if (connet_clients_.size() == 0)
+			{
 				break;
 			}
 			utils::Sleep(1);
 		}
 		EXPECT_EQ(connet_clients_.size(), 0);
 	}
-	void WebSocketServer::NormalResponseTest(){
+	void WebSocketServer::NormalResponseTest()
+	{
 		printf("**Test Start**this is a test for normal condition!\n");
 		if (connet_clients_.size() != 0)
 			connet_clients_.clear();
@@ -1599,8 +1725,10 @@ namespace bumo{
 
 		bool flag(false);
 		//wait for a connection
-		while (utils::Timestamp::HighResolution() - start_time < 10000000){
-			if (connet_clients_.size() == 1){
+		while (utils::Timestamp::HighResolution() - start_time < 10000000)
+		{
+			if (connet_clients_.size() == 1)
+			{
 				flag = true;
 				break;
 			}
@@ -1629,15 +1757,18 @@ namespace bumo{
 		start_time = utils::Timestamp::HighResolution();
 
 		//wait for a connection
-		while (utils::Timestamp::HighResolution() - start_time < 10000000){
-			if (connet_clients_.size() == 0){
+		while (utils::Timestamp::HighResolution() - start_time < 10000000)
+		{
+			if (connet_clients_.size() == 0)
+			{
 				break;
 			}
 			utils::Sleep(1);
 		}
 		EXPECT_EQ(connet_clients_.size(), 0);
 	}
-	void WebSocketServer::BadHelloResponseTest(){
+	void WebSocketServer::BadHelloResponseTest()
+	{
 		printf("**Test Start**this is a test for testing response with err code 2 and 16 on hello request!\n");
 		bool ret = true;
 		if (connet_clients_.size() != 0)
@@ -1785,7 +1916,8 @@ namespace bumo{
 		EXPECT_EQ(msg_processor_.GetTestOutput(), HELLO_VALID | REG_VALID| HB_VALID);
 		
 	}
-	void WebSocketServer::BadSessionIDTest(){
+	void WebSocketServer::BadSessionIDTest()
+	{
 		printf("**Test Start**This is a test to verify if a request with bad session id send, it is discard and the system keeps normal !\n");
 		printf("**Test Start**This is a test to verify if a response with bad session id send, it is discard and the system keeps normal !\n");
 		bool ret = true;
@@ -1823,7 +1955,8 @@ namespace bumo{
 		EXPECT_EQ(msg_processor_.GetTestOutput(), (HELLO_VALID | REG_VALID | HB_VALID));		
 		
 	}
-	void WebSocketServer::RequestBumoTest(){
+	void WebSocketServer::RequestBumoTest()
+	{
 		printf("**Test Start**this is a test to verify the response of request \"bumo\"!\n");
 		uint32_t testconditions[] = { GENERAL_CASE_RESPONSE_ERRCODE_0, GENERAL_CASE_RESPONSE_ERRCODE_14, \
 			GENERAL_CASE_RESPONSE_ERRCODE_21, GENERAL_CASE_RESPONSE_ERRCODE_22, GENERAL_CASE_RESPONSE_ERRCODE_MAX, \
@@ -1831,12 +1964,14 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(BUMO);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestSystemTest(){
+	void WebSocketServer::RequestSystemTest()
+	{
 		printf("**Test Start**this is a test to verify the response of request \"system\"!\n");
 		uint32_t testconditions[] = { 
 			GENERAL_CASE_RESPONSE_ERRCODE_0, 
@@ -1851,12 +1986,14 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(SYSTEM);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestLedgerTest(){
+	void WebSocketServer::RequestLedgerTest()
+	{
 		
 		printf("**Test Start**this is a test to verify the response of request \"ledger\"!\n");
 		uint32_t testconditions[] = { 
@@ -1876,14 +2013,16 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(LEDGER);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 
 		
 	}
-	void WebSocketServer::RequestAccountExceptionTest(){
+	void WebSocketServer::RequestAccountExceptionTest()
+	{
 		printf("**Test Start**this is a test to verify the response of request \"account_exception\"!\n");
 		uint32_t testconditions[] = { 
 			GENERAL_CASE_RESPONSE_ERRCODE_0, 
@@ -1897,12 +2036,14 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(ACCTEXCP);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestUpgradeTest(){
+	void WebSocketServer::RequestUpgradeTest()
+	{
 		printf("**Test Start**this is a test to verify the response of request \"upgrade\"!\n");
 		
 		uint32_t testconditions[] = { 
@@ -1926,14 +2067,16 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(UPGRADE);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 
 
 	}
-	void WebSocketServer::RequestSetConfigTest(){
+	void WebSocketServer::RequestSetConfigTest()
+	{
 		printf("**Test Start**this is a test to verify the response of request \"set_configure\"!\n");
 		
 		uint32_t testconditions[] = { 
@@ -1948,13 +2091,15 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(SETCONFG);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 		
 	}
-	void WebSocketServer::RequestGetConfigTest(){
+	void WebSocketServer::RequestGetConfigTest()
+	{
 		printf("**Test Start**this is a test to verify the response of request \"get_configure\"!\n");
 		uint32_t testconditions[] = { 
 			GENERAL_CASE_RESPONSE_ERRCODE_0, 
@@ -1969,12 +2114,14 @@ namespace bumo{
 
 		msg_processor_.SetCurrentRequestTest(GETCONFG);
 
-		for (int i = 0; i < (sizeof(testconditions) / 4); i++){
+		for (int i = 0; i < (sizeof(testconditions) / 4); i++)
+		{
 			msg_processor_.SetCurrentCondition(testconditions[i]);
 			RequestTest();
 		}
 	}
-	void WebSocketServer::RequestUndefTest(){
+	void WebSocketServer::RequestUndefTest()
+	{
 		printf("**Test Start**this is a test to verify the response of an undefined request!\n");
 		Cleanoutput();
 		msg_processor_.ResetTestInput();
@@ -2019,7 +2166,8 @@ namespace bumo{
 		EXPECT_EQ(connet_clients_.size(), 1);
 		
 	}
-	void WebSocketServer::RequestIncompleteTest(){
+	void WebSocketServer::RequestIncompleteTest()
+	{
 		printf("**Test Start**this is a test to verify the incomplete message does not influence the monitor!\n");
 		if (connet_clients_.size() != 0)
 			connet_clients_.clear();
@@ -2036,7 +2184,8 @@ namespace bumo{
 
 		bool ret = true;
 
-		for (int i = 0; i < sizeof(testrequest) / 4; i++){
+		for (int i = 0; i < sizeof(testrequest) / 4; i++)
+		{
 			Json::Value msg;
 			IncompleteRequestGenerator(IS_REQUEST, testrequest[i], msg);
 			{
@@ -2048,7 +2197,8 @@ namespace bumo{
 
 		}
 
-		for (int i = 0; i < sizeof(testresp) / 4; i++){
+		for (int i = 0; i < sizeof(testresp) / 4; i++)
+		{
 			Json::Value msg;
 			IncompleteRequestGenerator(IS_RESPONSE, testresp[i], msg);
 			{
@@ -2071,7 +2221,8 @@ namespace bumo{
 		
 
 	}
-	void WebSocketServer::ResponseErrorTest(){
+	void WebSocketServer::ResponseErrorTest()
+	{
 		printf("**Test Start**this is a test to verify the err log by sending all error code!\n");
 		if (connet_clients_.size() != 0)
 			connet_clients_.clear();
@@ -2092,7 +2243,8 @@ namespace bumo{
 
 		int errcode[] = {0, 1, 3, 4, 6,8, 9, 10, 11, 12, 13, 14, 17, 18, 19 ,90};
 		bool ret = true;
-		for (int i = 0; i < (sizeof(errcode)/sizeof(errcode[0])); i++){
+		for (int i = 0; i < (sizeof(errcode)/sizeof(errcode[0])); i++)
+		{
 			RecordErrorLogLatestTime();
 			msg_processor_.SendResponseMessage("error", false, errcode[i], result);
 			utils::Sleep(1000);
@@ -2100,7 +2252,8 @@ namespace bumo{
 		}
 		
 	}
-	void WebSocketServer::WarningTest(){
+	void WebSocketServer::WarningTest()
+	{
 		printf("**Test Start**this is a test to verify the warning!\n");
 
 		if (connet_clients_.size() != 0)
@@ -2119,7 +2272,8 @@ namespace bumo{
 		
 		uint32_t warning[] = { WARNING_CUP_LOW, WARNING_CPU_HIGH };
 		
-		for (int i = 0; i < (sizeof(warning) / sizeof(warning[0])); i++){
+		for (int i = 0; i < (sizeof(warning) / sizeof(warning[0])); i++)
+		{
 			Json::Value parameter;
 			parameter["session_id"] = "random_key";
 			msg_processor_.SendRequestMessage("logout", true, parameter);

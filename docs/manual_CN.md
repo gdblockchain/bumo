@@ -131,41 +131,41 @@ make install
 解压
 
 拷贝 buchain-`1.0.0.x`-linux-x64.tar.gz 到 /usr/local/
-```bash
-cd /usr/local/
-#需要注意用实际版本包 1.0.0.x 的名字
-tar xzvf buchain-1.0.0.x-linux-x64.tar.gz
-```
+
+    cd /usr/local/
+    //需要注意用实际版本包 1.0.0.x 的名字
+    tar xzvf buchain-1.0.0.x-linux-x64.tar.gz
+
 注册服务
-```bash
-ln -s /usr/local/buchain/scripts/bumo /etc/init.d/bumo 
-ln -s /usr/local/buchain/scripts/bumod /etc/init.d/bumod 
-```
+
+    ln -s /usr/local/buchain/scripts/bumo /etc/init.d/bumo 
+    ln -s /usr/local/buchain/scripts/bumod /etc/init.d/bumod 
+
 修改服务启动路径
 
 打开 ./buchain/scripts/bumo 和 ./buchain/scripts/bumod 
 
 将 `install_dir` 变量值修改成安装 Buchain 安装路径 
-```bash
+
     install_dir=/usr/local/buchain 
-```
+
 设置开机启动
-```bash
-#分别执行如下命令（级别1~5）
-ln -s -f /etc/init.d/bumod /etc/rc1.d/S99bumod 
-ln -s -f /etc/init.d/bumod /etc/rc2.d/S99bumod 
-ln -s -f /etc/init.d/bumod /etc/rc3.d/S99bumod 
-ln -s -f /etc/init.d/bumod /etc/rc4.d/S99bumod 
-ln -s -f /etc/init.d/bumod /etc/rc5.d/S99bumod 
-```
+
+    #分别执行如下命令（级别1~5）
+    ln -s -f /etc/init.d/bumod /etc/rc1.d/S99bumod 
+    ln -s -f /etc/init.d/bumod /etc/rc2.d/S99bumod 
+    ln -s -f /etc/init.d/bumod /etc/rc3.d/S99bumod 
+    ln -s -f /etc/init.d/bumod /etc/rc4.d/S99bumod 
+    ln -s -f /etc/init.d/bumod /etc/rc5.d/S99bumod 
+
 在 `/etc/rc.local` 文件末尾追加如下命令
-```bash
-/etc/init.d/bumod start
-```
+
+    /etc/init.d/bumod start
+
 保存后添加执行可执行权限： 
-```bash
-chmod +x /etc/rc.local
-```
+
+    chmod +x /etc/rc.local
+
 安装完成。
 
 ### MAC下的安装步骤
@@ -191,9 +191,9 @@ sudo make install
 
 拷贝 buchain-`1.0.0.x`-macOS-x64.tar.gz 到 /usr/local/
 
-```bash
+```
 cd /usr/local/
-#需要注意用实际版本包的名字
+//需要注意用实际版本包的名字
 sudo tar xzvf buchain-1.0.0.x-macOS-x64.tar.gz
 ```
 
@@ -217,137 +217,137 @@ sudo tar xzvf buchain-1.0.0.x-macOS-x64.tar.gz
 
 1、首先需要停止 bumo 程序，
 ```bash
-service bumod stop
-#MAC 系统没有 service 服务，直接终止 bumo 程序
+    service bumod stop
+    #MAC 系统没有 service 服务，直接终止 bumo 程序
 ```
 2、替换配置文件
 ```bash
-cd /usr/local/buchain/config/
-#拷贝目标环境配置文件
-cp bumo-testnet.json bumo.json  
+    cd /usr/local/buchain/config/
+    #拷贝目标环境配置文件
+    cp bumo-testnet.json bumo.json  
 
-#配置文件环境说明
-bumo.json           ##程序启动后默认加载的文件
-bumo-mainnet.json   ##主网环境配置文件
-bumo-testnet.json   ##测试网配置文件
-bumo-single.json    ##单机节点调试环境
+    #配置文件环境说明
+    bumo.json           ##程序启动后默认加载的文件
+    bumo-mainnet.json   ##主网环境配置文件
+    bumo-testnet.json   ##测试网配置文件
+    bumo-single.json    ##单机节点调试环境
 ```
 3、并清空数据库并启动服务
 ```bash
-cd ../
-./bin/bumo --dropdb
-service bumod start
+    cd ../
+    ./bin/bumo --dropdb
+    service bumod start
 
-#MAC 系统没有 service 服务，直接使用 sudo ./bin/bumo
+    #MAC 系统没有 service 服务，直接使用 sudo ./bin/bumo
 ```
 ### 运行
 
 ```bash
-service bumod start
-#MAC 系统没有 service 服务，直接使用 sudo ./bin/bumo
+    service bumod start
+    #MAC 系统没有 service 服务，直接使用 sudo ./bin/bumo
 ```
 
 ### 运行状态
 
 ```bash
-service bumod status
-#MAC 系统没有 service 服务
+    service bumod status
+    #MAC 系统没有 service 服务
 ```
 
 ### 配置
-```bash
+
 bumo.json
-```
+
 #### 数据存储
 
 ```json
-"db":
-{
-    "account_path": "data/account.db", //用来存储账号数据
-    "ledger_path": "data/ledger.db", //存储区块数据
-    "keyvalue_path": "data/keyvalue.db" //存储共识数据
-}
+    "db":
+    {
+        "account_path": "data/account.db", //用来存储账号数据
+        "ledger_path": "data/ledger.db", //存储区块数据
+        "keyvalue_path": "data/keyvalue.db" //存储共识数据
+    }
 ```
 #### 节点间网络通信
 ```json
-"p2p":
-{
-   "network_id":30000,//网络 ID
-   //共识网络
-   "consensus_network":
+    "p2p":
     {
-        "heartbeat_interval":60, //心跳周期，秒
-        "listen_port":36001,//已监听的端口
-         "target_peer_connection":50,  //最大主动连接节点数
-         "known_peers":
-        [
-            "127.0.0.1:36001"//连接其他节点
-        ]
+        "network_id":30000,//网络 ID
+        //共识网络
+        "consensus_network":
+        {
+            "heartbeat_interval":60, //心跳周期，秒
+            "listen_port":36001,//已监听的端口
+            "target_peer_connection":50,  //最大主动连接节点数
+            "known_peers":
+            [
+                "127.0.0.1:36001"//连接其他节点
+            ]
+        }
     }
-}
 ```
 
 #### WEB API 配置
 
 ```json
-"webserver":{
-    "listen_addresses":"0.0.0.0:36002" 
-}
+    "webserver":{
+        "listen_addresses":"0.0.0.0:36002" 
+    }
 ```
 
 #### WebSocket API 配置 
 
 ```json
-"wsserver":
-{
-    "listen_address":"0.0.0.0:36003"
-}
+    "wsserver":
+    {
+        "listen_address":"0.0.0.0:36003"
+    }
 ```
 
 #### 区块配置
 
 ```json
-"ledger":
-{
-    "validation_address":"buQmtDED9nFcCfRkwAF4TVhg6SL1FupDNhZY",//验证节点地址，同步节点或者钱包不需要配置
-    "validation_private_key": "e174929ecec818c0861aeb168ebb800f6317dae1d439ec85ac0ce4ccdb88487487c3b74a316ee777a3a7a77e5b12efd724cd789b3b57b063b5db0215fc8f3e89", //验证节点私钥，同步节点或者钱包不需要配置
-   "max_trans_per_ledger":1000,  //单个区块最大交易个数
-    "tx_pool":                      //交易池配置
+    "ledger":
     {
-        "queue_limit":10240,            //交易池总量限制
-        "queue_per_account_txs_limit":64    //单个账号的交易缓冲最大值
+        "validation_address":"buQmtDED9nFcCfRkwAF4TVhg6SL1FupDNhZY",//验证节点地址，同步节点或者钱包不需要配置
+        "validation_private_key": "e174929ecec818c0861aeb168ebb800f6317dae1d439ec85ac0ce4ccdb88487487c3b74a316ee777a3a7a77e5b12efd724cd789b3b57b063b5db0215fc8f3e89", //验证节点私钥，同步节点或者钱包不需要配置
+        "max_trans_per_ledger":1000,  //单个区块最大交易个数
+        "tx_pool":                      //交易池配置
+        {
+            "queue_limit":10240,            //交易池总量限制
+            "queue_per_account_txs_limit":64    //单个账号的交易缓冲最大值
+        }
     }
-}
 ```
 
 `validation_address` 和 `validation_private_key` 可以通过 bumo 程序命令行工具获得，请妥善保存该账号信息，丢失后将无法找回。
-```bash
-[root@bumo ~]# cd /usr/local/buchain/bin
-[root@bumo bin]#./bumo --create-account
+```
+    [root@bumo ~]# cd /usr/local/buchain/bin
+    [root@bumo bin]#./bumo --create-account
 
-{
-    "address" : "buQmtDED9nFcCfRkwAF4TVhg6SL1FupDNhZY", //地址
-    "private_key" : "privbsZozNs3q9aixZWEUzL9ft8AYph5DixN1sQccYvLs2zPsPhPK1Pt", //私钥
-    "private_key_aes" : "e174929ecec818c0861aeb168ebb800f6317dae1d439ec85ac0ce4ccdb88487487c3b74a316ee777a3a7a77e5b12efd724cd789b3b57b063b5db0215fc8f3e89", //AES 加密的私钥
-    "public_key" : "b00108d329d5ff69a70177a60bf1b68972576b35a22d99d0b9a61541ab568521db5ee817fea6", //公钥
-    "public_key_raw" : "08d329d5ff69a70177a60bf1b68972576b35a22d99d0b9a61541ab568521db5e", //原始公钥
-    "sign_type" : "ed25519" //ed25519 加密方式
-}
+    {
+        "address" : "buQmtDED9nFcCfRkwAF4TVhg6SL1FupDNhZY", //地址
+        "private_key" : "privbsZozNs3q9aixZWEUzL9ft8AYph5DixN1sQccYvLs2zPsPhPK1Pt", //私钥
+        "private_key_aes" : "e174929ecec818c0861aeb168ebb800f6317dae1d439ec85ac0ce4ccdb88487487c3b74a316ee777a3a7a77e5b12efd724cd789b3b57b063b5db0215fc8f3e89", //AES 加密的私钥
+        "public_key" : "b00108d329d5ff69a70177a60bf1b68972576b35a22d99d0b9a61541ab568521db5ee817fea6", //公钥
+        "public_key_raw" : "08d329d5ff69a70177a60bf1b68972576b35a22d99d0b9a61541ab568521db5e", //原始公钥
+        "sign_type" : "ed25519" //ed25519 加密方式
+    }
 ```
 
 ### 创世区块
 ```json
-"genesis": 
-{
-     "account": "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3", //创世区块地址
-     "slogan" : "a new era of value",  //存储在创世区块中的标语
-     "fees": 
-     {
-        "base_reserve": 10000000,  //账号最低预留费
-        "gas_price": 1000          //字节费
-     },
-     "validators": ["buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY"] //验证节点区块列表
-}
+   "genesis": 
+   {
+        "account": "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3", //创世区块地址
+        "slogan" : "a new era of value",  //存储在创世区块中的标语
+        "fees": 
+        {
+            "base_reserve": 10000000,  //账号最低预留费
+            "gas_price": 1000          //字节费
+        },
+        "validators": ["buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY"] //验证节点区块列表
+    }
 ```
 同一个区块链上的 `genesis` 配置，必须保持一致
 
@@ -355,18 +355,19 @@ bumo.json
 #### 日志配置
 
 ```json
-"logger":
-{
-    "path":"log/buchain.log", // 日志目录
-    "dest":"FILE|STDOUT|STDERR", //输出文件分类
-    "level":"TRACE|INFO|WARNING|ERROR|FATAL",//日志级别
-    "time_capacity":1, //时间容量，天
-    "size_capacity":10, //大小容量，兆
-    "expire_days":10  //清理日志周期，天
-}
+    "logger":
+    {
+        "path":"log/buchain.log", // 日志目录
+        "dest":"FILE|STDOUT|STDERR", //输出文件分类
+        "level":"TRACE|INFO|WARNING|ERROR|FATAL",//日志级别
+        "time_capacity":1, //时间容量，天
+        "size_capacity":10, //大小容量，兆
+        "expire_days":10  //清理日志周期，天
+    }
 ```
 
 #### 多节点配置示例
+
 
 以上章节介绍了配置文件的基本参数。本节以两个验证节点和一个同步节点为例，介绍多节点在一条链的配置，其中需要修改 p2p、validation 和 ledger 这三模块，具体示例如下
 
@@ -528,31 +529,31 @@ p2p 的 known_peers 必须为其他已知节点的 IP 和端口，用于节点�
 ```bash
 [root@bumo ~]# curl 127.0.0.1:36002/getModulesStatus
 {
-"glue_manager":{
-    "cache_topic_size":0,
-    "ledger_upgrade":{
-        "current_states":null,
-        "local_state":null
+    "glue_manager":{
+        "cache_topic_size":0,
+        "ledger_upgrade":{
+            "current_states":null,
+            "local_state":null
+        },
+        "system":{
+            "current_time":"2017-07-20 10:32:22", //当前系统时间
+            "process_uptime":"2017-07-20 09:35:06", //bumo启动时间
+            "uptime":"2017-05-14 23:51:04"
+        },
+        "time":"0 ms",
+        "transaction_size":0
     },
-    "system":{
-        "current_time":"2017-07-20 10:32:22", //当前系统时间
-        "process_uptime":"2017-07-20 09:35:06", //bumo启动时间
-        "uptime":"2017-05-14 23:51:04"
+    "keyvalue_db":Object{...},
+    "ledger_db":Object{...},
+    "ledger_manager":{
+        "account_count":2316,  //账户数
+        "hash_type":"sha256",
+        "ledger_sequence":12187,
+        "time":"0 ms",
+        "tx_count":1185   //交易数
     },
-    "time":"0 ms",
-    "transaction_size":0
-},
-"keyvalue_db":Object{...},
-"ledger_db":Object{...},
-"ledger_manager":{
-    "account_count":2316,  //账户数
-    "hash_type":"sha256",
-    "ledger_sequence":12187,
-    "time":"0 ms",
-    "tx_count":1185   //交易数
-},
-"peer_manager":Object{...},
-"web server":Object{...},
+    "peer_manager":Object{...},
+    "web server":Object{...},
 
 ```
 
@@ -574,15 +575,15 @@ Create hard fork ledger successful, seq(20), consensus value hash(**7aa332f05748
 - 把上述 Hash 值配置到本节点或者同步节点的 bumo.json 的hardfork_points
 
 ```json
-"ledger":
-{
-  	 "genesis_account": "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3",
-     "max_trans_per_ledger": 1000,
-     "hardfork_points" : 
-     [
-        "7aa332f05748e6ce9ad3d059c959a50675109bcaf0a4ba2c5c6adc6418960197"
-     ]
-},
+    "ledger":
+    {
+       	"genesis_account": "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3",
+        "max_trans_per_ledger": 1000,
+        "hardfork_points" : 
+        [
+        	"7aa332f05748e6ce9ad3d059c959a50675109bcaf0a4ba2c5c6adc6418960197"
+        ]
+    },
 ```
 
 - 启动节点服务即可生效

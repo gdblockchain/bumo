@@ -46,9 +46,6 @@
     <ClCompile Include="..\..\test\gtest\test\strings_test.cpp">
       <Filter>UTest</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\test\gtest\test\base64_utest.cpp">
-      <Filter>UTest</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\test\gtest\common\http_client.h">

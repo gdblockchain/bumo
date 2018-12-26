@@ -71,6 +71,27 @@ namespace bumo {
 		return true;
 	}
 
+
+
+	MessageChannelConfigure::MessageChannelConfigure(){// second
+	}
+
+	MessageChannelConfigure::~MessageChannelConfigure() {}
+
+	bool MessageChannelConfigure::Load(const Json::Value &value) {
+		std::string address;
+		Configure::GetValue(value, "listen_address", address);
+		listen_address_ = utils::InetAddress(address);
+		std::string target_message_channel;
+		Configure::GetValue(value, "target_message_channel", target_message_channel);
+		target_message_channel_ = utils::InetAddress(target_message_channel);
+
+		return true;
+	}
+
+
+
+
 	WsServerConfigure::~WsServerConfigure() {}
 
 	bool WsServerConfigure::Load(const Json::Value &value) {
@@ -106,8 +127,6 @@ namespace bumo {
 		ConfigureBase::GetValue(value, "query_limit", query_limit_);
 		ConfigureBase::GetValue(value, "multiquery_limit", multiquery_limit_);
 		ConfigureBase::GetValue(value, "thread_count", thread_count_);
-		ConfigureBase::GetValue(value, "allow_origin", allow_origin_);
-		
 		
 		if (ssl_enable_)
 			ssl_configure_.Load(value["ssl"]);
@@ -220,11 +239,13 @@ namespace bumo {
 		db_configure_.Load(values["db"]);
 		logger_configure_.Load(values["logger"]);
 		p2p_configure_.Load(values["p2p"]);
+		message_channel_configure_.Load(values["messagechannel"]);
 		webserver_configure_.Load(values["webserver"]);
 		ledger_configure_.Load(values["ledger"]);
 		genesis_configure_.Load(values["genesis"]);
 		wsserver_configure_.Load(values["wsserver"]);
 		monitor_configure_.Load(values["monitor"]);
+		bumo::General::SetSelfChainId(genesis_configure_.chain_id_);
 		return true;
 	}
 }

@@ -25,8 +25,7 @@
 		"thread_count": 8
     },
     "wsserver": {
-        "listen_address": "0.0.0.0:36003",
-	"allow_orgin" : ""
+        "listen_address": "0.0.0.0:36003"
     },
     "ledger": {
 	"validation_address": "buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY",
@@ -39,9 +38,8 @@
 		}
     },
     "genesis": {
-        "chain_id": 0,
         "account": "buQs9npaCq9mNFZG18qu88ZcmXYqd6bqpTU3",
-        "slogan" : "a new era of value",
+	"slogan" : "a new era of value",
         "fees": {
             "base_reserve": 10000000,
             "gas_price": 1000

@@ -28,7 +28,6 @@ namespace bumo {
 		const static uint32_t OVERLAY_VERSION;
 		const static uint32_t OVERLAY_MIN_VERSION;
 		const static uint32_t LEDGER_VERSION_HISTORY_1000;
-		const static uint32_t LEDGER_VERSION_HISTORY_1001;
 		const static uint32_t LEDGER_VERSION;
 		const static uint32_t LEDGER_MIN_VERSION;
 		const static uint32_t MONITOR_VERSION;
@@ -97,6 +96,8 @@ namespace bumo {
 
 		const static char *CONTRACT_VALIDATOR_ADDRESS;
 		const static char *CONTRACT_FEE_ADDRESS;
+		const static char *CONTRACT_CMC_ADDRESS;
+		const static char *CONTRACT_CPC_ADDRESS;
 
 		const static int32_t TRANSACTION_LIMIT_SIZE;
 		const static int32_t TXSET_LIMIT_SIZE;
@@ -108,6 +109,8 @@ namespace bumo {
 
 		const static int64_t REWARD_PERIOD = (5 * 365 * 24 * 60 * 60) / 10;
 		const static int64_t REWARD_INIT_VALUE = 8 * 100000000;
+
+		const static int64_t MAIN_CHAIN_ID = 0;
 
 		typedef enum WARNINGCODE_ {
 			WARNING,
@@ -137,9 +140,6 @@ namespace bumo {
 		int32_t code_;
 		std::string desc_;
 
-		//if has value, must a json, OR nullValue
-		//if has value, like, code_ == 0, {"type": bool/string, "value":true/"hello the world"}
-		Json::Value contract_result_; 
 	public:
 		Result();
 		Result(const Result &result);
@@ -147,11 +147,9 @@ namespace bumo {
 
 		int32_t code() const;
 		std::string desc() const;
-		const Json::Value &contract_result() const;
 
 		void set_code(int32_t code);
 		void set_desc(const std::string desc);
-		void set_contract_result(const Json::Value &contract_result);
 
 		bool operator=(const Result &result);
 	};
@@ -297,7 +295,6 @@ namespace bumo {
 	int64_t GetBlockReward(const int64_t cur_block_height);
 
 #define CHECK_VERSION_GT_1000 (LedgerManager::Instance().GetLastClosedLedger().version() > General::LEDGER_VERSION_HISTORY_1000)
-#define CHECK_VERSION_GT_1001 (LedgerManager::Instance().GetLastClosedLedger().version() > General::LEDGER_VERSION_HISTORY_1001)
 }
 
 #endif

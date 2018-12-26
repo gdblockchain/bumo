@@ -70,7 +70,6 @@ public:
 
 	void SetHome(const std::string &home);
 	void SetIndexName(const std::string &index_name);
-	void SetAllowOrigin(const std::string &allow_origin);
 
 	void Run();
 	void Stop();
@@ -109,7 +108,6 @@ private:
 
 	std::string web_home_;
 	std::string index_file_;
-	std::string allow_origin_;
 
 	std::map<std::string, std::string> compress_type_;
 	std::map<std::string, std::string> content_type_;

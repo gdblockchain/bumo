@@ -18,24 +18,31 @@
 
 #include <proto/cpp/chain.pb.h>
 #include <proto/cpp/consensus.pb.h>
+#include <utils/entry_cache.h>
 #include <utils/atom_map.h>
 #include <main/configure.h>
 #include <json/value.h>
 #include "account.h"
 
 namespace bumo {
-	class Environment : public utils::AtomMap<std::string, AccountFrm>{
+	class Environment : public AtomMap<std::string, AccountFrm>{
 	public:
-		typedef utils::AtomMap<std::string, Json::Value>::Map settingKV;
+		typedef AtomMap<std::string, Json::Value>::mapKV settingKV;
 		const std::string validatorsKey = "validators";
 		const std::string feesKey = "configFees";
 
 		AtomMap<std::string, Json::Value> settings_;
+		std::map<std::string, AccountFrm::pointer> entries_;
+
+		Environment *parent_;
+		bool useAtomMap_;
 
 		Environment() = default;
 		Environment(Environment const&) = delete;
 		Environment& operator=(Environment const&) = delete;
-		Environment(Map* data, settingKV* settings);
+
+		Environment(Environment *parent);
+		Environment(mapKV* data, settingKV* settings);
 
 		bool GetEntry(const std::string& key, AccountFrm::pointer &frm);
 		bool AddEntry(const std::string& key, AccountFrm::pointer frm);

@@ -29,11 +29,10 @@ namespace bumo {
 		3.Create a contract account without destination address, and it will be created automatically.
 	*/
 	const uint32_t General::LEDGER_VERSION_HISTORY_1000 = 1000;
-	const uint32_t General::LEDGER_VERSION_HISTORY_1001 = 1001;
-	const uint32_t General::LEDGER_VERSION = 1002;
+	const uint32_t General::LEDGER_VERSION = 1001;
 	const uint32_t General::LEDGER_MIN_VERSION = 1000;
 	const uint32_t General::MONITOR_VERSION = 1000;
-	const char *General::BUMO_VERSION = "1.1.0.0";
+	const char *General::BUMO_VERSION = "1.0.0.8";
 
 #ifdef WIN32
 	const char *General::DEFAULT_KEYVALUE_DB_PATH = "data/keyvalue.db";
@@ -93,6 +92,8 @@ namespace bumo {
 
 	const char *General::CONTRACT_VALIDATOR_ADDRESS = "buQtxgoaDrVJGtoPT66YnA2S84yE8FbBqQDJ";
 	const char *General::CONTRACT_FEE_ADDRESS = "buQiQgRerQM1fUM3GkqUftpNxGzNg2AdJBpe";
+	const char *General::CONTRACT_CMC_ADDRESS = "buQjjhxJhVDByQLSjQi4BEpDj9xTEHZbhbGe";
+	const char *General::CONTRACT_CPC_ADDRESS = "buQZ6zAfmCVQBWTz5uVvMpMEdNGesLTJ888P";
 
 	const int32_t General::TRANSACTION_LIMIT_SIZE = utils::BYTES_PER_MEGA;
 	const int32_t General::TXSET_LIMIT_SIZE = 16 * utils::BYTES_PER_MEGA;
@@ -101,13 +102,11 @@ namespace bumo {
 
 	Result::Result(){
 		code_ = protocol::ERRCODE_SUCCESS;
-		contract_result_ = Json::Value(Json::nullValue);
 	}
 
 	Result::Result(const Result &result) {
 		code_ = result.code_;
 		desc_ = result.desc_;
-		contract_result_ = result.contract_result_;
 	}
 
 	Result::~Result(){};
@@ -120,10 +119,6 @@ namespace bumo {
 		return desc_;
 	}
 
-	const Json::Value &Result::contract_result() const {
-		return contract_result_;
-	}
-
 	void Result::set_code(int32_t code){
 		code_ = code;
 	}
@@ -132,14 +127,9 @@ namespace bumo {
 		desc_ = desc;
 	}
 
-	void Result::set_contract_result(const Json::Value &contract_result) {
-		contract_result_ = contract_result;
-	}
-
 	bool Result::operator=(const Result &result){
 		code_ = result.code();
 		desc_ = result.desc();
-		contract_result_ = result.contract_result();
 		return true;
 	}
 

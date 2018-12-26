@@ -8,10 +8,13 @@
 #include <utils/strings.h>
 #include <utils/utils.h>
 
-namespace bumo{
-	class HttpClient{
+namespace bumo
+{
+	class HttpClient
+	{
 	public:
-		enum HTTP_REQUEST{
+		enum HTTP_REQUEST
+		{
 			HTTP_POST,
 			HTTP_GET
 		};

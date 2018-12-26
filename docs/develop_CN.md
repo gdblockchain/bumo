@@ -1840,23 +1840,6 @@ function query(input)
     */
     ```
 
-- ##### 获取合约账户属性
-
-    `getContractProperty(contract_address);`
-
-    - contract_address: 合约地址
-
-    例如
-    ```javascript
-    let value = getContractProperty('buQcFSxQP6RV9vnFagZ31SEGh55YMkakBSGW');
-
-    /*
-      权限：只读
-      返回：成功返回JSON对象，如 {"type":0, "length" : 416},  type 指合约类型， length 指合约代码长度，如果该账户不是合约则，length 为0.
-      失败返回false
-    */
-    ```
-
 - ##### 获取区块信息
 
     `getBlockHash(offset_seq);`
@@ -2051,7 +2034,7 @@ function query(input)
 
           
  - ##### 校验签名是否合法
-    `ecVerify(signedData, publicKey,blobData [, blobDataType]);`
+    `verify(signedData, publicKey,blobData [, blobDataType]);`
 
     - signedData: 签名数据，base16编码的字符串。
     - publicKey：公钥，base16编码的字符串。
@@ -2061,67 +2044,10 @@ function query(input)
 
     例如
     ```javascript
-    let ret = ecVerify('3471aceac411975bb83a22d7a0f0499b4bfcb504e937d29bb11ea263b5f657badb40714850a1209a0940d1ccbcfc095c4b2d38a7160a824a6f9ba11f743ad80a', 'b0014e28b305b56ae3062b2cee32ea5b9f3eccd6d738262c656b56af14a3823b76c2a4adda3c', 'abcd', 1);
+    let ret = verify('3471aceac411975bb83a22d7a0f0499b4bfcb504e937d29bb11ea263b5f657badb40714850a1209a0940d1ccbcfc095c4b2d38a7160a824a6f9ba11f743ad80a', 'b0014e28b305b56ae3062b2cee32ea5b9f3eccd6d738262c656b56af14a3823b76c2a4adda3c', 'abcd', 1);
     /*
       权限：只读
       返回：成功会返回true，失败会返回 false
-    */
-
-    ```
- - ##### DelegateCall
-    `delegateCall(contractAddress, input);`
-
-    - contractAddress: 被调用的合约地址。
-    - input：调用参数。
-    
-    delegateCall 函数会触发被调用的合约main函数入口，并且把当前合约的执行环境赋予被调用的合约。
-    
-    例如
-    ```javascript
-    let ret = delegateCall('buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY'，'{}');
-    /*
-      权限：可写
-      返回：成功会返回结果，失败抛出异常
-    */
-
-    ```
-
- - ##### contractCall
-    `contractCall(contractAddress, asset, amount, input);`
-
-    - contractAddress: 被调用的合约地址。
-    - asset : 资产类别，true代表BU，对象{"issue": buxxx, "code" : USDT} 代表资产。
-    - amount: 资产数量。
-    - input：调用参数。
-    
-    contractCall 函数会触发被调用的合约main函数入口。
-    
-    例如
-    ```javascript
-    let ret = contractCall('buQBwe7LZYCYHfxiEGb1RE9XC9kN2qrGXWCY'，true, toBaseUnit("10"), "");
-    /*
-      权限：可写
-      返回：如果目标账户为普通账户，则返回true，如果目标账户为合约，调用成功则返回main函数的返回值，调用失败则抛出异常
-    */
-
-    ```
-
- - ##### contractCreate
-    `contractCreate(balance, type, code, input);`
-
-    - balance: 字符串类型，转移给被创建的合约的资产。
-    - type : 整型，0代表javascript。
-    - code: 字符串类型， 合约代码。
-    - input：init函数初始化参数。
-    
-    contractCreate 创建合约。
-    
-    例如
-    ```javascript
-    let ret = contractCreate(toBaseUnit("10"), "'use strict';function init(input){return input;} function main(input){return input;} function query(input){return input;} ", "");
-    /*
-      权限：可写
-      返回：创建成功返回合约地址，失败则抛出异常
     */
 
     ```
@@ -2249,11 +2175,6 @@ function query(input)
 - ##### 当前区块时间戳
     blockTimestamp
 
-- ##### 原始调用者地址
-    originSender
-
-    当合约嵌套调用时，在任一深度的合约里都可以获取到原始的调用者地址
-
 - ##### 调用者的地址
     sender
     ```sender``` 的值等于本次调用该合约的账号。
@@ -2266,18 +2187,6 @@ function query(input)
     那么bar的值是x的账号地址。
     */
     ```
-
-    
-- ##### 交易发起者
-    txInitiator
-
-    交易发起者地址，该发起者负责支付交易手续费，合约中一般较少用到该内置变量。 例如某账号发起一笔转账操作，支付交易手续费的是地址 A，转账源地址是B，转账目的地址是C，那么 txInitiator 为A，sender 为B。注意，请在足够了解该变量的情况下使用，一般情况会用sender替代。
-
-    
-- ##### 原始交易发起者
-    originTxInitiator
-
-    原始交易发起者地址。
 
 - ##### 触发本次合约调用的操作的序号
     triggerIndex

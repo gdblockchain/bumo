@@ -15,7 +15,6 @@
         - [main](#main)
         - [query](#query)
 
-
 # Bumo CTP1.0 Token 标准
 
 ## 简介
@@ -23,14 +22,12 @@
 CTP 1.0(Contract Token Protocol) 指基于 BUMO 智能合约发行 token 的标准协议。该协议提供了转移 token 的基本功能，并允许 token 授权给第三方使用。
 
 ## 目标
-
+ 
 基于这套标准接口，可以让发行的 token 被其他应用程序和第三方快速对接和使用，比如钱包和交易所。
-
 
 ## 规则
 
 Bumo 智能合约由 JavaScript 语言实现, 包含初始化函数 init 和两个入口函数 main、query 。init 函数用于合约创建时初始化; main 函数主要负责数据写入，query 函数负责数据查询。
-
 
 ## Token 属性
 
@@ -41,7 +38,7 @@ Token 属性可以通过合约的 `tokenInfo` 功能函数查询到，存储在�
 |name          | Token 名称                  |
 |symbol        | Token 符号                  |
 |decimals      | Token 小数位数              |
-|totalSupply   | Token 总量      |
+|totalSupply   | Token 总量，totalSupply = Token 个数(supply) * 10 ^ decimals |
 |version       | Contract Token Protocol版本 |
 
 注意：
@@ -222,7 +219,7 @@ function init(input_str){
         "name":"DemoToken",
         "symbol":"DT",
         "decimals":8,
-        "totalSupply":"5000000000000",
+        "supply":"50000",
         "version": "1.0"
     }
 }
@@ -230,7 +227,7 @@ function init(input_str){
 - name: token 名称
 - symbol: 资产符号
 - decimals: 小数位数
-- totalSupply: 字符串格式，发行Token 总数。例如发行 50000 个 Token，其 totalSupply 总量为 50000 * 100000000
+- supply: 字符串格式，发行Token 个数(整数部分)。例如发行 50000 个 Token，其 totalSupply 总量为 50000 * 100000000
 - version: 版本号
 
 入口函数的返回值：true或者抛异常

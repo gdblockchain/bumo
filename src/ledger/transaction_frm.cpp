@@ -19,7 +19,7 @@
 #include <main/configure.h>
 #include <ledger/ledger_manager.h>
 #include "transaction_frm.h"
-#include <contract/contract_manager.h>
+#include "contract_manager.h"
 #include "fee_calculate.h"
 #include "ledger_frm.h"
 namespace bumo {
@@ -30,6 +30,7 @@ namespace bumo {
 		result_(),
 		transaction_env_(),
 		hash_(),
+		full_hash_(),
 		data_(),
 		full_data_(),
 		valid_signature_(),
@@ -82,11 +83,6 @@ namespace bumo {
 		result["actual_fee"] = actual_gas_for_query_;
 		result["hash"] = utils::String::BinToHexString(hash_);
 		result["tx_size"] = transaction_env_.ByteSize();
-
-		for (auto const &i : contract_tx_hashes_){
-			Json::Value &array_json = result["contract_tx_hashes"];
-			array_json[array_json.size()] = utils::String::BinToHexString(i);
-		}
 	}
 
 	void TransactionFrm::CacheTxToJson(Json::Value &result){
@@ -101,6 +97,7 @@ namespace bumo {
 		data_ = tran.SerializeAsString();
 		hash_ = HashWrapper::Crypto(data_);
 		full_data_ = transaction_env_.SerializeAsString();
+		full_hash_ = HashWrapper::Crypto(full_data_);
 
 		for (int32_t i = 0; i < transaction_env_.signatures_size(); i++) {
 			const protocol::Signature &signature = transaction_env_.signatures(i);
@@ -126,27 +123,16 @@ namespace bumo {
 		return data_;
 	}
 
+	std::string TransactionFrm::GetFullHash() const {
+		return full_hash_;
+	}
+
 	const protocol::TransactionEnv &TransactionFrm::GetTransactionEnv() const {
 		return transaction_env_;
 	}
 
 	std::string TransactionFrm::GetSourceAddress() const {
 		const protocol::Transaction &tran = transaction_env_.transaction();
-		return tran.source_address();
-	}
-
-
-	std::string TransactionFrm::GetOperatingSourceAddress() const {
-		const protocol::Transaction &tran = transaction_env_.transaction();
-		if (processing_operation_ < 0 || processing_operation_ >= tran.operations_size()) {
-			return "";
-		}
-
-		const protocol::Operation &ope = tran.operations(processing_operation_);
-		if (ope.source_address() != "") {
-			return ope.source_address();
-		}
-		
 		return tran.source_address();
 	}
 
@@ -493,6 +479,7 @@ namespace bumo {
 
 		if (tran.metadata().size() > General::METADATA_MAX_VALUE_SIZE) {
 			result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
+			//result_.set_desc("Transaction metadata too long");
 			result_.set_desc(utils::String::Format("Length of the metadata from transaction exceeds the limit(%d).",
 				General::METADATA_MAX_VALUE_SIZE));
 
@@ -511,6 +498,7 @@ namespace bumo {
 
 			if (tran.ceil_ledger_seq() < current_ledger_seq) {
 				result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
+				//result_.set_desc("Transaction metadata too long");
 				result_.set_desc(utils::String::Format("Limit ledger sequence(" FMT_I64 ") < current ledger sequence(" FMT_I64 ")",
 					tran.ceil_ledger_seq(), current_ledger_seq));
 
@@ -520,6 +508,7 @@ namespace bumo {
 		}
 		else if (tran.ceil_ledger_seq() < 0) {
 			result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
+			//result_.set_desc("Transaction metadata too long");
 			result_.set_desc(utils::String::Format("Limit ledger sequence(" FMT_I64 ") < 0",
 				tran.ceil_ledger_seq()));
 			LOG_ERROR("%s", result_.desc().c_str());
@@ -603,6 +592,17 @@ namespace bumo {
 		}
 
 		int64_t self_gas = GetSelfGas();
+		//if ((self_gas != 0) && ((utils::MAX_INT64 / self_gas) < gas_price)) {
+		//	std::string error_desc = utils::String::Format(
+		//		"Transaction(%s), gas(" FMT_I64 "), self gas price(" FMT_I64 ") not valid",
+		//		utils::String::BinToHexString(GetContentHash()).c_str(), self_gas, gas_price);
+
+		//	result_.set_code(protocol::ERRCODE_INVALID_PARAMETER);
+		//	result_.set_desc(error_desc);
+		//	LOG_ERROR("%s", error_desc.c_str());
+
+		//	return false;
+		//}
 		int64_t tx_fee=0;
 		if (!utils::SafeIntMul(self_gas, gas_price, tx_fee)){
 			std::string error_desc = utils::String::Format(
@@ -630,6 +630,14 @@ namespace bumo {
 	}
 
 	bool TransactionFrm::AddActualFee(TransactionFrm::pointer bottom_tx, TransactionFrm* txfrm){
+		
+		//if ((bottom_tx->GetGasPrice() != 0) && ((utils::MAX_INT64 / bottom_tx->GetGasPrice())  <  bottom_tx->GetActualGas())) {
+		//	txfrm->result_.set_code(protocol::ERRCODE_FEE_INVALID);
+		//	txfrm->result_.set_desc(utils::String::Format("Transaction(%s), actual gas(" FMT_I64 "), gas price(" FMT_I64 ")", utils::String::BinToHexString(bottom_tx->GetContentHash()).c_str(),
+		//		bottom_tx->GetActualGas(), bottom_tx->GetGasPrice()));
+		//	return false;
+		//}
+
 		bottom_tx->AddActualGas(txfrm->GetSelfGas());
 		int64_t actual_fee = 0;
 		if (!utils::SafeIntMul(bottom_tx->GetActualGas(), bottom_tx->GetGasPrice(), actual_fee)){
@@ -718,11 +726,6 @@ namespace bumo {
 		apply_time_ = envstor.close_time();
 		transaction_env_ = envstor.transaction_env();
 		actual_gas_for_query_ = envstor.actual_fee();
-		
-		contract_tx_hashes_.clear();
-		for (int32_t i = 0; i < envstor.contract_tx_hashes_size(); i++) {
-			contract_tx_hashes_.push_back(envstor.contract_tx_hashes(i));
-		}
 
 		ledger_seq_ = envstor.ledger_seq();
 		Initialize();
@@ -755,7 +758,11 @@ namespace bumo {
 
 	bool TransactionFrm::Apply(LedgerFrm* ledger_frm, std::shared_ptr<Environment> parent, bool bool_contract) {
 		ledger_ = ledger_frm;
-		environment_ = parent;
+
+		if (parent->useAtomMap_)
+			environment_ = parent;
+		else
+			environment_ = std::make_shared<Environment>(parent.get());
 
 		bool ret = TransactionFrm::AddActualFee(ledger_frm->lpledger_context_->GetBottomTx(), this);
 		if (!ret) return ret;
@@ -783,7 +790,9 @@ namespace bumo {
 				}
 			}
 
+			//opt->SourceRelationTx();
 			Result result = opt->Apply(environment_);
+
 			if (result.code() != 0) {
 				result_ = opt->GetResult();
 				bSucess = false;
@@ -792,13 +801,11 @@ namespace bumo {
 				break;
 			}
 			else if (!result.desc().empty()) {
-				//for contract address creation
 				Json::Value opt_result;
 				opt_result.fromString(result.desc());
 				apply_success_desc[apply_success_desc.size()] = opt_result;
 				result_.set_desc(apply_success_desc.toFastString());
 			}
-			result_.set_contract_result(opt->GetResult().contract_result());
 		}
 		
 		return bSucess;

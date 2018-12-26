@@ -37,19 +37,23 @@ namespace utils {
 
 	template <class Key, class Value, class Sort>
 	class EntryCache {
+		//Indicate an object has been added, deleted or modified
 	protected:
 	public:
 		typedef std::shared_ptr<Value> pointer;
 
+
 		struct Record {
 			Record(pointer val, const ChangeAction &action) :value_(val), action_(action) {}
 			Record() {}
+			//Key key_;
 			std::shared_ptr<Value> value_;
 			ChangeAction action_;
 		};
 
 		std::map<Key, Record, Sort> entries_;
 		std::shared_ptr<EntryCache> parent_;
+
 
 	private:
 		bool GetRecord(const Key &key, Record &r) {
@@ -62,11 +66,12 @@ namespace utils {
 			if (parent_) {
 				return parent_->GetRecord(key, r);
 			}
-
-			if (LoadValue(key, r.value_)) {
-				return true;
+			else {
+				if (LoadValue(key, r.value_)) {
+					return true;
+				}
+				return false;
 			}
-			return false;
 		}
 
 	public:
@@ -80,7 +85,10 @@ namespace utils {
 
 		~EntryCache() {}
 
+		//Note that v_pt is created within the loadValue function
 		virtual bool LoadValue(const Key&, pointer &v_pt) = 0;
+		/*virtual bool commit() = 0;*/
+		//virtual EntryCache<Key,Value> newBranch();
 		bool MergeFromBranch(EntryCache &branch) {
 
 			auto &branch_entries = branch.entries_;
@@ -99,6 +107,11 @@ namespace utils {
 					else {
 						entries_.insert({ it->first, it->second });
 					}
+				}
+
+				case KEEP: {
+
+					break;
 				}
 				case MOD:{
 					auto x = entries_.find(it->first);
@@ -138,6 +151,15 @@ namespace utils {
 			return true;
 		}
 
+		/*
+		usage:
+		pointer pt;
+		if(GetEntry(key,pv)){
+		//TODO modify the value which pt pointed to
+		ps!!!:
+		don't use pt=xxx
+		}
+		*/
 		bool GetEntry(const Key &key, pointer &pval) {
 			auto it = entries_.find(key);
 			if (it != entries_.end()) {
@@ -145,8 +167,8 @@ namespace utils {
 					pval = it->second.value_;
 					return true;
 				}
-
-				return false;
+				else
+					return false;
 			}
 
 			Record r;
@@ -156,8 +178,9 @@ namespace utils {
 					entries_.insert({ key, Record(pval, MOD) });
 					return true;
 				}
-					
-				return false;
+				else {
+					return false;
+				}
 			}
 
 			if (LoadValue(key, pval)) {
@@ -171,12 +194,13 @@ namespace utils {
 		bool AddEntry(const Key &key, pointer pval) {
 			auto it = entries_.find(key);
 			if (it != entries_.end()) {
-				if (it->second.action_ == DEL) {
+				if (it->second.action_ == DEL) {//Marked as deleted, added successfully
 					it->second = Record(pval, MOD);
 					return true;
 				}
-
-				return false;
+				else { //Already exited, fail
+					return false;
+				}
 			}
 
 			Record r;
@@ -184,18 +208,60 @@ namespace utils {
 				if (parent_->GetRecord(key, r) && r.action_ != DEL) {
 					return false;
 				}
-
-				entries_.insert({ key, Record(pval, ADD) });
-				return true;
+				else {
+					entries_.insert({ key, Record(pval, ADD) });
+					return true;
+				}
 			}
 
+			//If it has no parent level, then it is the top level. Just add it
 			if (!LoadValue(key, pval)) {
 				entries_.insert({ key, Record(pval, ADD) });
 				return true;
 			}
-
-			return false;
+			else {
+				//There is a same key, so it is repteated
+				return false;
+			}
 		}
+
+		//bool ModEntry(const Key &key, const Value &val) {
+		//	auto ptr = std::make_shared<Value>(val);
+		//	auto it = entries_.find(key);
+		//	if (it != entries_.end()) {
+		//		switch (it->second.action_) {
+		//			case ADD:{
+		//				it->second = Record(ptr, ADD);
+		//				return true;
+		//			}
+		//			case MOD:{
+		//				it->second = Record(ptr, MOD);
+		//				return true;
+		//			}
+		//			case DEL:{
+		//				return false;
+		//			}
+		//			case KEEP:{
+		//				it->second = Record(ptr, MOD);
+		//				return true;
+		//			}
+		//			default:{
+		//				return false;
+		//			}
+		//				
+		//		}
+		//	}
+		//	Record r;
+		//	if (getRecord(key, r)) {
+		//		if (r.action_ == DEL)
+		//			return false;
+		//		else {
+		//			entries_.insert({key, Record(ptr, MOD) });
+		//			return true;
+		//		}
+		//	}
+		//	return false;
+		//}
 
 		bool DeleteEntry(const Key &key) {
 			auto it = entries_.find(key);
