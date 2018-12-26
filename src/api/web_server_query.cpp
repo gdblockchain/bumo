@@ -161,54 +161,6 @@ namespace bumo {
 		reply = reply_json.toStyledString();
 	}
 
-	void WebServer::GetSystemAccountMetaData(const http::server::request &request, std::string &reply) {
-		std::string address = request.GetParamValue("address");
-		std::string key = request.GetParamValue("key");
-		int32_t error_code = protocol::ERRCODE_SUCCESS;
-		Json::Value reply_json = Json::Value(Json::objectValue);
-		Json::Value record = Json::Value(Json::arrayValue);
-		Json::Value &result = reply_json["result"];
-
-		utils::ReadLockGuard guard(Storage::Instance().account_ledger_lock_);
-
-		do 
-		{
-			if (key.empty() || address.empty()){
-				error_code = protocol::ERRCODE_INVALID_PARAMETER;
-				break;
-			}
-
-			utils::MutexGuard guard(account_map_lock_);
-			int64_t current_time = utils::Timestamp::HighResolution();
-			bool need_update = ((current_time - last_update_account_time_) > 10 * utils::MICRO_UNITS_PER_SEC);
-			if (need_update){
-				UpdateSystemAccount();
-				last_update_account_time_ = current_time;
-			}
-
-			SystemAccountMap::iterator itr = account_map_.find(address);
-			if (itr == account_map_.end()){
-				error_code = protocol::ERRCODE_INVALID_ADDRESS;
-				break;
-			}
-
-			if (itr->second == nullptr){
-				error_code = protocol::ERRCODE_NOT_EXIST;
-				break;
-			}
-			protocol::KeyPair value_ptr;
-			if (!itr->second->GetMetaData(key, value_ptr)) {
-				error_code = protocol::ERRCODE_INVALID_PARAMETER;
-				break;
-			}
-			result[key] = bumo::Proto2Json(value_ptr);
-
-		} while (false);
-
-		reply_json["error_code"] = error_code;
-		reply = reply_json.toStyledString();
-	}
-
 	void WebServer::Debug(const http::server::request &request, std::string &reply) {
 		std::string key = request.GetParamValue("key");
 		auto location = utils::String::HexStringToBin(key);

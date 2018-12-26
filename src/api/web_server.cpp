@@ -32,7 +32,6 @@ namespace bumo {
 		thread_count_(0),
         port_(0)
 	{
-		last_update_account_time_ = 0;
 	}
 
 	WebServer::~WebServer() {
@@ -88,7 +87,6 @@ namespace bumo {
 		server_ptr_->addRoute("getAccountBase", std::bind(&WebServer::GetAccountBase, this, std::placeholders::_1, std::placeholders::_2));
 		server_ptr_->addRoute("getGenesisAccount", std::bind(&WebServer::GetGenesisAccount, this, std::placeholders::_1, std::placeholders::_2));
 		server_ptr_->addRoute("getAccountMetaData", std::bind(&WebServer::GetAccountMetaData, this, std::placeholders::_1, std::placeholders::_2));
-		server_ptr_->addRoute("getSystemAccountMetaData", std::bind(&WebServer::GetSystemAccountMetaData, this, std::placeholders::_1, std::placeholders::_2));
 		server_ptr_->addRoute("getAccountAssets", std::bind(&WebServer::GetAccountAssets, this, std::placeholders::_1, std::placeholders::_2));
 
 		server_ptr_->addRoute("debug", std::bind(&WebServer::Debug, this, std::placeholders::_1, std::placeholders::_2));
@@ -120,11 +118,6 @@ namespace bumo {
 
 		StatusModule::RegisterModule(this);
 		LOG_INFO("Webserver started, thread count(" FMT_SIZE ") listen at %s", thread_count_, address.ToIpPort().c_str());
-
-		account_map_[General::CONTRACT_CMC_ADDRESS] = nullptr;
-		account_map_[General::CONTRACT_CPC_ADDRESS] = nullptr;
-		account_map_[General::CONTRACT_VALIDATOR_ADDRESS] = nullptr;
-
 		return true;
 	}
 
@@ -236,15 +229,4 @@ namespace bumo {
 	uint16_t WebServer::GetListenPort(){
         return port_;
     }
-
-	void WebServer::UpdateSystemAccount(){
-		SystemAccountMap::iterator itr = account_map_.begin();
-		for (; itr != account_map_.end(); itr++){
-			AccountFrm::pointer acc = NULL;
-			if (!Environment::AccountFromDB(itr->first, acc)) {
-				continue;
-			}
-			itr->second = acc;
-		}			
-	}
 }
