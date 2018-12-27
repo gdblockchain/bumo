@@ -576,8 +576,7 @@ function queryChildWithdrawal(params){
     if(input.seq === ''){
         let info = JSON.parse(storageLoad(CHAIN_WITHDRAWAL + input.chain_id));
         assert(info !== false, 'queryChildWithdrawal CHAIN_WITHDRAWAL' + input.chain_id + ' failed.');
-        let complete_seq = int64Add(info.complete_seq,1);
-        key = CHAIN_WITHDRAWAL + input.chain_id + '_' + complete_seq;
+        key = CHAIN_WITHDRAWAL + input.chain_id + '_' + info.complete_seq;
     } 
     else {
         key = CHAIN_WITHDRAWAL + input.chain_id + '_' + input.seq;
