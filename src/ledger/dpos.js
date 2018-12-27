@@ -11,8 +11,8 @@ const voteRecordPrefixVar = 'voteRecords_';
 const nonceVar            = 'nonce';
 const electionConfigVar   = 'configElection'; // configuration key will be read internal
 const withdrawVar		  = 'withdraw_';
+const effectiveVoteInterval = 15 * 24 * 60 * 60 * 1000 * 1000;
 
-let effectiveVoteInterval = 15 * 24 * 60 * 60 * 1000 * 1000;
 let proposalRecords = {};
 
 function getObjectMetaData(key){
@@ -340,7 +340,7 @@ function query(input_str){
         result.current_validators = getValidators();
     }
     else if(input.method === 'getCandidate'){
-        result.candidate = getValidatorCandidate(input.address);
+        result.candidate = getValidatorCandidate(input.params.address);
     }
     else if(input.method === 'getAbolishProposal'){
         result.abolish_proposal = storageLoad(abolishVar + input.params.address);
