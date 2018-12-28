@@ -63,7 +63,7 @@ namespace bumo {
 		bool ledger_state = !ledger_db->Get(General::KEY_LEDGER_SEQ, ledger_db_seq);
 		bool account_state = !account_db->Get(General::KEY_LEDGER_SEQ, account_db_seq);
 
-		if (ledger_state&&account_state){
+		if (ledger_state && account_state){
 			return true;
 		}
 
@@ -72,7 +72,7 @@ namespace bumo {
 			return false;
 		}
 
-		if (ledger_state) {
+		if (account_state) {
 			LOG_ERROR("Failed to get ledger seq from account-db\n");
 			return false;
 		}
