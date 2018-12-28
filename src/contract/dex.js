@@ -78,14 +78,13 @@ function takeOrder(orderKey, fee){
 
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
-        if(int64Add(order.target.value, fee) === thisPayCoinAmount){/*平单*/
+        if(int64Add(order.target.value, fee) === thisPayCoinAmount){
             feeValid(order.target.value, fee);
             bilateralFee = int64Add(fee, fee);
             payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
 
             if(order.own.code === undefined){ /*maker is CTP*/
-                let transferFrom = { 'method':'transferFrom', 'params':{ 'from':order.maker, 'to':sender, 'value':order.own.value}};
-                payCoin(order.own.issuer, 0, transferFrom);
+                payCTP(order.own.issuer, order.maker, sender, order.own.value);
                 tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
             }
             else{ /*maker is ATP*/
@@ -97,7 +96,7 @@ function takeOrder(orderKey, fee){
     else if(order.target.code === undefined){ /*taker is CTP*/
         let checkParam = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
         let res = payCoin(order.target.issuer, '0', checkParam);
-        if(order.target.value === res.allowance){ /*平单*/
+        if(order.target.value === res.allowance){
             bilateralFee = int64Add(order.own.fee, order.own.fee);
 
             let transferFrom = { 'method':'transferFrom', 'params':{ 'from':sender, 'to':order.maker, 'value':order.target.value}};
