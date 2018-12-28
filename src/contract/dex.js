@@ -2,34 +2,43 @@ let globalAttribute = {};
 const globalAttributeKey = 'global_attribute';
 const 1BU                = 100000000;
 
+function feeValid(value, fee){
+    assert(int64Add(value, fee) === thisPayCoinAmount, 'Insufficient BU paid.');
+
+    let amount  = int64Sub(thisPayCoinAmount, fee);
+    let realFee = int64Mul(amount, globalAttribute.feeRate) / 1BU;
+    assert(realFee === fee, 'Insufficient fee.');
+}
+
+function ctpApproveValid(issuer, value){
+    let arg = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
+    let res = contractQuery(issuer, arg);
+    assert(value === res.allowance, 'Insufficient CTP(contract address:' + issuer + ') paid.');
+}
+
+function payAssetValid(asset){
+    let x = asset.issuer === thisPayAsset.key.issuer;
+    let y = asset.code === thisPayAsset.key.code;
+    let z = asset.value === thisPayAsset.amount;
+
+    assert(x && y && z, 'Insufficient ATP( issuer:' + asset.issuer + ', code:' + asset.code + ' ) paid.');
+}
+
 function makeOrder(own, target, fee, expiration){
-    assert(blockTimestamp < expiration, 'Order date has expired.');
-    assert(stoI64Check(target.value), 'Target value must be alphanumeric.');
+    assert(blockTimestamp < expiration, 'Order date has expired.'); /*Need add time built-in interfacce*/
+    //assert(stoI64Check(own.value) && stoI64Check(target.value), 'Target value must be alphanumeric.');
 
     if(own.issuer === undefined){ /* BU */
         assert(addressCheck(target.issuer), 'The peer asset issuance address is invalid.');
-
-        assert(int64Add(own.value, fee) === thisPayCoinAmount, 'Insufficient BU paid.');
-
-        let amount  = int64Sub(thisPayCoinAmount, fee);
-        let realFee = int64Mul(amount, globalAttribute.feeRate) / 1BU;
-        assert(realFee === fee,'Insufficient fee.');
-        
+        feeValid(own.value, fee);
     }
     else if(own.code === undefined){ /* CTP */
         assert(target.issuer === undefined, 'Must have a party asset is BU.');
-
-        let checkParam = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
-        let res = payCoin(own.issuer, '0', checkParam);
-        assert(own.value === res.allowance, 'Insufficient CTP(contract address:' + own.issuer + ') paid.');
+        ctpApproveValid(own.issuer, own.value);
     }
     else{ /* ATP */
         assert(target.issuer === undefined, 'Must have a party asset is BU.');
-
-        assert((own.issuer === thisPayAsset.key.issuer) &&
-               (own.code === thisPayAsset.key.code)) &&
-               (own.value === thisPayAsset.amount),
-               'Insufficient ATP( issuer:' + own.issuer + ', code:' + own.code + ' ) paid.');
+        payAssetValid(own);
     }
     
     let orderKey   = 'order_' + (globalAttribute.orderInterval[1] + 1);
@@ -40,6 +49,28 @@ function makeOrder(own, target, fee, expiration){
     storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
+/**
+ * key  :order_n
+ * value:{
+ *     'maker':'buQxxxx',
+ *     'own':{
+ *         'issuer':buQyyy',
+ *         'code':'GBP',
+ *         'value':10000,
+ *     },
+ *    'target':{
+ *        'value':1000,
+ *     },
+ *    'fee':5,
+ *    'expiration':'2018...'
+ * }
+**/
+
+function payCTP(issuer, from, to, value){
+    let args = { 'method':'transferFrom', 'params':{ 'from':from, 'to':to, 'value':value}};
+    payCoin(issuer, 0, args);
+}
+
 function takeOrder(orderKey, fee){
     let orderStr = storageLoad(orderKey);
     assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
@@ -48,8 +79,8 @@ function takeOrder(orderKey, fee){
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
         if(int64Add(order.target.value, fee) === thisPayCoinAmount){/*平单*/
-            bilateralFee               = int64Add(fee, fee);
-            globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
+            feeValid(order.target.value, fee);
+            bilateralFee = int64Add(fee, fee);
             payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
 
             if(order.own.code === undefined){ /*maker is CTP*/
@@ -68,7 +99,6 @@ function takeOrder(orderKey, fee){
         let res = payCoin(order.target.issuer, '0', checkParam);
         if(order.target.value === res.allowance){ /*平单*/
             bilateralFee = int64Add(order.own.fee, order.own.fee);
-            globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
 
             let transferFrom = { 'method':'transferFrom', 'params':{ 'from':sender, 'to':order.maker, 'value':order.target.value}};
             payCoin(order.target.issuer, 0, transferFrom);
@@ -83,7 +113,6 @@ function takeOrder(orderKey, fee){
            (order.target.value === thisPayAsset.amount)){
 
             bilateralFee = int64Add(order.own.fee, order.own.fee);
-            globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
 
             payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
             payCoin(sender, int64Sub(order.own.value, bilateralFee));
@@ -91,6 +120,7 @@ function takeOrder(orderKey, fee){
         }
     }
 
+    globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
     storageDel(orderKey);
 }
 
