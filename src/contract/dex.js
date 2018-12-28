@@ -117,6 +117,7 @@ function takeOrder(orderKey, fee){
     }
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
     storageDel(orderKey);
 }
 
