@@ -76,6 +76,11 @@ function takeOrder(orderKey, fee){
     assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
     let order = JSON.parse(orderStr);
 
+    if(blockTimestamp > order.expiration){
+        storageDel(orderKey);
+        return;
+    }
+
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
         feeValid(order.target.value, fee);
