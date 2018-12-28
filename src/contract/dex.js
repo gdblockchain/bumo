@@ -102,16 +102,13 @@ function takeOrder(orderKey, fee){
         tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
     }
     else{ /*take is ATP*/
-        if((order.target.issuer === thisPayAsset.key.issuer) &&
-           (order.target.code === thisPayAsset.key.code) && 
-           (order.target.value === thisPayAsset.amount)){
+        payAssetValid(order.target);
 
-            bilateralFee = int64Add(order.own.fee, order.own.fee);
+        bilateralFee = int64Add(order.own.fee, order.own.fee);
+        payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
+        payCoin(sender, int64Sub(order.own.value, bilateralFee));
 
-            payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
-            payCoin(sender, int64Sub(order.own.value, bilateralFee));
-            tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.code + ':' + order.target.value));
-        }
+        tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.code + ':' + order.target.value));
     }
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
