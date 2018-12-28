@@ -94,14 +94,12 @@ function takeOrder(orderKey, fee){
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
         ctpApproveValid(order.target.issuer, order.target.value);
-        if(order.target.value === res.allowance){
-            bilateralFee = int64Add(order.own.fee, order.own.fee);
 
-            payCTP(order.target.issuer, sender, order.maker, order.target.value);
-            payCoin(sender, int64Sub(order.own.value, bilateralFee));
+        bilateralFee = int64Add(order.own.fee, order.own.fee);
+        payCTP(order.target.issuer, sender, order.maker, order.target.value);
+        payCoin(sender, int64Sub(order.own.value, bilateralFee));
 
-            tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
-        }
+        tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
     }
     else{ /*take is ATP*/
         if((order.target.issuer === thisPayAsset.key.issuer) &&
