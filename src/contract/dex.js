@@ -94,13 +94,11 @@ function takeOrder(orderKey, fee){
         }
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
-        let checkParam = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
-        let res = payCoin(order.target.issuer, '0', checkParam);
+        ctpApproveValid(order.target.issuer, order.target.value);
         if(order.target.value === res.allowance){
             bilateralFee = int64Add(order.own.fee, order.own.fee);
 
-            let transferFrom = { 'method':'transferFrom', 'params':{ 'from':sender, 'to':order.maker, 'value':order.target.value}};
-            payCoin(order.target.issuer, 0, transferFrom);
+            payCTP(order.target.issuer, sender, order.maker, order.target.value);
             payCoin(sender, int64Sub(order.own.value, bilateralFee));
 
             tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
