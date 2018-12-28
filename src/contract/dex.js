@@ -78,19 +78,18 @@ function takeOrder(orderKey, fee){
 
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
-        if(int64Add(order.target.value, fee) === thisPayCoinAmount){
-            feeValid(order.target.value, fee);
-            bilateralFee = int64Add(fee, fee);
-            payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
+        feeValid(order.target.value, fee);
 
-            if(order.own.code === undefined){ /*maker is CTP*/
-                payCTP(order.own.issuer, order.maker, sender, order.own.value);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
-            }
-            else{ /*maker is ATP*/
-                payAsset(sender, order.own.issuer, order.own.code, order.own.value);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + order.own.value), sender, order.target.value);
-            }
+        bilateralFee = int64Add(fee, fee);
+        payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
+
+        if(order.own.code === undefined){ /*maker is CTP*/
+            payCTP(order.own.issuer, order.maker, sender, order.own.value);
+            tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
+        }
+        else{ /*maker is ATP*/
+            payAsset(sender, order.own.issuer, order.own.code, order.own.value);
+            tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + order.own.value), sender, order.target.value);
         }
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
