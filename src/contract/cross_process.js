@@ -223,6 +223,7 @@ function queryChildDeposit(params){
         retinfo.index = info.seq;
         retinfo.executed = info.status;
         retinfo.validators = info.votes;
+        retinfo.deposit_data = info.deposit_data;
     }
     log('queryChildDeposit retinfo '+ retinfo);
     return retinfo;
