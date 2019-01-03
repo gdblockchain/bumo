@@ -131,7 +131,7 @@ namespace bumo {
 		assert(!trans_task.dest_address_.empty());
 		assert(!trans_task.input_paras_.empty());
 		assert(notify != nullptr);
-		
+
 		utils::MutexGuard guard(task_vector_lock_);
 		TransTaskVector &task_vector = trans_task_map_[notify];
 		task_vector.push_back(trans_task);
@@ -168,7 +168,7 @@ namespace bumo {
 			return;
 		}
 		cur_nonce_ = account_ptr->GetAccountNonce() + 1;
-		
+
 		for (TransTaskMap::const_iterator itr = temp_map.begin(); itr != temp_map.end(); itr++){
 			ITransactionSenderNotify* notify = itr->first;
 			const TransTaskVector &task_vector = itr->second;
@@ -193,20 +193,20 @@ namespace bumo {
 			err_code = SendTransaction(trans);
 			switch (err_code)
 			{
-				case protocol::ERRCODE_SUCCESS:
-				case protocol::ERRCODE_ALREADY_EXIST:{
-					cur_nonce_++;
-					TransTaskResult task_result(true, "", hash);
-					return task_result;
-				}
-				case protocol::ERRCODE_BAD_SEQUENCE:{
-					cur_nonce_++;
-					continue;
-				}
-				default:{
-					LOG_ERROR("Send transaction erro code:%d", err_code);
-					continue;
-				}
+			case protocol::ERRCODE_SUCCESS:
+			case protocol::ERRCODE_ALREADY_EXIST:{
+													 cur_nonce_++;
+													 TransTaskResult task_result(true, "", hash);
+													 return task_result;
+			}
+			case protocol::ERRCODE_BAD_SEQUENCE:{
+													cur_nonce_++;
+													continue;
+			}
+			default:{
+						LOG_ERROR("Send transaction erro code:%d", err_code);
+						continue;
+			}
 			}
 
 			utils::Sleep(10);
@@ -295,4 +295,39 @@ namespace bumo {
 		return length;
 	}
 
+	//build merkle tree
+	void MerkleTree::BuildTree(){
+
+		//	do{
+		//		std::vector<MerkleNodePointer> new_nodes;
+		//		MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes
+
+		//		for (int64_t i = 0; i < base_nodes_.end()[-1].size(); i += 2){
+		//			MerkleNodePointer new_parent = MerkleNodePointer();
+		//			//Set the parent node.Pass in the last element, ie the i and i + 1 of a node list.
+		//			base_nodes_.end()[-1][i]->SetParent(new_parent);
+		//			base_nodes_.end()[-1][i + 1]->SetParent(new_parent);
+
+		//			// set the hash value of the parent node by the hash value of the two child nodes
+		//			new_parent->setHash(base_nodes_.end()[-1][i]->GetHash() + base_nodes_.end()[-1][i + 1]->GetHash());
+		//			// set the left and right child nodes of the parent node to these two
+		//			new_parent->SetChildren(base_nodes_.end()[-1][i], base_nodes_.end()[-1][i + 1]);
+		//			// push new parent into new nodes
+		//			new_nodes.push_back(new_parent);
+
+		//			cout << "Hash togther: " << base_nodes_.end()[-1][i]->GetHash() << \
+					//				" and " << base_nodes_.end()[-1][i + 1]->getHash() << " attached: " << \
+					//				&new_parent << endl;
+		//		}
+		//		//Push a new round of parent node new_n odes into base
+		//		base_nodes_.push_back(new_nodes);
+
+		//		cout << "Hashed level with: " << base_nodes_.end()[-1].size() << '\n';
+		//	} while (base_nodes_.end()[-1].size() > 1); // so that each round gets a new layer of parent nodes, until the root node to exit the loop
+
+		//	merkleRoot = base_nodes_.end()[-1][0]->GetHash(); // the hash value of the root node
+
+		//	cout << "Merkle Root is : " << merkleRoot << endl << endl;
+	}
 }
+	

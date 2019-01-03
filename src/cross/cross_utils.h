@@ -110,11 +110,22 @@ namespace bumo {
 	//merkel tree
 	class MerkleNode{
 	public:
+		MerkleNode();
+		MerkleNodePointer GetParent();
+		void  SetChildren(const MerkleNodePointer &children_l, const MerkleNodePointer &children_r);
+		MerkleNodePointer GetChildrenLeft();
+		void SetParent(const MerkleNodePointer &parent);
+		string GetHash();
+		int64_t CheckDir();
+		MerkleNodePointer GetSibling();
+		void SetHash(const std::string &hash_str);
+		virtual ~MerkleNode();
+		bool IsLeaf();
+	private:
 		std::string hash_;
 		MerkleNodePointer left_node_;
 		MerkleNodePointer right_node_;
 		MerkleNodePointer parent_;
-		bool IsLeaf();
 	};
 
 	class MerkleTree{
