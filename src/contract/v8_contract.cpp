@@ -3,25 +3,29 @@
 #include "contract_manager.h"
 
 namespace bumo {
-	std::map<std::string, std::string> V8Contract::jslib_sources_;
-	std::map<std::string, v8::FunctionCallback> V8Contract::js_func_read_;
-	std::map<std::string, v8::FunctionCallback> V8Contract::js_func_write_;
+	#define ORIGIN_OBJ "Origin"
+	#define BLOCKCHAIN_OBJ "Blockchain"
+	#define UTILS_OBJ "Utils"
+	#define ToV8Int32(a) (v8::Int32::New(isolate_, (a)))
+	#define ToV8Number(a) (v8::Number::New(isolate_, (double)(a)))
+	#define ToV8String(a) (v8::String::NewFromUtf8(isolate_, (a), v8::NewStringType::kNormal).ToLocalChecked())
+	#define ToV8StringStatic(a, b) (v8::String::NewFromUtf8((a), (b), v8::NewStringType::kNormal).ToLocalChecked())
 
-	std::map<std::string, v8::FunctionCallback> V8Contract::js_func_read_gt1001_;
-	std::map<std::string, v8::FunctionCallback> V8Contract::js_func_write_gt1001_;
+	std::map<std::string, std::string> V8Contract::jslib_sources_;
+
+	std::map<std::string, V8Contract::JsFuncList> V8Contract::js_obj_;
 
 	std::string V8Contract::user_global_string_;
 	std::string V8Contract::user_global_string_gt1001_;
 
+	//for contract interface
+	const std::string V8Contract::init_name_ = "init";
+	const std::string V8Contract::main_name_ = "main";
+	const std::string V8Contract::query_name_ = "query";
+
+	//for built-in variables
 	const std::string V8Contract::sender_name_ = "sender";
-	const std::string V8Contract::origin_sender_name_ = "originSender";
-	const std::string V8Contract::tx_initiator_name_ = "txInitiator";
-	const std::string V8Contract::origin_tx_initiator_name_ = "originTxInitiator";
 	const std::string V8Contract::this_address_ = "thisAddress";
-	const char* V8Contract::main_name_ = "main";
-	const char* V8Contract::query_name_ = "query";
-	const char* V8Contract::init_name_ = "init";
-	const char* V8Contract::call_jslint_ = "callJslint";
 	const std::string V8Contract::trigger_tx_name_ = "trigger";
 	const std::string V8Contract::trigger_tx_index_name_ = "triggerIndex";
 	const std::string V8Contract::this_header_name_ = "consensusValue";
@@ -29,6 +33,10 @@ namespace bumo {
 	const std::string V8Contract::pay_asset_amount_name_ = "thisPayAsset";
 	const std::string V8Contract::block_timestamp_name_ = "blockTimestamp";
 	const std::string V8Contract::block_number_name_ = "blockNumber";
+
+	//for check source
+	const std::string V8Contract::call_jslint_ = "callJslint";
+
 	utils::Mutex V8Contract::isolate_to_contract_mutex_;
 	std::unordered_map<v8::Isolate*, V8Contract *> V8Contract::isolate_to_contract_;
 
@@ -51,50 +59,84 @@ namespace bumo {
 	}
 
 	bool V8Contract::LoadJsFuncList() {
-		//read func
-		js_func_read_["log"] = V8Contract::CallBackLog;
-		js_func_read_["getBalance"] = V8Contract::CallBackGetBalance;
-		js_func_read_["getAccountAsset"] = V8Contract::CallBackGetAccountAsset;
-		js_func_read_["storageLoad"] = V8Contract::CallBackStorageLoad;
-		js_func_read_["getBlockHash"] = V8Contract::CallBackGetBlockHash;
-		js_func_read_["contractQuery"] = V8Contract::CallBackContractQuery;
-		js_func_read_["getValidators"] = V8Contract::CallBackGetValidators;
-		js_func_read_[General::CHECK_TIME_FUNCTION] = V8Contract::InternalCheckTime;
-		js_func_read_["stoI64Check"] = V8Contract::CallBackStoI64Check;
-		js_func_read_["int64Add"] = V8Contract::CallBackInt64Add;
-		js_func_read_["int64Sub"] = V8Contract::CallBackInt64Sub;
-		js_func_read_["int64Mul"] = V8Contract::CallBackInt64Mul;
-		js_func_read_["int64Mod"] = V8Contract::CallBackInt64Mod;
-		js_func_read_["int64Div"] = V8Contract::CallBackInt64Div;
-		js_func_read_["int64Compare"] = V8Contract::CallBackInt64Compare;
-		js_func_read_["toBaseUnit"] = V8Contract::CallBackToBaseUnit;
-		js_func_read_["assert"] = V8Contract::CallBackAssert;
-		js_func_read_["addressCheck"] = V8Contract::CallBackAddressValidCheck;
+		JsFuncList init_obj;
+		js_obj_[ORIGIN_OBJ] = init_obj;
+		js_obj_[BLOCKCHAIN_OBJ] = init_obj;
+		js_obj_[UTILS_OBJ] = init_obj;
 
-		//write func
-		js_func_write_["storageStore"] = V8Contract::CallBackStorageStore;
-		js_func_write_["storageDel"] = V8Contract::CallBackStorageDel;
-		js_func_write_["configFee"] = V8Contract::CallBackConfigFee;
-		js_func_write_["setValidators"] = V8Contract::CallBackSetValidators;
-		js_func_write_["payCoin"] = V8Contract::CallBackPayCoin;
-		js_func_write_["issueAsset"] = V8Contract::CallBackIssueAsset;
-		js_func_write_["payAsset"] = V8Contract::CallBackPayAsset;
-		js_func_write_["tlog"] = V8Contract::CallBackTopicLog;
+		//for origin read function
+		JsFuncList &origin = js_obj_[ORIGIN_OBJ];
+		origin.read_["log"] = V8Contract::CallBackLog;
+		origin.read_["getBalance"] = V8Contract::CallBackGetBalance;
+		origin.read_["getAccountAsset"] = V8Contract::CallBackGetAccountAsset;
+		origin.read_["storageLoad"] = V8Contract::CallBackStorageLoad;
+		origin.read_["getBlockHash"] = V8Contract::CallBackGetBlockHash;
+		origin.read_["contractQuery"] = V8Contract::CallBackContractQuery;
+		origin.read_["getValidators"] = V8Contract::CallBackGetValidators;
+		origin.read_[General::CHECK_TIME_FUNCTION] = V8Contract::InternalCheckTime;
+		origin.read_["stoI64Check"] = V8Contract::CallBackStoI64Check;
+		origin.read_["int64Add"] = V8Contract::CallBackInt64Add;
+		origin.read_["int64Sub"] = V8Contract::CallBackInt64Sub;
+		origin.read_["int64Mul"] = V8Contract::CallBackInt64Mul;
+		origin.read_["int64Mod"] = V8Contract::CallBackInt64Mod;
+		origin.read_["int64Div"] = V8Contract::CallBackInt64Div;
+		origin.read_["int64Compare"] = V8Contract::CallBackInt64Compare;
+		origin.read_["toBaseUnit"] = V8Contract::CallBackToBaseUnit;
+		origin.read_["assert"] = V8Contract::CallBackAssert;
+		origin.read_["addressCheck"] = V8Contract::CallBackAddressValidCheck;
 
-		//for gt1001 read func
-		js_func_read_gt1001_["getAccountMetadata"] = V8Contract::CallBackGetAccountMetadata;
-		js_func_read_gt1001_["sha256"] = V8Contract::CallBackSha256;
-		js_func_read_gt1001_["ecVerify"] = V8Contract::CallBackVerify;
-		js_func_read_gt1001_["toAddress"] = V8Contract::CallBackToAddress;
-		js_func_read_gt1001_["getContractProperty"] = V8Contract::CallBackGetContractProperty;
+		//for origin write function
+		origin.write_["storageStore"] = V8Contract::CallBackStorageStore;
+		origin.write_["storageDel"] = V8Contract::CallBackStorageDel;
+		origin.write_["configFee"] = V8Contract::CallBackConfigFee;
+		origin.write_["setValidators"] = V8Contract::CallBackSetValidators;
+		origin.write_["payCoin"] = V8Contract::CallBackPayCoin;
+		origin.write_["issueAsset"] = V8Contract::CallBackIssueAsset;
+		origin.write_["payAsset"] = V8Contract::CallBackPayAsset;
+		origin.write_["tlog"] = V8Contract::CallBackTopicLog;
 
-		js_func_write_gt1001_["delegateCall"] = V8Contract::CallBackDelegateCall;
-		js_func_write_gt1001_["contractCall"] = V8Contract::CallBackCall;
-		js_func_write_gt1001_["contractCreate"] = V8Contract::CallBackCreate;
+		//for blockchain object read
+		JsFuncList &blockchain = js_obj_[BLOCKCHAIN_OBJ];
+		blockchain.read_["getBalance"] = V8Contract::CallBackGetBalance;
+		blockchain.read_["getAccountAsset"] = V8Contract::CallBackGetAccountAsset;
+		blockchain.read_["storageLoad"] = V8Contract::CallBackStorageLoad;
+		blockchain.read_["getBlockHash"] = V8Contract::CallBackGetBlockHash;
+		blockchain.read_["delegateQuery"] = V8Contract::CallBackDelegateQuery;
+		blockchain.read_["contractQuery"] = V8Contract::CallBackContractQuery;
+		blockchain.read_["getValidators"] = V8Contract::CallBackGetValidators;
+		blockchain.read_["getAccountMetadata"] = V8Contract::CallBackGetAccountMetadata;
+		blockchain.read_["getContractProperty"] = V8Contract::CallBackGetContractProperty;
+
+		//for blockchain object write
+		blockchain.write_["storageStore"] = V8Contract::CallBackStorageStore;
+		blockchain.write_["storageDel"] = V8Contract::CallBackStorageDel;
+		blockchain.write_["configFee"] = V8Contract::CallBackConfigFee;
+		blockchain.write_["setValidators"] = V8Contract::CallBackSetValidators;
+		blockchain.write_["payCoin"] = V8Contract::CallBackPayCoin;
+		blockchain.write_["issueAsset"] = V8Contract::CallBackIssueAsset;
+		blockchain.write_["payAsset"] = V8Contract::CallBackPayAsset;
+		blockchain.write_["tlog"] = V8Contract::CallBackTopicLog;
+		blockchain.write_["delegateCall"] = V8Contract::CallBackDelegateCall;
+		blockchain.write_["contractCall"] = V8Contract::CallBackCall;
+		blockchain.write_["contractCreate"] = V8Contract::CallBackCreate;
+
+		//for utils object read
+		JsFuncList &utils = js_obj_[UTILS_OBJ];;
+		utils.read_["log"] = V8Contract::CallBackLog;
+		utils.read_["stoI64Check"] = V8Contract::CallBackStoI64Check;
+		utils.read_["int64Add"] = V8Contract::CallBackInt64Add;
+		utils.read_["int64Sub"] = V8Contract::CallBackInt64Sub;
+		utils.read_["int64Mul"] = V8Contract::CallBackInt64Mul;
+		utils.read_["int64Mod"] = V8Contract::CallBackInt64Mod;
+		utils.read_["int64Div"] = V8Contract::CallBackInt64Div;
+		utils.read_["int64Compare"] = V8Contract::CallBackInt64Compare;
+		utils.read_["toBaseUnit"] = V8Contract::CallBackToBaseUnit;
+		utils.read_["assert"] = V8Contract::CallBackAssert;
+		utils.read_["addressCheck"] = V8Contract::CallBackAddressValidCheck;
+		utils.read_["sha256"] = V8Contract::CallBackSha256;
+		utils.read_["ecVerify"] = V8Contract::CallBackVerify;
+		utils.read_["toAddress"] = V8Contract::CallBackToAddress;
 		
-		
-
-
 		return true;
 	}
 
@@ -133,26 +175,19 @@ namespace bumo {
 		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", pay_asset_amount_name_.c_str());
 		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", block_timestamp_name_.c_str());
 		user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", block_number_name_.c_str());
-		std::map<std::string, v8::FunctionCallback>::iterator itr;
-		for (itr = js_func_read_.begin(); itr != js_func_read_.end(); itr++) {
+		JsFunctions::iterator itr;
+		JsFuncList & origin_js_func = js_obj_[ORIGIN_OBJ];
+		for (itr = origin_js_func.read_.begin(); itr != origin_js_func.read_.end(); itr++) {
 			user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", itr->first.c_str());
 		}
-		for (itr = js_func_write_.begin(); itr != js_func_write_.end(); itr++) {
+		for (itr = origin_js_func.write_.begin(); itr != origin_js_func.write_.end(); itr++) {
 			user_global_string_ = utils::String::AppendFormat(user_global_string_, ",%s", itr->first.c_str());
 		}
 
 		//for gt1001
 		user_global_string_gt1001_ = user_global_string_;
-		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", origin_sender_name_.c_str());
-		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", tx_initiator_name_.c_str());
-		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", origin_tx_initiator_name_.c_str());
-
-		for (itr = js_func_read_gt1001_.begin(); itr != js_func_read_gt1001_.end(); itr++) {
-			user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", itr->first.c_str());
-		}
-		for (itr = js_func_write_gt1001_.begin(); itr != js_func_write_gt1001_.end(); itr++) {
-			user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", itr->first.c_str());
-		}
+		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", BLOCKCHAIN_OBJ);
+		user_global_string_gt1001_ = utils::String::AppendFormat(user_global_string_gt1001_, ",%s", UTILS_OBJ);
 		return true;
 	}
 
@@ -188,76 +223,14 @@ namespace bumo {
 		v8::TryCatch try_catch(isolate_);
 
 		v8::Local<v8::Context> context = CreateContext(isolate_, false);
-
 		v8::Context::Scope context_scope(context);
+		SetV8InterfaceFunc(context, false);
+		CreateJsObject(context, false);
 
-		//block number, timestamp, orginal
-
-		auto string_sender = v8::String::NewFromUtf8(isolate_, parameter_.sender_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			string_sender);
-
-		auto string_contractor = v8::String::NewFromUtf8(isolate_, parameter_.this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			string_contractor);
-
-		v8::Local<v8::Integer> index_v8 = v8::Int32::New(isolate_, parameter_.ope_index_);
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, trigger_tx_index_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			index_v8);
-
-		auto coin_amount = v8::String::NewFromUtf8(isolate_, utils::String::ToString(parameter_.pay_coin_amount_).c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, pay_coin_amount_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			coin_amount);
-
-		if (parameter_.pay_asset_amount_.has_key()) {
-			v8::Local<v8::Object> v8_asset = v8::Object::New(isolate_);
-			v8::Local<v8::Object> v8_asset_property = v8::Object::New(isolate_);
-			const protocol::AssetKey &asset_key = parameter_.pay_asset_amount_.key();
-			v8_asset_property->Set(v8::String::NewFromUtf8(isolate_, "issuer"), v8::String::NewFromUtf8(isolate_, asset_key.issuer().c_str()));
-			v8_asset_property->Set(v8::String::NewFromUtf8(isolate_, "code"), v8::String::NewFromUtf8(isolate_, asset_key.code().c_str()));
-			v8_asset->Set(v8::String::NewFromUtf8(isolate_, "amount"), v8::String::NewFromUtf8(isolate_, utils::String::ToString(parameter_.pay_asset_amount_.amount()).c_str()));
-			v8_asset->Set(v8::String::NewFromUtf8(isolate_, "key"), v8_asset_property);
-
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, pay_asset_amount_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				v8_asset);
-		}
-
-		auto blocknumber_v8 = v8::Number::New(isolate_, (double)parameter_.blocknumber_);
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, block_number_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			blocknumber_v8);
-
-		auto timestamp_v8 = v8::Number::New(isolate_, (double)parameter_.timestamp_);
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, block_timestamp_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			timestamp_v8);
-
-		if (CHECK_VERSION_GT_1001) {
-			auto string_origin_sender = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetOperatingSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, origin_sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				string_origin_sender);
-
-			auto tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.tx_initiator_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				tx_initiator);
-
-			auto string_origin_tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, origin_tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				string_origin_tx_initiator);
-		}
-
-		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str());
+		v8::Local<v8::String> v8src = ToV8String(parameter_.code_.c_str());
 		v8::Local<v8::Script> compiled_script;
 
-		std::string fn_name = parameter_.init_ ? "init" : "main";
+		std::string fn_name = parameter_.init_ ? init_name_ : main_name_;
 		do {
 			Json::Value error_random;
 			if (!RemoveRandom(isolate_, error_random)) {
@@ -271,10 +244,7 @@ namespace bumo {
 				break;
 			}
 
-			v8::Local<v8::String> check_time_name(
-				v8::String::NewFromUtf8(context->GetIsolate(), "__enable_check_time__",
-				v8::NewStringType::kNormal).ToLocalChecked());
-			v8::ScriptOrigin origin_check_time_name(check_time_name);
+			v8::ScriptOrigin origin_check_time_name(ToV8String("__enable_check_time__"));
 
 			if (!v8::Script::Compile(context, v8src, &origin_check_time_name).ToLocal(&compiled_script)) {
 				//"VERSION CHECKING condition" may be removed after version 1002
@@ -299,12 +269,9 @@ namespace bumo {
 				break;
 			}
 
-			v8::Local<v8::String> process_name =
-				v8::String::NewFromUtf8(isolate_, fn_name.c_str(), v8::NewStringType::kNormal, fn_name.size())
-				.ToLocalChecked();
 			v8::Local<v8::Value> process_val;
 
-			if (!context->Global()->Get(context, process_name).ToLocal(&process_val) ||
+			if (!context->Global()->Get(context, ToV8String(fn_name.c_str())).ToLocal(&process_val) ||
 				!process_val->IsFunction()) {
 				Json::Value json_result;
 				json_result["exception"] = utils::String::Format("Lost of %s function", fn_name.c_str());
@@ -317,7 +284,7 @@ namespace bumo {
 			v8::Local<v8::Function> process = v8::Local<v8::Function>::Cast(process_val);
 
 			const int argc = 1;
-			v8::Local<v8::String> arg1 = v8::String::NewFromUtf8(isolate_, parameter_.input_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			v8::Local<v8::String> arg1 = ToV8String(parameter_.input_.c_str());
 
 			v8::Local<v8::Value> argv[argc];
 			argv[0] = arg1;
@@ -371,7 +338,7 @@ namespace bumo {
 			return false;
 		}
 
-		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, find_jslint_source->second.c_str());
+		v8::Local<v8::String> v8src = ToV8String(find_jslint_source->second.c_str());
 		v8::Local<v8::Script> compiled_script;
 		if (!v8::Script::Compile(context, v8src).ToLocal(&compiled_script)) {
 			result_.set_code(protocol::ERRCODE_CONTRACT_SYNTAX_ERROR);
@@ -387,14 +354,12 @@ namespace bumo {
 			LOG_ERROR("%s", result_.desc().c_str());
 			return false;
 		}
-		v8::Local<v8::String> process_name = v8::String::NewFromUtf8(
-			isolate_, V8Contract::call_jslint_, v8::NewStringType::kNormal, strlen(V8Contract::call_jslint_)).ToLocalChecked();
 
 		v8::Local<v8::Value> process_val;
-		if (!context->Global()->Get(context, process_name).ToLocal(&process_val) ||
+		if (!context->Global()->Get(context, ToV8String(call_jslint_.c_str())).ToLocal(&process_val) ||
 			!process_val->IsFunction()) {
 			Json::Value json_result;
-			json_result["exception"] = utils::String::Format("Failed to find jslint name(%s)", call_jslint_);
+			json_result["exception"] = utils::String::Format("Failed to find jslint name(%s)", call_jslint_.c_str());
 			result_.set_code(protocol::ERRCODE_CONTRACT_SYNTAX_ERROR);
 			result_.set_desc(json_result.toFastString());
 			LOG_ERROR("%s", result_.desc().c_str());
@@ -404,8 +369,8 @@ namespace bumo {
 		v8::Local<v8::Function> process = v8::Local<v8::Function>::Cast(process_val);
 		const int argc = 2;
 		v8::Local<v8::Value>  argv[argc];
-		v8::Local<v8::String> arg1 = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		v8::Local<v8::String> arg2 = v8::String::NewFromUtf8(isolate_, GetGlobalString().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+		v8::Local<v8::String> arg1 = ToV8String(parameter_.code_.c_str());
+		v8::Local<v8::String> arg2 = ToV8String(GetGlobalString().c_str());
 		argv[0] = arg1;
 		argv[1] = arg2;
 
@@ -453,52 +418,11 @@ namespace bumo {
 		v8::HandleScope    handle_scope(isolate_);
 		v8::TryCatch       try_catch(isolate_);
 
-		v8::Local<v8::Context>       context = CreateContext(isolate_, true);
-		v8::Context::Scope            context_scope(context);
-
-		auto string_sender = v8::String::NewFromUtf8(isolate_, parameter_.sender_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			string_sender);
-
-		auto string_contractor = v8::String::NewFromUtf8(isolate_, parameter_.this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, this_address_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			string_contractor);
-
-		v8::Local<v8::Integer> index_v8 = v8::Int32::New(isolate_, parameter_.ope_index_);
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, trigger_tx_index_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			index_v8);
-
-		auto blocknumber_v8 = v8::Number::New(isolate_, (double)parameter_.blocknumber_);
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, block_number_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			blocknumber_v8);
-
-		auto timestamp_v8 = v8::Number::New(isolate_, (double)parameter_.timestamp_);
-		context->Global()->Set(context,
-			v8::String::NewFromUtf8(isolate_, block_timestamp_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-			timestamp_v8);
-
-		if (CHECK_VERSION_GT_1001) {
-			auto string_origin_sender = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetOperatingSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, origin_sender_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				string_origin_sender);
-
-			auto tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.tx_initiator_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				tx_initiator);
-
-			auto string_origin_tx_initiator = v8::String::NewFromUtf8(isolate_, parameter_.ledger_context_->GetBottomTx()->GetSourceAddress().c_str(), v8::NewStringType::kNormal).ToLocalChecked();
-			context->Global()->Set(context,
-				v8::String::NewFromUtf8(isolate_, origin_tx_initiator_name_.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				string_origin_tx_initiator);
-		}
-
-		v8::Local<v8::String> v8src = v8::String::NewFromUtf8(isolate_, parameter_.code_.c_str());
+		v8::Local<v8::Context> context = CreateContext(isolate_, true);
+		v8::Context::Scope context_scope(context);
+		SetV8InterfaceFunc(context, true);
+		CreateJsObject(context, true);
+		v8::Local<v8::String> v8src = ToV8String(parameter_.code_.c_str());
 		v8::Local<v8::Script> compiled_script;
 
 		Json::Value error_desc_f;
@@ -508,10 +432,7 @@ namespace bumo {
 				break;
 			}
 
-			v8::Local<v8::String> check_time_name(
-				v8::String::NewFromUtf8(context->GetIsolate(), "__enable_check_time__",
-				v8::NewStringType::kNormal).ToLocalChecked());
-			v8::ScriptOrigin origin_check_time_name(check_time_name);
+			v8::ScriptOrigin origin_check_time_name(ToV8String("__enable_check_time__"));
 
 			if (!v8::Script::Compile(context, v8src, &origin_check_time_name).ToLocal(&compiled_script)) {
 				error_desc_f = ReportException(isolate_, &try_catch);
@@ -524,14 +445,11 @@ namespace bumo {
 				break;
 			}
 
-			v8::Local<v8::String> process_name = v8::String::NewFromUtf8(
-				isolate_, query_name_, v8::NewStringType::kNormal, strlen(query_name_)).ToLocalChecked();
-
 			v8::Local<v8::Value> process_val;
-			if (!context->Global()->Get(context, process_name).ToLocal(&process_val) ||
+			if (!context->Global()->Get(context, ToV8String(query_name_.c_str())).ToLocal(&process_val) ||
 				!process_val->IsFunction()) {
 				Json::Value &exception = error_desc_f["exception"];
-				exception = utils::String::Format("Lost of %s function", query_name_);
+				exception = utils::String::Format("Lost of %s function", query_name_.c_str());
 				LOG_ERROR("%s", exception.asCString());
 				break;
 			}
@@ -540,13 +458,13 @@ namespace bumo {
 
 			const int argc = 1;
 			v8::Local<v8::Value>  argv[argc];
-			v8::Local<v8::String> arg1 = v8::String::NewFromUtf8(isolate_, parameter_.input_.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			v8::Local<v8::String> arg1 = ToV8String(parameter_.input_.c_str());
 			argv[0] = arg1;
 
 			v8::Local<v8::Value> callRet;
 			if (!process->Call(context, context->Global(), argc, argv).ToLocal(&callRet)) {
 				error_desc_f = ReportException(isolate_, &try_catch);
-				LOG_ERROR("Failed to execute %s function.", query_name_);
+				LOG_ERROR("Failed to execute %s function.", query_name_.c_str());
 				break;
 			}
 
@@ -560,6 +478,102 @@ namespace bumo {
 		return false;
 	}
 
+	void V8Contract::CreateJsObject(v8::Local<v8::Context> context, bool readonly){
+		if (!CHECK_VERSION_GT_1001) {
+			return;
+		}
+
+		//for Blockchain
+		v8::Local<v8::Object> block_chain_obj = v8::Object::New(isolate_);
+		//blockchain.block
+		v8::Local<v8::Object> block = v8::Object::New(isolate_);
+		const ContractParameter::Block &param_block = parameter_.block_;
+		block->Set(ToV8String("timestamp"), ToV8Number(param_block.timestamp_));
+		block->Set(ToV8String("number"), ToV8Number(param_block.number_));
+		block_chain_obj->Set(ToV8String("block"), block);
+
+		//blockchain.tx
+		v8::Local<v8::Object> tx = v8::Object::New(isolate_);
+		const ContractParameter::Tx &param_tx = parameter_.tx_;
+		tx->Set(ToV8String("initiator"), ToV8String(param_tx.initiator_.c_str()));
+		tx->Set(ToV8String("sender"), ToV8String(param_tx.sender_.c_str()));
+		tx->Set(ToV8String("gasPrice"), ToV8Number(param_tx.gas_price_));
+		tx->Set(ToV8String("feeLimit"), ToV8Number(param_tx.fee_limit_));
+		tx->Set(ToV8String("hash"), ToV8String(param_tx.hash_.c_str()));
+		block_chain_obj->Set(ToV8String("tx"), tx);
+
+		//blockchain.msg
+		v8::Local<v8::Object> msg = v8::Object::New(isolate_);
+		const ContractParameter::Msg &param_msg = parameter_.msg_;
+		msg->Set(ToV8String("initiator"), ToV8String(parameter_.msg_.initiator_.c_str()));
+		msg->Set(ToV8String("sender"), ToV8String(parameter_.msg_.sender_.c_str()));
+		msg->Set(ToV8String("nonce"), ToV8Number(param_msg.nonce_));
+		msg->Set(ToV8String("operationIndex"), ToV8Int32(param_msg.operation_index_));
+		if (!readonly){
+			msg->Set(ToV8String("coinAmount"), ToV8String(utils::String::ToString(param_msg.coin_amount_).c_str()));
+			const protocol::Asset &msg_asset = param_msg.asset_;
+			if (msg_asset.has_key()) {
+				v8::Local<v8::Object> v8_asset_key = v8::Object::New(isolate_);
+				const protocol::AssetKey &asset_key = msg_asset.key();
+				v8_asset_key->Set(ToV8String("issuer"), ToV8String(asset_key.issuer().c_str()));
+				v8_asset_key->Set(ToV8String("code"), ToV8String(asset_key.code().c_str()));
+
+				v8::Local<v8::Object> asset = v8::Object::New(isolate_);
+				asset->Set(ToV8String("amount"), ToV8String(utils::String::ToString(msg_asset.amount()).c_str()));
+				asset->Set(ToV8String("key"), v8_asset_key);
+				msg->Set(ToV8String("asset"), block);
+			}
+		}
+		block_chain_obj->Set(ToV8String("msg"), msg);
+
+		//blockchain.function
+		block_chain_obj->Set(ToV8String("thisAddress"), ToV8String(parameter_.this_address_.c_str()));
+		SetV8ObjectFunc(block_chain_obj, js_obj_[BLOCKCHAIN_OBJ].read_);
+		if (!readonly) {
+			SetV8ObjectFunc(block_chain_obj, js_obj_[BLOCKCHAIN_OBJ].write_);
+		}
+		context->Global()->Set(context, ToV8String(BLOCKCHAIN_OBJ), block_chain_obj);
+
+		//for Utils
+		v8::Local<v8::Object> utils_obj = v8::Object::New(isolate_);
+		SetV8ObjectFunc(utils_obj, js_obj_[UTILS_OBJ].read_);
+		if (!readonly) {
+			SetV8ObjectFunc(utils_obj, js_obj_[UTILS_OBJ].write_);
+		}
+		context->Global()->Set(context, ToV8String(UTILS_OBJ), utils_obj);
+	}
+
+	void V8Contract::SetV8ObjectFunc(v8::Local<v8::Object> object, JsFunctions &js_functions){
+		for (JsFunctions::iterator itr = js_functions.begin(); itr != js_functions.end(); itr++) {
+			object->Set(ToV8String(itr->first.c_str()), v8::Function::New(isolate_, itr->second));
+		}
+	}
+
+	void V8Contract::SetV8InterfaceFunc(v8::Local<v8::Context> context, bool readonly){
+		//for sender, this address, tx index, block number, timestamp
+		context->Global()->Set(context, ToV8String(sender_name_.c_str()), ToV8String(parameter_.msg_.sender_.c_str()));
+		context->Global()->Set(context, ToV8String(this_address_.c_str()), ToV8String(parameter_.this_address_.c_str()));
+		context->Global()->Set(context, ToV8String(trigger_tx_index_name_.c_str()), ToV8Int32(parameter_.msg_.operation_index_));
+		context->Global()->Set(context, ToV8String(block_number_name_.c_str()), ToV8Number(parameter_.block_.number_));
+		context->Global()->Set(context, ToV8String(block_timestamp_name_.c_str()), ToV8Number(parameter_.block_.timestamp_));
+
+		if (readonly){
+			return;
+		}
+
+		//for pay coin, pay asset
+		context->Global()->Set(context, ToV8String(pay_coin_amount_name_.c_str()), ToV8String(utils::String::ToString(parameter_.msg_.coin_amount_).c_str()));
+		if (parameter_.msg_.asset_.has_key()) {
+			v8::Local<v8::Object> v8_asset = v8::Object::New(isolate_);
+			v8::Local<v8::Object> v8_asset_property = v8::Object::New(isolate_);
+			const protocol::AssetKey &asset_key = parameter_.msg_.asset_.key();
+			v8_asset_property->Set(ToV8String("issuer"), ToV8String(asset_key.issuer().c_str()));
+			v8_asset_property->Set(ToV8String("code"), ToV8String(asset_key.code().c_str()));
+			v8_asset->Set(ToV8String("amount"), ToV8String(utils::String::ToString(parameter_.msg_.asset_.amount()).c_str()));
+			v8_asset->Set(ToV8String("key"), v8_asset_property);
+			context->Global()->Set(context, ToV8String(pay_asset_amount_name_.c_str()), v8_asset);
+		}
+	}
 
 	V8Contract *V8Contract::GetContractFrom(v8::Isolate* isolate) {
 		utils::MutexGuard guard(isolate_to_contract_mutex_);
@@ -575,13 +589,9 @@ namespace bumo {
 		v8::TryCatch try_catch(isolate);
 		std::string js_file = "delete String.prototype.localeCompare; delete Date; delete Math;";
 
-		v8::Local<v8::String> source = v8::String::NewFromUtf8(isolate, js_file.c_str());
+		v8::Local<v8::String> source = ToV8StringStatic(isolate, js_file.c_str());
 		v8::Local<v8::Script> script;
-
-		v8::Local<v8::String> check_time_name(
-			v8::String::NewFromUtf8(isolate->GetCurrentContext()->GetIsolate(), "__enable_check_time__",
-			v8::NewStringType::kNormal).ToLocalChecked());
-		v8::ScriptOrigin origin_check_time_name(check_time_name);
+		v8::ScriptOrigin origin_check_time_name(ToV8StringStatic(isolate->GetCurrentContext()->GetIsolate(), "__enable_check_time__"));
 
 		if (!v8::Script::Compile(isolate->GetCurrentContext(), source, &origin_check_time_name).ToLocal(&script)) {
 			error_msg = ReportException(isolate, &try_catch);
@@ -600,38 +610,17 @@ namespace bumo {
 	v8::Local<v8::Context> V8Contract::CreateContext(v8::Isolate* isolate, bool readonly) {
 		// Create a template for the global object.
 		v8::Local<v8::ObjectTemplate> global = v8::ObjectTemplate::New(isolate);
-		std::map<std::string, v8::FunctionCallback>::iterator itr;
-		for (itr = js_func_read_.begin(); itr != js_func_read_.end(); itr++) {
-			global->Set(v8::String::NewFromUtf8(isolate, itr->first.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				v8::FunctionTemplate::New(isolate, itr->second));
+		JsFunctions &read_funcs = js_obj_[ORIGIN_OBJ].read_;
+		for (JsFunctions::iterator itr = read_funcs.begin(); itr != read_funcs.end(); itr++) {
+			global->Set(ToV8StringStatic(isolate, itr->first.c_str()), v8::FunctionTemplate::New(isolate, itr->second));
 		}
 		if (!readonly) {
-			for (itr = js_func_write_.begin(); itr != js_func_write_.end(); itr++) {
-				global->Set(v8::String::NewFromUtf8(isolate, itr->first.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-					v8::FunctionTemplate::New(isolate, itr->second));
+			JsFunctions &writer_funcs = js_obj_[ORIGIN_OBJ].write_;
+			for (JsFunctions::iterator itr = writer_funcs.begin(); itr != writer_funcs.end(); itr++) {
+				global->Set(ToV8StringStatic(isolate, itr->first.c_str()), v8::FunctionTemplate::New(isolate, itr->second));
 			}
 		}
-
-		if (CHECK_VERSION_GT_1001) {
-			InitFuncTemplateGt1001(isolate, global, readonly);
-		}
-
 		return v8::Context::New(isolate, NULL, global);
-	}
-
-	void V8Contract::InitFuncTemplateGt1001(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> global, bool readonly) {
-		// Init function template when ledger greater than 1001
-		std::map<std::string, v8::FunctionCallback>::iterator itr;
-		for (itr = js_func_read_gt1001_.begin(); itr != js_func_read_gt1001_.end(); itr++) {
-			global->Set(v8::String::NewFromUtf8(isolate, itr->first.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-				v8::FunctionTemplate::New(isolate, itr->second));
-		}
-		if (!readonly) {
-			for (itr = js_func_write_gt1001_.begin(); itr != js_func_write_gt1001_.end(); itr++) {
-				global->Set(v8::String::NewFromUtf8(isolate, itr->first.c_str(), v8::NewStringType::kNormal).ToLocalChecked(),
-					v8::FunctionTemplate::New(isolate, itr->second));
-			}
-		}
 	}
 
 	Json::Value V8Contract::ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch) {
@@ -746,13 +735,10 @@ namespace bumo {
 			v8::TryCatch try_catch(args.GetIsolate());
 			std::string js_file = find_source->second; //load_file(*str);
 
-			v8::Local<v8::String> source = v8::String::NewFromUtf8(args.GetIsolate(), js_file.c_str());
+			v8::Local<v8::String> source = ToV8StringStatic(args.GetIsolate(), js_file.c_str());
 			v8::Local<v8::Script> script;
 
-			v8::Local<v8::String> check_time_name(
-				v8::String::NewFromUtf8(args.GetIsolate()->GetCurrentContext()->GetIsolate(), "__enable_check_time__",
-				v8::NewStringType::kNormal).ToLocalChecked());
-			v8::ScriptOrigin origin_check_time_name(check_time_name);
+			v8::ScriptOrigin origin_check_time_name(ToV8StringStatic(args.GetIsolate()->GetCurrentContext()->GetIsolate(), "__enable_check_time__"));
 
 			if (!v8::Script::Compile(args.GetIsolate()->GetCurrentContext(), source, &origin_check_time_name).ToLocal(&script)) {
 				ReportException(args.GetIsolate(), &try_catch);
@@ -790,12 +776,9 @@ namespace bumo {
 
 			std::string error_info;
 			if (ptr->IsExpire(error_info)) {
-				args.GetIsolate()->ThrowException(
-					v8::String::NewFromUtf8(args.GetIsolate(), error_info.c_str(),
-					v8::NewStringType::kNormal).ToLocalChecked());
+				args.GetIsolate()->ThrowException(ToV8StringStatic(args.GetIsolate(), error_info.c_str()));
 			}
 		}
-
 	}
 
 	bool V8Contract::TransEncodeType(const v8::Local<v8::Value> &arg, DataEncodeType &data_type) {
