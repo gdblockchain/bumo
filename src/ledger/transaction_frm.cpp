@@ -256,6 +256,10 @@ namespace bumo {
 		return incoming_time_;
 	}
 
+	const int64_t TransactionFrm::GetProcessingOperation() const{
+		return processing_operation_;
+	}
+
 	bool TransactionFrm::PayFee(std::shared_ptr<Environment> environment, int64_t &total_fee) {
 		int64_t fee = GetFeeLimit();
 		std::string str_address = transaction_env_.transaction().source_address();
