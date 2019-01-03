@@ -277,4 +277,8 @@ namespace bumo {
 
 	//merkel tree
 	bool MerkleNode::IsLeaf(){ return left_node_ == nullptr && right_node_ == nullptr; }
+
+	MerkleTree::MerkleTree() {}
+	MerkleTree::~MerkleTree() {}
+
 }
