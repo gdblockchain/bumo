@@ -103,6 +103,19 @@ namespace bumo {
 		typedef std::map<ITransactionSenderNotify*, TransTaskVector> TransTaskMap;
 		TransTaskMap trans_task_map_;
 	};
+
+
+	//merkel tree
+	class MerkleNode
+	{
+	public:
+		//MerkleHash hash_;
+		typedef std::shared_ptr<bumo::MerkleNode> MerkleNodePointer;
+		MerkleNodePointer left_node_;
+		MerkleNodePointer right_node_;
+		MerkleNodePointer parent_;
+		bool IsLeaf(){ return left_node_ == nullptr && right_node_ == nullptr; }
+	};
 }
 
 #endif
