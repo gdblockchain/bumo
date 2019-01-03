@@ -369,7 +369,9 @@ enum MERKEL_BRANCH_TYPE{
 		OLD_ROOT,    // used for linear list of hashes to compute the old root in a consistency proof.
 	};
 
-message MerkelProofHash {
+message MerkelProofHash{
+    string hash = 1;
+	MERKEL_BRANCH_TYPE direction = 2;
 }
 
 
