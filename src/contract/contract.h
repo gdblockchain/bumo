@@ -12,20 +12,65 @@ namespace bumo {
 		ContractParameter();
 		~ContractParameter();
 
+		typedef struct Block{
+			Block(){
+				Reset();
+			}
+			void Reset(){
+				timestamp_ = 0;
+				number_ = 0;
+			}
+			int64_t timestamp_;
+			int64_t number_;
+		};
+
+		typedef struct Tx{
+			Tx(){
+				Reset();
+			}
+			void Reset(){
+				initiator_ = "";
+				sender_ = "";
+				gas_price_ = 0;
+				fee_limit_ = 0;
+				hash_ = "";
+			}
+			std::string initiator_;
+			std::string sender_;
+			int64_t gas_price_;
+			int64_t fee_limit_;
+			std::string hash_;
+		};
+
+		typedef struct Msg{
+			Msg(){
+				Reset();
+			}
+			void Reset(){
+				initiator_ = "";
+				sender_ = "";
+				asset_.Clear();
+				coin_amount_ = 0;
+				operation_index_ = 0;
+				nonce_ = 0;
+			}
+			std::string initiator_;
+			std::string sender_;
+			protocol::Asset asset_;
+			int64_t coin_amount_;
+			int32_t operation_index_;
+			int64_t nonce_;
+		};
+
 		bool init_;
 		std::string code_;
 		std::string input_;
 		std::string this_address_;
-		std::string sender_;
-		std::string trigger_tx_;
-		int32_t ope_index_;
-		std::string consensus_value_;
-		int64_t timestamp_;
-		int64_t blocknumber_;
 		LedgerContext *ledger_context_;
-		int64_t pay_coin_amount_;
-		protocol::Asset pay_asset_amount_;
-		std::string tx_initiator_;
+		
+		Block block_;
+		Tx tx_;
+		Msg msg_;
 	};
 
 	class TestParameter {};
