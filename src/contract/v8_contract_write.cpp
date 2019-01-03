@@ -161,7 +161,6 @@ namespace bumo {
 		return asset_key;
 	}
 
-
 	void V8Contract::CallBackDelegateCall(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		v8::HandleScope handle_scope(args.GetIsolate());
 		v8::Local<v8::Object> obj = v8::Object::New(args.GetIsolate());
@@ -219,17 +218,12 @@ namespace bumo {
 
 			ledger_context->transaction_stack_.push_back(ledger_context->GetTopTx());
 
-			ContractParameter parameter;
+			ContractParameter parameter = v8_contract->GetParameter();
+			//contract
 			parameter.code_ = contract.payload();
-			parameter.sender_ = v8_contract->GetParameter().sender_;
-			parameter.tx_initiator_ = v8_contract->GetParameter().tx_initiator_;
-			parameter.this_address_ = v8_contract->GetParameter().this_address_;
+			parameter.init_ = false;
 			parameter.input_ = input;
-			parameter.ope_index_ = v8_contract->GetParameter().ope_index_;
-			parameter.timestamp_ = v8_contract->GetParameter().timestamp_;
-			parameter.blocknumber_ = v8_contract->GetParameter().blocknumber_;
-			parameter.consensus_value_ = v8_contract->GetParameter().consensus_value_;
-			parameter.ledger_context_ = v8_contract->GetParameter().ledger_context_;
+			parameter.this_address_ = v8_contract->GetParameter().this_address_;
 
 			Result tmp_result = ContractManager::Instance().Execute(contract.type(), parameter);
 			if (tmp_result.code() > 0) {
@@ -251,7 +245,6 @@ namespace bumo {
 			v8::String::NewFromUtf8(args.GetIsolate(), error_desc.c_str(),
 			v8::NewStringType::kNormal).ToLocalChecked());
 	}
-
 
 	void V8Contract::CallBackSetValidators(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		std::string error_desc;
