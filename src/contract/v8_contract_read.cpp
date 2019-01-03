@@ -17,7 +17,7 @@ namespace bumo {
 		std::string this_contract = v8_contract->parameter_.this_address_;
 		v8::String::Utf8Value str1(args[0]);
 		const char* cstr = ToCString(str1);
-		LOG_TRACE("V8contract log[%s:%s]\n%s", this_contract.c_str(), v8_contract->parameter_.sender_.c_str(), cstr);
+		LOG_TRACE("V8contract log[%s:%s]\n%s", this_contract.c_str(), v8_contract->parameter_.msg_.sender_.c_str(), cstr);
 		//v8_contract->AddLog(cstr);
 
 		return;
@@ -214,17 +214,21 @@ namespace bumo {
 
 			ledger_context->transaction_stack_.push_back(ledger_context->GetTopTx());
 
-			ContractParameter parameter;
+			ContractParameter parameter = v8_contract->GetParameter();
+			//contract
 			parameter.code_ = contract.payload();
-			parameter.sender_ = v8_contract->GetParameter().this_address_;
-			parameter.tx_initiator_ = v8_contract->GetParameter().tx_initiator_;
-			parameter.this_address_ = address;
+			parameter.init_ = false;
 			parameter.input_ = input;
-			parameter.ope_index_ = 0;
-			parameter.timestamp_ = v8_contract->GetParameter().timestamp_;
-			parameter.blocknumber_ = v8_contract->GetParameter().blocknumber_;
-			parameter.consensus_value_ = v8_contract->GetParameter().consensus_value_;
-			parameter.ledger_context_ = v8_contract->GetParameter().ledger_context_;
+			parameter.this_address_ = address;
+
+			//msg
+			parameter.msg_.Reset();
+			parameter.msg_.coin_amount_ = 0;
+			parameter.msg_.asset_.Clear();
+			parameter.msg_.initiator_ = v8_contract->GetParameter().msg_.initiator_;
+			parameter.msg_.nonce_ = 0;
+			parameter.msg_.operation_index_ = 0;
+			parameter.msg_.sender_ = v8_contract->GetParameter().this_address_;
 
 			Json::Value query_result;
 			bool ret = ContractManager::Instance().Query(contract.type(), parameter, query_result);
@@ -303,18 +307,25 @@ namespace bumo {
 				break;
 			}
 
-			ContractParameter parameter;
+			ContractParameter parameter = v8_contract->GetParameter();
+			//contract
 			parameter.code_ = contract.payload();
-			parameter.sender_ = v8_contract->GetParameter().this_address_;
+			
+			parameter.init_ = false;
 			parameter.this_address_ = address;
 			parameter.input_ = input;
-			parameter.ope_index_ = 0;
-			parameter.timestamp_ = v8_contract->GetParameter().timestamp_;
-			parameter.blocknumber_ = v8_contract->GetParameter().blocknumber_;
-			parameter.consensus_value_ = v8_contract->GetParameter().consensus_value_;
-			parameter.ledger_context_ = v8_contract->GetParameter().ledger_context_;
-			//Query
+			
 
+			//msg
+			parameter.msg_.Reset();
+			parameter.msg_.coin_amount_ = 0;
+			parameter.msg_.asset_.Clear();
+			parameter.msg_.initiator_ = v8_contract->GetParameter().msg_.initiator_;
+			parameter.msg_.nonce_ = 0;
+			parameter.msg_.operation_index_ = 0;
+			parameter.msg_.sender_ = v8_contract->GetParameter().this_address_;
+
+			//Query
 			Json::Value query_result;
 			bool ret = ContractManager::Instance().Query(contract.type(), parameter, query_result);
 
@@ -336,6 +347,89 @@ namespace bumo {
 		args.GetReturnValue().Set(obj);
 	}
 
+	void V8Contract::CallBackDelegateQuery(const v8::FunctionCallbackInfo<v8::Value>& args) {
+		v8::HandleScope handle_scope(args.GetIsolate());
+		v8::Local<v8::Object> obj = v8::Object::New(args.GetIsolate());
+		std::string error_desc;
+		do {
+			if (args.Length() != 2) {
+				error_desc = "parameter error";
+				break;
+			}
+
+			if (!args[0]->IsString()) { //the called contract address
+				error_desc = "contract execution error, CallBackDelegateQuery, parameter 0 should be a String";
+				break;
+			}
+
+			if (!args[1]->IsString()) {
+				error_desc = "contract execution error, CallBackDelegateQuery, parameter 1 should be a String";
+				break;
+			}
+
+			std::string address = ToCString(v8::String::Utf8Value(args[0]));
+			std::string input = ToCString(v8::String::Utf8Value(args[1]));
+
+			bumo::AccountFrm::pointer account_frm = nullptr;
+			V8Contract *v8_contract = GetContractFrom(args.GetIsolate());
+			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
+			ledger_context->GetBottomTx()->ContractStepInc(1000);
+
+			std::shared_ptr<Environment> environment = ledger_context->GetTopTx()->environment_;
+			if (!environment->GetEntry(address, account_frm)) {
+				error_desc = utils::String::Format("Failed to find account %s.", address.c_str());
+				break;
+			}
+
+			if (!account_frm->GetProtoAccount().has_contract()) {
+				error_desc = utils::String::Format("The account(%s) has no contract.", address.c_str());
+				break;
+			}
+
+			protocol::Contract contract = account_frm->GetProtoAccount().contract();
+			if (contract.payload().size() == 0) {
+				error_desc = utils::String::Format("The account(%s) has no contract.", address.c_str());
+				break;
+			}
+
+			if (ledger_context->transaction_stack_.size() > General::CONTRACT_MAX_RECURSIVE_DEPTH) {
+				error_desc = "Too many recursion";
+				break;
+			}
+
+			ledger_context->transaction_stack_.push_back(ledger_context->GetTopTx());
+
+			ContractParameter parameter = v8_contract->GetParameter();
+			//contract
+			parameter.code_ = contract.payload();
+			parameter.init_ = false;
+			parameter.input_ = input;
+			parameter.this_address_ = v8_contract->GetParameter().this_address_;
+
+			Json::Value query_result;
+			bool ret = ContractManager::Instance().Query(contract.type(), parameter, query_result);
+			ledger_context->transaction_stack_.pop_back();
+
+			//Just like this, { "result": "abcde"} or {"error" : true}
+			if (!ret) {
+				error_desc = "Failed to query";
+				break;
+			}
+
+			Json::Value js_object = query_result["result"];
+			v8::Local<v8::Value> v8_result;
+			CppJsonToJsValue(args.GetIsolate(), js_object, v8_result);
+			obj->Set(v8::String::NewFromUtf8(args.GetIsolate(), "result"), v8_result);
+			args.GetReturnValue().Set(obj);
+
+			return;
+		} while (false);
+		LOG_ERROR("%s", error_desc.c_str());
+		v8::Local<v8::Boolean> flag_false = v8::Boolean::New(args.GetIsolate(), true);
+		obj->Set(v8::String::NewFromUtf8(args.GetIsolate(), "error"), flag_false);
+		args.GetReturnValue().Set(obj);
+	}
+	
 	void V8Contract::CallBackGetValidators(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		do {
 			if (args.Length() != 0) {
