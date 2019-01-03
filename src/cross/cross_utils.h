@@ -16,6 +16,7 @@
 #ifndef CROSS_UTILS_H_
 #define CROSS_UTILS_H_
 #include<ledger/ledger_manager.h>
+#include<proto/cpp/overlay.pb.h>
 using namespace std;
 class MerkleNode;
 namespace bumo {
@@ -117,11 +118,27 @@ namespace bumo {
 	};
 
 	class MerkleTree{
+	public:
+		MerkleTree();
+		virtual ~MerkleTree();
+		void BuildTree();
+		string GetMerkleRoot();
+		void BuildBaseLeafes(const vector<string> &base_leafs);
+		void IterateUp(const int &element);
+		int VerifyMerkelLeaf(const std::string &leaf_hash);
+		string HashMerkleBranches(const string &left, const string &right);
+
+
+		void BuildAuditTrail(vector<protocol::MerkelProofHash> &audit_trail, const MerkleNodePointer &parent, const MerkleNodePointer &child);
+		void AuditProof(const std::string &leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail);
+		bool VerifyAudit(const std::string &root_hash, const std::string& leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail);
 
 	private:
-		std::string merkle_root_;
 		int MakeBinary(std::vector<MerkleNodePointer> &node_vector);
 		void PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level);
+		
+	private:
+		std::string merkle_root_;
 		std::vector<vector<MerkleNodePointer>> base_nodes_; //It's a list of nodes
 		utils::Mutex base_nodes_lock_;
 	};
