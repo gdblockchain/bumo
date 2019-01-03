@@ -983,7 +983,7 @@ namespace bumo {
 			tx_store.mutable_transaction_env()->CopyFrom(new_tx->GetProtoTxEnv());
 			auto trigger = tx_store.mutable_transaction_env()->mutable_trigger();
 			trigger->mutable_transaction()->set_hash(top_tx->GetContentHash());
-			trigger->mutable_transaction()->set_index(top_tx->processing_operation_);
+			trigger->mutable_transaction()->set_index(top_tx->GetProcessingOperation());
 
 
 			if (new_tx->GetResult().code() == protocol::ERRCODE_SUCCESS) {
@@ -1015,7 +1015,7 @@ namespace bumo {
 		tx_store.mutable_transaction_env()->CopyFrom(new_tx->GetProtoTxEnv());
 		auto trigger = tx_store.mutable_transaction_env()->mutable_trigger();
 		trigger->mutable_transaction()->set_hash(top_tx->GetContentHash());
-		trigger->mutable_transaction()->set_index(top_tx->processing_operation_);
+		trigger->mutable_transaction()->set_index(top_tx->GetProcessingOperation());
 		top_tx->instructions_.push_back(tx_store);
 
 		result = new_tx->GetResult();
