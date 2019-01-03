@@ -364,9 +364,9 @@ message MessageChannelchildWithdrawalChallenge{
 }
 
 enum MERKEL_BRANCH_TYPE{
-		LEFT,
-		RIGHT,
-		OLD_ROOT,    // used for linear list of hashes to compute the old root in a consistency proof.
+		LEFT = 0;
+		RIGHT = 1;
+		OLD_ROOT = 2;    // used for linear list of hashes to compute the old root in a consistency proof.
 	};
 
 message MerkelProofHash{
