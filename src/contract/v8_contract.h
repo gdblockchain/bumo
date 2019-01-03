@@ -27,26 +27,25 @@ namespace bumo {
 		static bool LoadJslintGlobalString();
 		static std::string GetGlobalString();
 		static std::map<std::string, std::string> jslib_sources_;
-		static std::map<std::string, v8::FunctionCallback> js_func_read_;
-		static std::map<std::string, v8::FunctionCallback> js_func_write_;
 
-		static std::map<std::string, v8::FunctionCallback> js_func_read_gt1001_;
-		static std::map<std::string, v8::FunctionCallback> js_func_write_gt1001_;
+		typedef std::map<std::string, v8::FunctionCallback> JsFunctions;
+		typedef struct JsFuncList{
+			JsFunctions read_;
+			JsFunctions write_;
+		};
+		static std::map<std::string, JsFuncList> js_obj_;
 
 		static std::string user_global_string_;
 		static std::string user_global_string_gt1001_;
 
+		//for contract interface
+		static const std::string init_name_;
+		static const std::string main_name_;
+		static const std::string query_name_;
+		
+		//for built-in variables
 		static const std::string sender_name_;
-		static const std::string origin_sender_name_;
-
-		static const std::string tx_initiator_name_;
-		static const std::string origin_tx_initiator_name_;
-
-		static const std::string this_address_;
-		static const char* main_name_;
-		static const char* query_name_;
-		static const char* init_name_;
-		static const char* call_jslint_;
+		static const std::string this_address_;		
 		static const std::string trigger_tx_name_;
 		static const std::string trigger_tx_index_name_;
 		static const std::string this_header_name_;
@@ -54,6 +53,9 @@ namespace bumo {
 		static const std::string pay_asset_amount_name_;
 		static const std::string block_timestamp_name_;
 		static const std::string block_number_name_;
+
+		//for check source
+		static const std::string call_jslint_;
 
 		static utils::Mutex isolate_to_contract_mutex_;
 		static std::unordered_map<v8::Isolate*, V8Contract *> isolate_to_contract_;
@@ -64,7 +66,6 @@ namespace bumo {
 		static protocol::AssetKey GetAssetFromJsObject(v8::Isolate* isolate, v8::Local<v8::Object> js_object);
 		static bool RemoveRandom(v8::Isolate* isolate, Json::Value &error_msg);
 		static v8::Local<v8::Context> CreateContext(v8::Isolate* isolate, bool readonly);
-		static void InitFuncTemplateGt1001(v8::Isolate* isolate, v8::Local<v8::ObjectTemplate> global, bool readonly);
 		static V8Contract *GetContractFrom(v8::Isolate* isolate);
 		static Json::Value ReportException(v8::Isolate* isolate, v8::TryCatch* try_catch);
 		static const char* ToCString(const v8::String::Utf8Value& value);
@@ -87,6 +88,7 @@ namespace bumo {
 		static void CallBackContractQuery(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackContractQueryGt11(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackDelegateCall(const v8::FunctionCallbackInfo<v8::Value>& args);
+		static void CallBackDelegateQuery(const v8::FunctionCallbackInfo<v8::Value>& args);
 		static void CallBackGetContractProperty(const v8::FunctionCallbackInfo<v8::Value>& args);
 
 		static V8Contract *UnwrapContract(v8::Local<v8::Object> obj);
@@ -147,6 +149,10 @@ namespace bumo {
 
 		static bool TransEncodeType(const v8::Local<v8::Value> &arg, DataEncodeType &data_type);
 		static bool TransEncodeData(const v8::Local<v8::Value> &raw_data, const DataEncodeType &encode_type, std::string &result_data);
+
+		void SetV8InterfaceFunc(v8::Local<v8::Context> context, bool readonly);
+		void CreateJsObject(v8::Local<v8::Context> context, bool readonly);
+		void SetV8ObjectFunc(v8::Local<v8::Object> object, JsFunctions &js_functions);
 	};
 }
 
