@@ -123,6 +123,7 @@ namespace bumo {
 		int MakeBinary(std::vector<MerkleNodePointer> &node_vector);
 		void PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level);
 		std::vector<vector<MerkleNodePointer>> base_nodes_; //It's a list of nodes
+		utils::Mutex base_nodes_lock_;
 	};
 }
 
