@@ -109,7 +109,7 @@ namespace bumo {
 	class MerkleNode
 	{
 	public:
-		//MerkleHash hash_;
+		std::string hash_;
 		typedef std::shared_ptr<bumo::MerkleNode> MerkleNodePointer;
 		MerkleNodePointer left_node_;
 		MerkleNodePointer right_node_;
