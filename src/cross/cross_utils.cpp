@@ -300,10 +300,6 @@ namespace bumo {
 		return hash_;
 	}
 
-	int64_t MerkleNode::CheckDir(){
-		return 0;
-	}
-
 	MerkleNodePointer MerkleNode::GetSibling(){
 		// the left child gets the right child, and the right child gets the left child
 		// gets the parent node of the node

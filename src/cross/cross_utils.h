@@ -134,7 +134,6 @@ namespace bumo {
 		MerkleNodePointer GetChildrenRight();
 		void SetParent(const MerkleNodePointer &parent);
 		string GetHash();
-		int64_t CheckDir();
 		MerkleNodePointer GetSibling();
 		void SetHash(const std::string &leaf_hash);
 		virtual ~MerkleNode();
