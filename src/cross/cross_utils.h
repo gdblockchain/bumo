@@ -134,7 +134,7 @@ namespace bumo {
 		bool VerifyAudit(const std::string &root_hash, const std::string& leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail);
 
 	private:
-		int MakeBinary(std::vector<MerkleNodePointer> &node_vector);
+		int64_t MakeBinary(std::vector<MerkleNodePointer> &node_vector);
 		void PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level);
 		
 	private:

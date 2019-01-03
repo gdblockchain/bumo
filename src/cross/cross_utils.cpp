@@ -281,4 +281,18 @@ namespace bumo {
 	MerkleTree::MerkleTree() {}
 	MerkleTree::~MerkleTree() {}
 
+	// as merkle algorithm requires that leaf nodes are even in blockchain, when a block contains an odd number of transactions,
+	// make an even number of copies of the last transaction.
+	int64_t MerkleTree::MakeBinary(std::vector<MerkleNodePointer> &node_vector){
+		// make leaf nodes double
+		int64_t length = node_vector.size();
+
+		// If the number of elements is odd, then put the last node's push_back once
+		if ((length % 2) != 0){
+			node_vector.push_back(node_vector.end()[-1]); //The last element of push_back,end() - 1
+			length++;
+		}
+		return length;
+	}
+
 }
