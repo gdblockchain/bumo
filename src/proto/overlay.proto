@@ -275,10 +275,11 @@ message MessageChannelQueryHead{
 	int64 ledger_seq = 1;
 }
 
-message MerkelProof {
-	bytes merkel_root = 1;
-	bytes merkel_path = 2;
-	Transaction transaction = 3;
+message MerkelProof{
+	string merkel_root = 1;
+	repeated MerkelProofHash proof_branch = 2;
+	bytes leaft = 3;
+	string leaft_hash = 4;
 }
 
 message MessageChannelDeposit{
