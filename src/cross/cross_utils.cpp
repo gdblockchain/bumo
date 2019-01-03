@@ -274,4 +274,7 @@ namespace bumo {
 		PeerManager::Instance().Broadcast(protocol::OVERLAY_MSGTYPE_TRANSACTION, tran_ptr->GetProtoTxEnv().SerializeAsString());
 		return protocol::ERRCODE_SUCCESS;
 	}
+
+	//merkel tree
+	bool MerkleNode::IsLeaf(){ return left_node_ == nullptr && right_node_ == nullptr; }
 }

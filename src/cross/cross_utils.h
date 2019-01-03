@@ -11,12 +11,13 @@
 
 	You should have received a copy of the GNU General Public License
 	along with bumo.  If not, see <http://www.gnu.org/licenses/>.
-*/
+	*/
 
 #ifndef CROSS_UTILS_H_
 #define CROSS_UTILS_H_
 #include<ledger/ledger_manager.h>
-
+using namespace std;
+class MerkleNode;
 namespace bumo {
 	class CrossUtils : public utils::NonCopyable{
 	public:
@@ -104,17 +105,24 @@ namespace bumo {
 		TransTaskMap trans_task_map_;
 	};
 
-
+	typedef std::shared_ptr<MerkleNode> MerkleNodePointer;
 	//merkel tree
-	class MerkleNode
-	{
+	class MerkleNode{
 	public:
 		std::string hash_;
-		typedef std::shared_ptr<bumo::MerkleNode> MerkleNodePointer;
 		MerkleNodePointer left_node_;
 		MerkleNodePointer right_node_;
 		MerkleNodePointer parent_;
-		bool IsLeaf(){ return left_node_ == nullptr && right_node_ == nullptr; }
+		bool IsLeaf();
+	};
+
+	class MerkleTree{
+
+	private:
+		std::string merkle_root_;
+		int MakeBinary(std::vector<MerkleNodePointer> &node_vector);
+		void PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level);
+		std::vector<vector<MerkleNodePointer>> base_nodes_; //It's a list of nodes
 	};
 }
 
