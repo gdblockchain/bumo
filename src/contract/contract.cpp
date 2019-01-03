@@ -2,7 +2,17 @@
 #include "contract.h"
 
 namespace bumo {
-	ContractParameter::ContractParameter() : ope_index_(-1), ledger_context_(NULL), pay_coin_amount_(0), init_(false) {}
+	ContractParameter::ContractParameter(){
+		block_.Reset();
+		tx_.Reset();
+		msg_.Reset();
+
+		init_ = false;
+		code_ = "";
+		input_ = "";
+		this_address_ = "";
+		ledger_context_ = NULL;
+	}
 
 	ContractParameter::~ContractParameter() {}
 
