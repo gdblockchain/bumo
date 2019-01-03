@@ -368,5 +368,17 @@ namespace bumo {
 
 			/*cout << "Merkle Root is : " << merkle_root_ << endl << endl;*/
 	}
+
+	// create a list of leaf nodes
+	void MerkleTree::BuildBaseLeafes(const vector<string> &base_leafs){
+		std::vector<MerkleNodePointer> new_nodes;
+		// creates a node for each string and sets the hash value through this string
+		for (auto leaf : base_leafs){
+			MerkleNodePointer new_node = MerkleNodePointer();
+			new_node->SetHash(leaf);
+			new_nodes.push_back(new_node);
+		}
+		base_nodes_.push_back(new_nodes);
+	}
 }
 	
