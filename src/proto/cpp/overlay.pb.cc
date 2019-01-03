@@ -613,10 +613,11 @@ void protobuf_AssignDesc_overlay_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannelQueryHead, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MessageChannelQueryHead, _is_default_instance_));
   MerkelProof_descriptor_ = file->message_type(26);
-  static const int MerkelProof_offsets_[3] = {
+  static const int MerkelProof_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProof, merkel_root_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProof, merkel_path_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProof, transaction_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProof, proof_branch_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProof, leaft_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProof, leaft_hash_),
   };
   MerkelProof_reflection_ =
     ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
@@ -1112,103 +1113,103 @@ void protobuf_AddDesc_overlay_2eproto() {
     ".protocol.ERRORCODE\022\022\n\nerror_desc\030\002 \001(\t\022"
     "D\n\022create_child_chain\030\003 \001(\0132(.protocol.M"
     "essageChannelCreateChildChain\"-\n\027Message"
-    "ChannelQueryHead\022\022\n\nledger_seq\030\001 \001(\003\"c\n\013"
-    "MerkelProof\022\023\n\013merkel_root\030\001 \001(\014\022\023\n\013merk"
-    "el_path\030\002 \001(\014\022*\n\013transaction\030\003 \001(\0132\025.pro"
-    "tocol.Transaction\"\205\001\n\025MessageChannelDepo"
-    "sit\022\020\n\010chain_id\030\001 \001(\003\022\016\n\006amount\030\002 \001(\003\022\013\n"
-    "\003seq\030\003 \001(\003\022\024\n\014block_number\030\004 \001(\003\022\026\n\016sour"
-    "ce_address\030\005 \001(\t\022\017\n\007address\030\006 \001(\t\"\306\001\n\030Me"
-    "ssageChannelWithdrawal\022\020\n\010chain_id\030\001 \001(\003"
-    "\022\016\n\006amount\030\002 \001(\003\022\013\n\003seq\030\003 \001(\003\022\022\n\nblock_h"
-    "ash\030\004 \001(\014\022\021\n\tblock_seq\030\005 \001(\003\022\026\n\016source_a"
-    "ddress\030\006 \001(\t\022\017\n\007address\030\007 \001(\t\022+\n\014merkel_"
-    "proof\030\010 \001(\0132\025.protocol.MerkelProof\"\344\001\n!M"
-    "essageChannelWithdrawalChallenge\022\020\n\010chai"
-    "n_id\030\001 \001(\003\022\016\n\006amount\030\002 \001(\003\022\013\n\003seq\030\003 \001(\003\022"
-    "\022\n\nblock_hash\030\004 \001(\014\022\026\n\016source_address\030\005 "
-    "\001(\t\022\017\n\007address\030\006 \001(\t\022\033\n\023main_source_addr"
-    "ess\030\007 \001(\t\022\021\n\tblock_seq\030\010 \001(\003\022\r\n\005state\030\t "
-    "\001(\003\022\024\n\014merkel_proof\030\n \001(\t\"\200\001\n\"MessageCha"
-    "nnelChangeChildValidator\022\032\n\022main_chain_t"
-    "x_hash\030\001 \001(\t\022\025\n\radd_validator\030\002 \001(\t\022\030\n\020d"
-    "elete_validator\030\003 \001(\t\022\r\n\005index\030\004 \001(\t\"W\n\'"
-    "MessageChannelQueryChangeChildValidator\022"
-    "\020\n\010chain_id\030\001 \001(\003\022\032\n\022change_child_index\030"
-    "\002 \001(\003\"L\n\035MessageChannelQuerySubmitHead\022\020"
-    "\n\010chain_id\030\001 \001(\003\022\013\n\003seq\030\002 \001(\003\022\014\n\004hash\030\003 "
-    "\001(\014\"Q\n\030MessageChannelSubmitHead\022&\n\006heade"
-    "r\030\001 \001(\0132\026.protocol.LedgerHeader\022\r\n\005state"
-    "\030\002 \001(\003\"p\n\036MessageChannelHandleWithdrawal"
-    "\022\?\n\nwithdrawal\030\001 \001(\0132+.protocol.MessageC"
-    "hannelWithdrawalChallenge\022\r\n\005state\030\002 \001(\003"
-    "\">\n\035MessageChannelQueryWithdrawal\022\020\n\010cha"
-    "in_id\030\001 \001(\003\022\013\n\003seq\030\002 \001(\003\"\307\001\n MessageChan"
-    "nelChildChallengeHead\022\020\n\010chain_id\030\001 \001(\003\022"
-    ";\n\004type\030\002 \001(\0162-.protocol.MESSAGE_CHANNEL"
-    "_CHALLENGE_HEAD_TYPE\022(\n\010cmc_head\030\003 \001(\0132\026"
-    ".protocol.LedgerHeader\022*\n\nchild_head\030\004 \001"
-    "(\0132\026.protocol.LedgerHeader\"\331\001\n&MessageCh"
-    "annelchildWithdrawalChallenge\022\?\n\nwithdra"
-    "wal\030\001 \001(\0132+.protocol.MessageChannelWithd"
-    "rawalChallenge\022A\n\004type\030\002 \001(\01623.protocol."
-    "MESSAGE_CHANNEL_CHALLENGE_WITHDRAWAL_TYP"
-    "E\022+\n\014merkel_proof\030\003 \001(\0132\025.protocol.Merke"
-    "lProof\"P\n\017MerkelProofHash\022\014\n\004hash\030\001 \001(\t\022"
-    "/\n\tdirection\030\002 \001(\0162\034.protocol.MERKEL_BRA"
-    "NCH_TYPE*\203\002\n\024OVERLAY_MESSAGE_TYPE\022\030\n\024OVE"
-    "RLAY_MSGTYPE_NONE\020\000\022\030\n\024OVERLAY_MSGTYPE_P"
-    "ING\020\001\022\031\n\025OVERLAY_MSGTYPE_HELLO\020\002\022\031\n\025OVER"
-    "LAY_MSGTYPE_PEERS\020\003\022\037\n\033OVERLAY_MSGTYPE_T"
-    "RANSACTION\020\004\022\033\n\027OVERLAY_MSGTYPE_LEDGERS\020"
-    "\005\022\030\n\024OVERLAY_MSGTYPE_PBFT\020\006\022)\n%OVERLAY_M"
-    "SGTYPE_LEDGER_UPGRADE_NOTIFY\020\007*\372\001\n\020Chain"
-    "MessageType\022\023\n\017CHAIN_TYPE_NONE\020\000\022\017\n\013CHAI"
-    "N_HELLO\020\n\022\023\n\017CHAIN_TX_STATUS\020\013\022\025\n\021CHAIN_"
-    "PEER_ONLINE\020\014\022\026\n\022CHAIN_PEER_OFFLINE\020\r\022\026\n"
-    "\022CHAIN_PEER_MESSAGE\020\016\022\033\n\027CHAIN_SUBMITTRA"
-    "NSACTION\020\017\022\027\n\023CHAIN_LEDGER_HEADER\020\020\022\026\n\022C"
-    "HAIN_SUBSCRIBE_TX\020\021\022\026\n\022CHAIN_TX_ENV_STOR"
-    "E\020\022*\227\001\n\031MESSAGE_CHANNEL_NODE_TYPE\022\"\n\036MES"
-    "SAGE_CHANNEL_NODE_TYPE_NONE\020\000\022 \n\034MESSAGE"
-    "_CHANNEL_NODE_PACKAGE\020\036\022\036\n\032MESSAGE_CHANN"
-    "EL_NODE_HELLO\020\037\022\024\n\020EVENT_WITHDRAWAL\020 *\212\006"
-    "\n\024MESSAGE_CHANNEL_TYPE\022\035\n\031MESSAGE_CHANNE"
-    "L_TYPE_NONE\020\000\022&\n\"MESSAGE_CHANNEL_CREATE_"
-    "CHILD_CHAIN\020\001\022\034\n\030MESSAGE_CHANNEL_MAIN_MI"
-    "X\020\002\022\035\n\031MESSAGE_CHANNEL_CHILD_MIX\020\003\022\033\n\027ME"
-    "SSAGE_CHANNEL_DEPOSIT\020\004\022\036\n\032MESSAGE_CHANN"
-    "EL_WITHDRAWAL\020\005\022#\n\037MESSAGE_CHANNEL_FAST_"
-    "WITHDRAWAL\020\006\022\037\n\033MESSAGE_CHANNEL_SUBMIT_H"
-    "EAD\020\007\022(\n$MESSAGE_CHANNEL_CHALLENGE_WITHD"
-    "RAWAL\020\010\022\"\n\036MESSAGE_CHANNEL_CHALLENGE_HEA"
-    "D\020\t\022)\n%MESSAGE_CHANNEL_CHILD_GENESES_REQ"
-    "UEST\020\n\022*\n&MESSAGE_CHANNEL_CHILD_GENESES_"
-    "RESPONSE\020\013\022\036\n\032MESSAGE_CHANNEL_QUERY_HEAD"
-    "\020\014\022!\n\035MESSAGE_CHANNEL_QUERY_DEPOSIT\020\r\022*\n"
-    "&MESSAGE_CHANNEL_CHANGE_CHILD_VALIDATOR\020"
-    "\016\0220\n,MESSAGE_CHANNEL_QUERY_CHANGE_CHILD_"
-    "VALIDATOR\020\017\022%\n!MESSAGE_CHANNEL_QUERY_SUB"
-    "MIT_HEAD\020\020\022$\n MESSAGE_CHANNEL_QUERY_WITH"
-    "DRAWAL\020\021\022(\n$MESSAGE_CHANNEL_CHILD_CHALLE"
-    "NGE_HEAD\020\022\022.\n*MESSAGE_CHANNEL_CHILD_CHAL"
-    "LENGE_WITHDRAWAL\020\023*\272\001\n#MESSAGE_CHANNEL_C"
-    "HALLENGE_HEAD_TYPE\022/\n+MESSAGE_CHANNEL_CH"
-    "ALLENGE_HEAD_TYPE_SUCCESS\020\000\0220\n,MESSAGE_C"
-    "HANNEL_CHALLENGE_HEAD_TYPE_NONEXIST\020\001\0220\n"
-    ",MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_DOC"
-    "TORED\020\002*\331\002\n)MESSAGE_CHANNEL_CHALLENGE_WI"
-    "THDRAWAL_TYPE\0225\n1MESSAGE_CHANNEL_CHALLEN"
-    "GE_WITHDRAWAL_TYPE_SUCCESS\020\000\0226\n2MESSAGE_"
-    "CHANNEL_CHALLENGE_WITHDRAWAL_TYPE_NONEXI"
-    "ST\020\001\0226\n2MESSAGE_CHANNEL_CHALLENGE_WITHDR"
-    "AWAL_TYPE_DOCTORED\020\002\022@\n<MESSAGE_CHANNEL_"
-    "CHALLENGE_WITHDRAWAL_TYPE_CONTRACT_CPC_Q"
-    "UERY\020\003\022C\n\?MESSAGE_CHANNEL_CHALLENGE_WITH"
-    "DRAWAL_TYPE_CONTRACT_CPC_DOCTORED\020\004*7\n\022M"
-    "ERKEL_BRANCH_TYPE\022\010\n\004LEFT\020\000\022\t\n\005RIGHT\020\001\022\014"
-    "\n\010OLD_ROOT\020\002B\"\n io.bumo.sdk.core.extend."
-    "protobufb\006proto3", 6776);
+    "ChannelQueryHead\022\022\n\nledger_seq\030\001 \001(\003\"v\n\013"
+    "MerkelProof\022\023\n\013merkel_root\030\001 \001(\t\022/\n\014proo"
+    "f_branch\030\002 \003(\0132\031.protocol.MerkelProofHas"
+    "h\022\r\n\005leaft\030\003 \001(\014\022\022\n\nleaft_hash\030\004 \001(\t\"\205\001\n"
+    "\025MessageChannelDeposit\022\020\n\010chain_id\030\001 \001(\003"
+    "\022\016\n\006amount\030\002 \001(\003\022\013\n\003seq\030\003 \001(\003\022\024\n\014block_n"
+    "umber\030\004 \001(\003\022\026\n\016source_address\030\005 \001(\t\022\017\n\007a"
+    "ddress\030\006 \001(\t\"\306\001\n\030MessageChannelWithdrawa"
+    "l\022\020\n\010chain_id\030\001 \001(\003\022\016\n\006amount\030\002 \001(\003\022\013\n\003s"
+    "eq\030\003 \001(\003\022\022\n\nblock_hash\030\004 \001(\014\022\021\n\tblock_se"
+    "q\030\005 \001(\003\022\026\n\016source_address\030\006 \001(\t\022\017\n\007addre"
+    "ss\030\007 \001(\t\022+\n\014merkel_proof\030\010 \001(\0132\025.protoco"
+    "l.MerkelProof\"\344\001\n!MessageChannelWithdraw"
+    "alChallenge\022\020\n\010chain_id\030\001 \001(\003\022\016\n\006amount\030"
+    "\002 \001(\003\022\013\n\003seq\030\003 \001(\003\022\022\n\nblock_hash\030\004 \001(\014\022\026"
+    "\n\016source_address\030\005 \001(\t\022\017\n\007address\030\006 \001(\t\022"
+    "\033\n\023main_source_address\030\007 \001(\t\022\021\n\tblock_se"
+    "q\030\010 \001(\003\022\r\n\005state\030\t \001(\003\022\024\n\014merkel_proof\030\n"
+    " \001(\t\"\200\001\n\"MessageChannelChangeChildValida"
+    "tor\022\032\n\022main_chain_tx_hash\030\001 \001(\t\022\025\n\radd_v"
+    "alidator\030\002 \001(\t\022\030\n\020delete_validator\030\003 \001(\t"
+    "\022\r\n\005index\030\004 \001(\t\"W\n\'MessageChannelQueryCh"
+    "angeChildValidator\022\020\n\010chain_id\030\001 \001(\003\022\032\n\022"
+    "change_child_index\030\002 \001(\003\"L\n\035MessageChann"
+    "elQuerySubmitHead\022\020\n\010chain_id\030\001 \001(\003\022\013\n\003s"
+    "eq\030\002 \001(\003\022\014\n\004hash\030\003 \001(\014\"Q\n\030MessageChannel"
+    "SubmitHead\022&\n\006header\030\001 \001(\0132\026.protocol.Le"
+    "dgerHeader\022\r\n\005state\030\002 \001(\003\"p\n\036MessageChan"
+    "nelHandleWithdrawal\022\?\n\nwithdrawal\030\001 \001(\0132"
+    "+.protocol.MessageChannelWithdrawalChall"
+    "enge\022\r\n\005state\030\002 \001(\003\">\n\035MessageChannelQue"
+    "ryWithdrawal\022\020\n\010chain_id\030\001 \001(\003\022\013\n\003seq\030\002 "
+    "\001(\003\"\307\001\n MessageChannelChildChallengeHead"
+    "\022\020\n\010chain_id\030\001 \001(\003\022;\n\004type\030\002 \001(\0162-.proto"
+    "col.MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE\022"
+    "(\n\010cmc_head\030\003 \001(\0132\026.protocol.LedgerHeade"
+    "r\022*\n\nchild_head\030\004 \001(\0132\026.protocol.LedgerH"
+    "eader\"\331\001\n&MessageChannelchildWithdrawalC"
+    "hallenge\022\?\n\nwithdrawal\030\001 \001(\0132+.protocol."
+    "MessageChannelWithdrawalChallenge\022A\n\004typ"
+    "e\030\002 \001(\01623.protocol.MESSAGE_CHANNEL_CHALL"
+    "ENGE_WITHDRAWAL_TYPE\022+\n\014merkel_proof\030\003 \001"
+    "(\0132\025.protocol.MerkelProof\"P\n\017MerkelProof"
+    "Hash\022\014\n\004hash\030\001 \001(\t\022/\n\tdirection\030\002 \001(\0162\034."
+    "protocol.MERKEL_BRANCH_TYPE*\203\002\n\024OVERLAY_"
+    "MESSAGE_TYPE\022\030\n\024OVERLAY_MSGTYPE_NONE\020\000\022\030"
+    "\n\024OVERLAY_MSGTYPE_PING\020\001\022\031\n\025OVERLAY_MSGT"
+    "YPE_HELLO\020\002\022\031\n\025OVERLAY_MSGTYPE_PEERS\020\003\022\037"
+    "\n\033OVERLAY_MSGTYPE_TRANSACTION\020\004\022\033\n\027OVERL"
+    "AY_MSGTYPE_LEDGERS\020\005\022\030\n\024OVERLAY_MSGTYPE_"
+    "PBFT\020\006\022)\n%OVERLAY_MSGTYPE_LEDGER_UPGRADE"
+    "_NOTIFY\020\007*\372\001\n\020ChainMessageType\022\023\n\017CHAIN_"
+    "TYPE_NONE\020\000\022\017\n\013CHAIN_HELLO\020\n\022\023\n\017CHAIN_TX"
+    "_STATUS\020\013\022\025\n\021CHAIN_PEER_ONLINE\020\014\022\026\n\022CHAI"
+    "N_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016"
+    "\022\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHAIN_L"
+    "EDGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026"
+    "\n\022CHAIN_TX_ENV_STORE\020\022*\227\001\n\031MESSAGE_CHANN"
+    "EL_NODE_TYPE\022\"\n\036MESSAGE_CHANNEL_NODE_TYP"
+    "E_NONE\020\000\022 \n\034MESSAGE_CHANNEL_NODE_PACKAGE"
+    "\020\036\022\036\n\032MESSAGE_CHANNEL_NODE_HELLO\020\037\022\024\n\020EV"
+    "ENT_WITHDRAWAL\020 *\212\006\n\024MESSAGE_CHANNEL_TYP"
+    "E\022\035\n\031MESSAGE_CHANNEL_TYPE_NONE\020\000\022&\n\"MESS"
+    "AGE_CHANNEL_CREATE_CHILD_CHAIN\020\001\022\034\n\030MESS"
+    "AGE_CHANNEL_MAIN_MIX\020\002\022\035\n\031MESSAGE_CHANNE"
+    "L_CHILD_MIX\020\003\022\033\n\027MESSAGE_CHANNEL_DEPOSIT"
+    "\020\004\022\036\n\032MESSAGE_CHANNEL_WITHDRAWAL\020\005\022#\n\037ME"
+    "SSAGE_CHANNEL_FAST_WITHDRAWAL\020\006\022\037\n\033MESSA"
+    "GE_CHANNEL_SUBMIT_HEAD\020\007\022(\n$MESSAGE_CHAN"
+    "NEL_CHALLENGE_WITHDRAWAL\020\010\022\"\n\036MESSAGE_CH"
+    "ANNEL_CHALLENGE_HEAD\020\t\022)\n%MESSAGE_CHANNE"
+    "L_CHILD_GENESES_REQUEST\020\n\022*\n&MESSAGE_CHA"
+    "NNEL_CHILD_GENESES_RESPONSE\020\013\022\036\n\032MESSAGE"
+    "_CHANNEL_QUERY_HEAD\020\014\022!\n\035MESSAGE_CHANNEL"
+    "_QUERY_DEPOSIT\020\r\022*\n&MESSAGE_CHANNEL_CHAN"
+    "GE_CHILD_VALIDATOR\020\016\0220\n,MESSAGE_CHANNEL_"
+    "QUERY_CHANGE_CHILD_VALIDATOR\020\017\022%\n!MESSAG"
+    "E_CHANNEL_QUERY_SUBMIT_HEAD\020\020\022$\n MESSAGE"
+    "_CHANNEL_QUERY_WITHDRAWAL\020\021\022(\n$MESSAGE_C"
+    "HANNEL_CHILD_CHALLENGE_HEAD\020\022\022.\n*MESSAGE"
+    "_CHANNEL_CHILD_CHALLENGE_WITHDRAWAL\020\023*\272\001"
+    "\n#MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE\022/\n"
+    "+MESSAGE_CHANNEL_CHALLENGE_HEAD_TYPE_SUC"
+    "CESS\020\000\0220\n,MESSAGE_CHANNEL_CHALLENGE_HEAD"
+    "_TYPE_NONEXIST\020\001\0220\n,MESSAGE_CHANNEL_CHAL"
+    "LENGE_HEAD_TYPE_DOCTORED\020\002*\331\002\n)MESSAGE_C"
+    "HANNEL_CHALLENGE_WITHDRAWAL_TYPE\0225\n1MESS"
+    "AGE_CHANNEL_CHALLENGE_WITHDRAWAL_TYPE_SU"
+    "CCESS\020\000\0226\n2MESSAGE_CHANNEL_CHALLENGE_WIT"
+    "HDRAWAL_TYPE_NONEXIST\020\001\0226\n2MESSAGE_CHANN"
+    "EL_CHALLENGE_WITHDRAWAL_TYPE_DOCTORED\020\002\022"
+    "@\n<MESSAGE_CHANNEL_CHALLENGE_WITHDRAWAL_"
+    "TYPE_CONTRACT_CPC_QUERY\020\003\022C\n\?MESSAGE_CHA"
+    "NNEL_CHALLENGE_WITHDRAWAL_TYPE_CONTRACT_"
+    "CPC_DOCTORED\020\004*7\n\022MERKEL_BRANCH_TYPE\022\010\n\004"
+    "LEFT\020\000\022\t\n\005RIGHT\020\001\022\014\n\010OLD_ROOT\020\002B\"\n io.bu"
+    "mo.sdk.core.extend.protobufb\006proto3", 6795);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -12815,8 +12816,9 @@ void MessageChannelQueryHead::clear_ledger_seq() {
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
 const int MerkelProof::kMerkelRootFieldNumber;
-const int MerkelProof::kMerkelPathFieldNumber;
-const int MerkelProof::kTransactionFieldNumber;
+const int MerkelProof::kProofBranchFieldNumber;
+const int MerkelProof::kLeaftFieldNumber;
+const int MerkelProof::kLeaftHashFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
 MerkelProof::MerkelProof()
@@ -12827,7 +12829,6 @@ MerkelProof::MerkelProof()
 
 void MerkelProof::InitAsDefaultInstance() {
   _is_default_instance_ = true;
-  transaction_ = const_cast< ::protocol::Transaction*>(&::protocol::Transaction::default_instance());
 }
 
 MerkelProof::MerkelProof(const MerkelProof& from)
@@ -12843,8 +12844,8 @@ void MerkelProof::SharedCtor() {
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
   merkel_root_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  merkel_path_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  transaction_ = NULL;
+  leaft_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  leaft_hash_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
 MerkelProof::~MerkelProof() {
@@ -12854,9 +12855,9 @@ MerkelProof::~MerkelProof() {
 
 void MerkelProof::SharedDtor() {
   merkel_root_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  merkel_path_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  leaft_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  leaft_hash_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
-    delete transaction_;
   }
 }
 
@@ -12888,9 +12889,9 @@ MerkelProof* MerkelProof::New(::google::protobuf::Arena* arena) const {
 void MerkelProof::Clear() {
 // @@protoc_insertion_point(message_clear_start:protocol.MerkelProof)
   merkel_root_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  merkel_path_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  if (GetArenaNoVirtual() == NULL && transaction_ != NULL) delete transaction_;
-  transaction_ = NULL;
+  leaft_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  leaft_hash_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  proof_branch_.Clear();
 }
 
 bool MerkelProof::MergePartialFromCodedStream(
@@ -12903,37 +12904,62 @@ bool MerkelProof::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional bytes merkel_root = 1;
+      // optional string merkel_root = 1;
       case 1: {
         if (tag == 10) {
-          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_merkel_root()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->merkel_root().data(), this->merkel_root().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "protocol.MerkelProof.merkel_root"));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(18)) goto parse_merkel_path;
+        if (input->ExpectTag(18)) goto parse_proof_branch;
         break;
       }
 
-      // optional bytes merkel_path = 2;
+      // repeated .protocol.MerkelProofHash proof_branch = 2;
       case 2: {
         if (tag == 18) {
-         parse_merkel_path:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
-                input, this->mutable_merkel_path()));
+         parse_proof_branch:
+          DO_(input->IncrementRecursionDepth());
+         parse_loop_proof_branch:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtualNoRecursionDepth(
+                input, add_proof_branch()));
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(26)) goto parse_transaction;
+        if (input->ExpectTag(18)) goto parse_loop_proof_branch;
+        input->UnsafeDecrementRecursionDepth();
+        if (input->ExpectTag(26)) goto parse_leaft;
         break;
       }
 
-      // optional .protocol.Transaction transaction = 3;
+      // optional bytes leaft = 3;
       case 3: {
         if (tag == 26) {
-         parse_transaction:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
-               input, mutable_transaction()));
+         parse_leaft:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
+                input, this->mutable_leaft()));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(34)) goto parse_leaft_hash;
+        break;
+      }
+
+      // optional string leaft_hash = 4;
+      case 4: {
+        if (tag == 34) {
+         parse_leaft_hash:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_leaft_hash()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->leaft_hash().data(), this->leaft_hash().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "protocol.MerkelProof.leaft_hash"));
         } else {
           goto handle_unusual;
         }
@@ -12965,22 +12991,36 @@ failure:
 void MerkelProof::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:protocol.MerkelProof)
-  // optional bytes merkel_root = 1;
+  // optional string merkel_root = 1;
   if (this->merkel_root().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->merkel_root().data(), this->merkel_root().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "protocol.MerkelProof.merkel_root");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
       1, this->merkel_root(), output);
   }
 
-  // optional bytes merkel_path = 2;
-  if (this->merkel_path().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
-      2, this->merkel_path(), output);
+  // repeated .protocol.MerkelProofHash proof_branch = 2;
+  for (unsigned int i = 0, n = this->proof_branch_size(); i < n; i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->proof_branch(i), output);
   }
 
-  // optional .protocol.Transaction transaction = 3;
-  if (this->has_transaction()) {
-    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      3, *this->transaction_, output);
+  // optional bytes leaft = 3;
+  if (this->leaft().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
+      3, this->leaft(), output);
+  }
+
+  // optional string leaft_hash = 4;
+  if (this->leaft_hash().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->leaft_hash().data(), this->leaft_hash().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "protocol.MerkelProof.leaft_hash");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      4, this->leaft_hash(), output);
   }
 
   // @@protoc_insertion_point(serialize_end:protocol.MerkelProof)
@@ -12989,25 +13029,40 @@ void MerkelProof::SerializeWithCachedSizes(
 ::google::protobuf::uint8* MerkelProof::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:protocol.MerkelProof)
-  // optional bytes merkel_root = 1;
+  // optional string merkel_root = 1;
   if (this->merkel_root().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->merkel_root().data(), this->merkel_root().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "protocol.MerkelProof.merkel_root");
     target =
-      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
         1, this->merkel_root(), target);
   }
 
-  // optional bytes merkel_path = 2;
-  if (this->merkel_path().size() > 0) {
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
-        2, this->merkel_path(), target);
-  }
-
-  // optional .protocol.Transaction transaction = 3;
-  if (this->has_transaction()) {
+  // repeated .protocol.MerkelProofHash proof_branch = 2;
+  for (unsigned int i = 0, n = this->proof_branch_size(); i < n; i++) {
     target = ::google::protobuf::internal::WireFormatLite::
       InternalWriteMessageNoVirtualToArray(
-        3, *this->transaction_, false, target);
+        2, this->proof_branch(i), false, target);
+  }
+
+  // optional bytes leaft = 3;
+  if (this->leaft().size() > 0) {
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
+        3, this->leaft(), target);
+  }
+
+  // optional string leaft_hash = 4;
+  if (this->leaft_hash().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->leaft_hash().data(), this->leaft_hash().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "protocol.MerkelProof.leaft_hash");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->leaft_hash(), target);
   }
 
   // @@protoc_insertion_point(serialize_to_array_end:protocol.MerkelProof)
@@ -13018,25 +13073,33 @@ int MerkelProof::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:protocol.MerkelProof)
   int total_size = 0;
 
-  // optional bytes merkel_root = 1;
+  // optional string merkel_root = 1;
   if (this->merkel_root().size() > 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::BytesSize(
+      ::google::protobuf::internal::WireFormatLite::StringSize(
         this->merkel_root());
   }
 
-  // optional bytes merkel_path = 2;
-  if (this->merkel_path().size() > 0) {
+  // optional bytes leaft = 3;
+  if (this->leaft().size() > 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::BytesSize(
-        this->merkel_path());
+        this->leaft());
   }
 
-  // optional .protocol.Transaction transaction = 3;
-  if (this->has_transaction()) {
+  // optional string leaft_hash = 4;
+  if (this->leaft_hash().size() > 0) {
     total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->leaft_hash());
+  }
+
+  // repeated .protocol.MerkelProofHash proof_branch = 2;
+  total_size += 1 * this->proof_branch_size();
+  for (int i = 0; i < this->proof_branch_size(); i++) {
+    total_size +=
       ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
-        *this->transaction_);
+        this->proof_branch(i));
   }
 
   GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
@@ -13067,16 +13130,18 @@ void MerkelProof::MergeFrom(const MerkelProof& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
+  proof_branch_.MergeFrom(from.proof_branch_);
   if (from.merkel_root().size() > 0) {
 
     merkel_root_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.merkel_root_);
   }
-  if (from.merkel_path().size() > 0) {
+  if (from.leaft().size() > 0) {
 
-    merkel_path_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.merkel_path_);
+    leaft_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.leaft_);
   }
-  if (from.has_transaction()) {
-    mutable_transaction()->::protocol::Transaction::MergeFrom(from.transaction());
+  if (from.leaft_hash().size() > 0) {
+
+    leaft_hash_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.leaft_hash_);
   }
 }
 
@@ -13105,8 +13170,9 @@ void MerkelProof::Swap(MerkelProof* other) {
 }
 void MerkelProof::InternalSwap(MerkelProof* other) {
   merkel_root_.Swap(&other->merkel_root_);
-  merkel_path_.Swap(&other->merkel_path_);
-  std::swap(transaction_, other->transaction_);
+  proof_branch_.UnsafeArenaSwap(&other->proof_branch_);
+  leaft_.Swap(&other->leaft_);
+  leaft_hash_.Swap(&other->leaft_hash_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
 }
@@ -13122,7 +13188,7 @@ void MerkelProof::InternalSwap(MerkelProof* other) {
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // MerkelProof
 
-// optional bytes merkel_root = 1;
+// optional string merkel_root = 1;
 void MerkelProof::clear_merkel_root() {
   merkel_root_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -13140,7 +13206,7 @@ void MerkelProof::clear_merkel_root() {
   merkel_root_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.merkel_root)
 }
- void MerkelProof::set_merkel_root(const void* value, size_t size) {
+ void MerkelProof::set_merkel_root(const char* value, size_t size) {
   
   merkel_root_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
@@ -13166,86 +13232,122 @@ void MerkelProof::clear_merkel_root() {
   // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.merkel_root)
 }
 
-// optional bytes merkel_path = 2;
-void MerkelProof::clear_merkel_path() {
-  merkel_path_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+// repeated .protocol.MerkelProofHash proof_branch = 2;
+int MerkelProof::proof_branch_size() const {
+  return proof_branch_.size();
 }
- const ::std::string& MerkelProof::merkel_path() const {
-  // @@protoc_insertion_point(field_get:protocol.MerkelProof.merkel_path)
-  return merkel_path_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+void MerkelProof::clear_proof_branch() {
+  proof_branch_.Clear();
 }
- void MerkelProof::set_merkel_path(const ::std::string& value) {
-  
-  merkel_path_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:protocol.MerkelProof.merkel_path)
+const ::protocol::MerkelProofHash& MerkelProof::proof_branch(int index) const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProof.proof_branch)
+  return proof_branch_.Get(index);
 }
- void MerkelProof::set_merkel_path(const char* value) {
-  
-  merkel_path_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.merkel_path)
+::protocol::MerkelProofHash* MerkelProof::mutable_proof_branch(int index) {
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.proof_branch)
+  return proof_branch_.Mutable(index);
 }
- void MerkelProof::set_merkel_path(const void* value, size_t size) {
-  
-  merkel_path_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProof.merkel_path)
+::protocol::MerkelProofHash* MerkelProof::add_proof_branch() {
+  // @@protoc_insertion_point(field_add:protocol.MerkelProof.proof_branch)
+  return proof_branch_.Add();
 }
- ::std::string* MerkelProof::mutable_merkel_path() {
-  
-  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.merkel_path)
-  return merkel_path_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash >*
+MerkelProof::mutable_proof_branch() {
+  // @@protoc_insertion_point(field_mutable_list:protocol.MerkelProof.proof_branch)
+  return &proof_branch_;
 }
- ::std::string* MerkelProof::release_merkel_path() {
-  // @@protoc_insertion_point(field_release:protocol.MerkelProof.merkel_path)
-  
-  return merkel_path_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void MerkelProof::set_allocated_merkel_path(::std::string* merkel_path) {
-  if (merkel_path != NULL) {
-    
-  } else {
-    
-  }
-  merkel_path_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), merkel_path);
-  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.merkel_path)
+const ::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash >&
+MerkelProof::proof_branch() const {
+  // @@protoc_insertion_point(field_list:protocol.MerkelProof.proof_branch)
+  return proof_branch_;
 }
 
-// optional .protocol.Transaction transaction = 3;
-bool MerkelProof::has_transaction() const {
-  return !_is_default_instance_ && transaction_ != NULL;
+// optional bytes leaft = 3;
+void MerkelProof::clear_leaft() {
+  leaft_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-void MerkelProof::clear_transaction() {
-  if (GetArenaNoVirtual() == NULL && transaction_ != NULL) delete transaction_;
-  transaction_ = NULL;
+ const ::std::string& MerkelProof::leaft() const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProof.leaft)
+  return leaft_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-const ::protocol::Transaction& MerkelProof::transaction() const {
-  // @@protoc_insertion_point(field_get:protocol.MerkelProof.transaction)
-  return transaction_ != NULL ? *transaction_ : *default_instance_->transaction_;
-}
-::protocol::Transaction* MerkelProof::mutable_transaction() {
+ void MerkelProof::set_leaft(const ::std::string& value) {
   
-  if (transaction_ == NULL) {
-    transaction_ = new ::protocol::Transaction;
-  }
-  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.transaction)
-  return transaction_;
+  leaft_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.MerkelProof.leaft)
 }
-::protocol::Transaction* MerkelProof::release_transaction() {
-  // @@protoc_insertion_point(field_release:protocol.MerkelProof.transaction)
+ void MerkelProof::set_leaft(const char* value) {
   
-  ::protocol::Transaction* temp = transaction_;
-  transaction_ = NULL;
-  return temp;
+  leaft_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.leaft)
 }
-void MerkelProof::set_allocated_transaction(::protocol::Transaction* transaction) {
-  delete transaction_;
-  transaction_ = transaction;
-  if (transaction) {
+ void MerkelProof::set_leaft(const void* value, size_t size) {
+  
+  leaft_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProof.leaft)
+}
+ ::std::string* MerkelProof::mutable_leaft() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.leaft)
+  return leaft_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MerkelProof::release_leaft() {
+  // @@protoc_insertion_point(field_release:protocol.MerkelProof.leaft)
+  
+  return leaft_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MerkelProof::set_allocated_leaft(::std::string* leaft) {
+  if (leaft != NULL) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.transaction)
+  leaft_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), leaft);
+  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.leaft)
+}
+
+// optional string leaft_hash = 4;
+void MerkelProof::clear_leaft_hash() {
+  leaft_hash_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& MerkelProof::leaft_hash() const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProof.leaft_hash)
+  return leaft_hash_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MerkelProof::set_leaft_hash(const ::std::string& value) {
+  
+  leaft_hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.MerkelProof.leaft_hash)
+}
+ void MerkelProof::set_leaft_hash(const char* value) {
+  
+  leaft_hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.leaft_hash)
+}
+ void MerkelProof::set_leaft_hash(const char* value, size_t size) {
+  
+  leaft_hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProof.leaft_hash)
+}
+ ::std::string* MerkelProof::mutable_leaft_hash() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.leaft_hash)
+  return leaft_hash_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MerkelProof::release_leaft_hash() {
+  // @@protoc_insertion_point(field_release:protocol.MerkelProof.leaft_hash)
+  
+  return leaft_hash_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MerkelProof::set_allocated_leaft_hash(::std::string* leaft_hash) {
+  if (leaft_hash != NULL) {
+    
+  } else {
+    
+  }
+  leaft_hash_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), leaft_hash);
+  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.leaft_hash)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS

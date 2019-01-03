@@ -3227,36 +3227,50 @@ class MerkelProof : public ::google::protobuf::Message /* @@protoc_insertion_poi
 
   // accessors -------------------------------------------------------
 
-  // optional bytes merkel_root = 1;
+  // optional string merkel_root = 1;
   void clear_merkel_root();
   static const int kMerkelRootFieldNumber = 1;
   const ::std::string& merkel_root() const;
   void set_merkel_root(const ::std::string& value);
   void set_merkel_root(const char* value);
-  void set_merkel_root(const void* value, size_t size);
+  void set_merkel_root(const char* value, size_t size);
   ::std::string* mutable_merkel_root();
   ::std::string* release_merkel_root();
   void set_allocated_merkel_root(::std::string* merkel_root);
 
-  // optional bytes merkel_path = 2;
-  void clear_merkel_path();
-  static const int kMerkelPathFieldNumber = 2;
-  const ::std::string& merkel_path() const;
-  void set_merkel_path(const ::std::string& value);
-  void set_merkel_path(const char* value);
-  void set_merkel_path(const void* value, size_t size);
-  ::std::string* mutable_merkel_path();
-  ::std::string* release_merkel_path();
-  void set_allocated_merkel_path(::std::string* merkel_path);
+  // repeated .protocol.MerkelProofHash proof_branch = 2;
+  int proof_branch_size() const;
+  void clear_proof_branch();
+  static const int kProofBranchFieldNumber = 2;
+  const ::protocol::MerkelProofHash& proof_branch(int index) const;
+  ::protocol::MerkelProofHash* mutable_proof_branch(int index);
+  ::protocol::MerkelProofHash* add_proof_branch();
+  ::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash >*
+      mutable_proof_branch();
+  const ::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash >&
+      proof_branch() const;
 
-  // optional .protocol.Transaction transaction = 3;
-  bool has_transaction() const;
-  void clear_transaction();
-  static const int kTransactionFieldNumber = 3;
-  const ::protocol::Transaction& transaction() const;
-  ::protocol::Transaction* mutable_transaction();
-  ::protocol::Transaction* release_transaction();
-  void set_allocated_transaction(::protocol::Transaction* transaction);
+  // optional bytes leaft = 3;
+  void clear_leaft();
+  static const int kLeaftFieldNumber = 3;
+  const ::std::string& leaft() const;
+  void set_leaft(const ::std::string& value);
+  void set_leaft(const char* value);
+  void set_leaft(const void* value, size_t size);
+  ::std::string* mutable_leaft();
+  ::std::string* release_leaft();
+  void set_allocated_leaft(::std::string* leaft);
+
+  // optional string leaft_hash = 4;
+  void clear_leaft_hash();
+  static const int kLeaftHashFieldNumber = 4;
+  const ::std::string& leaft_hash() const;
+  void set_leaft_hash(const ::std::string& value);
+  void set_leaft_hash(const char* value);
+  void set_leaft_hash(const char* value, size_t size);
+  ::std::string* mutable_leaft_hash();
+  ::std::string* release_leaft_hash();
+  void set_allocated_leaft_hash(::std::string* leaft_hash);
 
   // @@protoc_insertion_point(class_scope:protocol.MerkelProof)
  private:
@@ -3264,8 +3278,9 @@ class MerkelProof : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
   ::google::protobuf::internal::ArenaStringPtr merkel_root_;
-  ::google::protobuf::internal::ArenaStringPtr merkel_path_;
-  ::protocol::Transaction* transaction_;
+  ::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash > proof_branch_;
+  ::google::protobuf::internal::ArenaStringPtr leaft_;
+  ::google::protobuf::internal::ArenaStringPtr leaft_hash_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_overlay_2eproto();
   friend void protobuf_AssignDesc_overlay_2eproto();
@@ -7175,7 +7190,7 @@ inline void MessageChannelQueryHead::set_ledger_seq(::google::protobuf::int64 va
 
 // MerkelProof
 
-// optional bytes merkel_root = 1;
+// optional string merkel_root = 1;
 inline void MerkelProof::clear_merkel_root() {
   merkel_root_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -7193,7 +7208,7 @@ inline void MerkelProof::set_merkel_root(const char* value) {
   merkel_root_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.merkel_root)
 }
-inline void MerkelProof::set_merkel_root(const void* value, size_t size) {
+inline void MerkelProof::set_merkel_root(const char* value, size_t size) {
   
   merkel_root_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
@@ -7219,86 +7234,122 @@ inline void MerkelProof::set_allocated_merkel_root(::std::string* merkel_root) {
   // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.merkel_root)
 }
 
-// optional bytes merkel_path = 2;
-inline void MerkelProof::clear_merkel_path() {
-  merkel_path_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+// repeated .protocol.MerkelProofHash proof_branch = 2;
+inline int MerkelProof::proof_branch_size() const {
+  return proof_branch_.size();
 }
-inline const ::std::string& MerkelProof::merkel_path() const {
-  // @@protoc_insertion_point(field_get:protocol.MerkelProof.merkel_path)
-  return merkel_path_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+inline void MerkelProof::clear_proof_branch() {
+  proof_branch_.Clear();
 }
-inline void MerkelProof::set_merkel_path(const ::std::string& value) {
-  
-  merkel_path_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:protocol.MerkelProof.merkel_path)
+inline const ::protocol::MerkelProofHash& MerkelProof::proof_branch(int index) const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProof.proof_branch)
+  return proof_branch_.Get(index);
 }
-inline void MerkelProof::set_merkel_path(const char* value) {
-  
-  merkel_path_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.merkel_path)
+inline ::protocol::MerkelProofHash* MerkelProof::mutable_proof_branch(int index) {
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.proof_branch)
+  return proof_branch_.Mutable(index);
 }
-inline void MerkelProof::set_merkel_path(const void* value, size_t size) {
-  
-  merkel_path_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProof.merkel_path)
+inline ::protocol::MerkelProofHash* MerkelProof::add_proof_branch() {
+  // @@protoc_insertion_point(field_add:protocol.MerkelProof.proof_branch)
+  return proof_branch_.Add();
 }
-inline ::std::string* MerkelProof::mutable_merkel_path() {
-  
-  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.merkel_path)
-  return merkel_path_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+inline ::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash >*
+MerkelProof::mutable_proof_branch() {
+  // @@protoc_insertion_point(field_mutable_list:protocol.MerkelProof.proof_branch)
+  return &proof_branch_;
 }
-inline ::std::string* MerkelProof::release_merkel_path() {
-  // @@protoc_insertion_point(field_release:protocol.MerkelProof.merkel_path)
-  
-  return merkel_path_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void MerkelProof::set_allocated_merkel_path(::std::string* merkel_path) {
-  if (merkel_path != NULL) {
-    
-  } else {
-    
-  }
-  merkel_path_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), merkel_path);
-  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.merkel_path)
+inline const ::google::protobuf::RepeatedPtrField< ::protocol::MerkelProofHash >&
+MerkelProof::proof_branch() const {
+  // @@protoc_insertion_point(field_list:protocol.MerkelProof.proof_branch)
+  return proof_branch_;
 }
 
-// optional .protocol.Transaction transaction = 3;
-inline bool MerkelProof::has_transaction() const {
-  return !_is_default_instance_ && transaction_ != NULL;
+// optional bytes leaft = 3;
+inline void MerkelProof::clear_leaft() {
+  leaft_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline void MerkelProof::clear_transaction() {
-  if (GetArenaNoVirtual() == NULL && transaction_ != NULL) delete transaction_;
-  transaction_ = NULL;
+inline const ::std::string& MerkelProof::leaft() const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProof.leaft)
+  return leaft_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
-inline const ::protocol::Transaction& MerkelProof::transaction() const {
-  // @@protoc_insertion_point(field_get:protocol.MerkelProof.transaction)
-  return transaction_ != NULL ? *transaction_ : *default_instance_->transaction_;
-}
-inline ::protocol::Transaction* MerkelProof::mutable_transaction() {
+inline void MerkelProof::set_leaft(const ::std::string& value) {
   
-  if (transaction_ == NULL) {
-    transaction_ = new ::protocol::Transaction;
-  }
-  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.transaction)
-  return transaction_;
+  leaft_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.MerkelProof.leaft)
 }
-inline ::protocol::Transaction* MerkelProof::release_transaction() {
-  // @@protoc_insertion_point(field_release:protocol.MerkelProof.transaction)
+inline void MerkelProof::set_leaft(const char* value) {
   
-  ::protocol::Transaction* temp = transaction_;
-  transaction_ = NULL;
-  return temp;
+  leaft_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.leaft)
 }
-inline void MerkelProof::set_allocated_transaction(::protocol::Transaction* transaction) {
-  delete transaction_;
-  transaction_ = transaction;
-  if (transaction) {
+inline void MerkelProof::set_leaft(const void* value, size_t size) {
+  
+  leaft_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProof.leaft)
+}
+inline ::std::string* MerkelProof::mutable_leaft() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.leaft)
+  return leaft_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* MerkelProof::release_leaft() {
+  // @@protoc_insertion_point(field_release:protocol.MerkelProof.leaft)
+  
+  return leaft_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void MerkelProof::set_allocated_leaft(::std::string* leaft) {
+  if (leaft != NULL) {
     
   } else {
     
   }
-  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.transaction)
+  leaft_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), leaft);
+  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.leaft)
+}
+
+// optional string leaft_hash = 4;
+inline void MerkelProof::clear_leaft_hash() {
+  leaft_hash_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& MerkelProof::leaft_hash() const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProof.leaft_hash)
+  return leaft_hash_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void MerkelProof::set_leaft_hash(const ::std::string& value) {
+  
+  leaft_hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.MerkelProof.leaft_hash)
+}
+inline void MerkelProof::set_leaft_hash(const char* value) {
+  
+  leaft_hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.MerkelProof.leaft_hash)
+}
+inline void MerkelProof::set_leaft_hash(const char* value, size_t size) {
+  
+  leaft_hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProof.leaft_hash)
+}
+inline ::std::string* MerkelProof::mutable_leaft_hash() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProof.leaft_hash)
+  return leaft_hash_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* MerkelProof::release_leaft_hash() {
+  // @@protoc_insertion_point(field_release:protocol.MerkelProof.leaft_hash)
+  
+  return leaft_hash_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void MerkelProof::set_allocated_leaft_hash(::std::string* leaft_hash) {
+  if (leaft_hash != NULL) {
+    
+  } else {
+    
+  }
+  leaft_hash_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), leaft_hash);
+  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProof.leaft_hash)
 }
 
 // -------------------------------------------------------------------
