@@ -111,11 +111,11 @@ namespace bumo {
 		bool IsExpire(std::string &error_info);
 		void EnableChecked();
 		const int64_t GetInComingTime() const;
+		const int64_t GetProcessingOperation() const;
 
 		uint64_t apply_time_;
 		int64_t ledger_seq_;
 		Result result_;	
-		int32_t processing_operation_;
 		LedgerFrm* ledger_;
 		
 		//for query
@@ -140,6 +140,7 @@ namespace bumo {
 		bool enable_check_;
 		int64_t apply_start_time_;
 		int64_t apply_use_time_;
+		int32_t processing_operation_;
 	};
 };
 
