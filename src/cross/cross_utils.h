@@ -106,19 +106,37 @@ namespace bumo {
 		TransTaskMap trans_task_map_;
 	};
 
-	typedef std::shared_ptr<MerkleNode> MerkleNodePointer;
+	
 	//merkel tree
-	class MerkleNode{
+	//class IMerkleNode{
+	//public:
+	//	virtual MerkleNodePointer GetParent() = 0;
+	//	virtual void  SetChildren(const MerkleNodePointer &children_l, const MerkleNodePointer &children_r) = 0;
+	//	virtual MerkleNodePointer GetChildrenLeft() = 0;
+	//	virtual MerkleNodePointer GetChildrenRight() = 0;
+	//	virtual void SetParent(const MerkleNodePointer &parent) = 0;
+	//	virtual string GetHash() = 0;
+	//	virtual int64_t CheckDir() = 0;
+	//	virtual MerkleNodePointer GetSibling() = 0;
+	//	virtual void SetHash(const std::string &leaf_hash) = 0;
+	//	virtual ~IMerkleNode(){}
+	//	virtual bool IsLeaf() = 0;
+	//};
+
+	
+	class MerkleNode {
+		typedef std::shared_ptr<MerkleNode> MerkleNodePointer;
 	public:
 		MerkleNode();
 		MerkleNodePointer GetParent();
 		void  SetChildren(const MerkleNodePointer &children_l, const MerkleNodePointer &children_r);
 		MerkleNodePointer GetChildrenLeft();
+		MerkleNodePointer GetChildrenRight();
 		void SetParent(const MerkleNodePointer &parent);
 		string GetHash();
 		int64_t CheckDir();
 		MerkleNodePointer GetSibling();
-		void SetHash(const std::string &hash_str);
+		void SetHash(const std::string &leaf_hash);
 		virtual ~MerkleNode();
 		bool IsLeaf();
 	private:
@@ -129,6 +147,7 @@ namespace bumo {
 	};
 
 	class MerkleTree{
+		typedef std::shared_ptr<MerkleNode> MerkleNodePointer;
 	public:
 		MerkleTree();
 		virtual ~MerkleTree();

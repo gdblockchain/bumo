@@ -20,9 +20,8 @@
 #include "cross_utils.h"
 
 #define MAX_SEND_TRANSACTION_TIMES 50
-
 namespace bumo {
-
+	typedef std::shared_ptr<MerkleNode> MerkleNodePointer;
 	int32_t CrossUtils::QueryContract(const std::string &address, const std::string &input, Json::Value &query_rets){
 		std::string result = "";
 		ContractTestParameter parameter;
@@ -276,6 +275,50 @@ namespace bumo {
 	}
 
 	//merkel tree
+
+	MerkleNode::MerkleNode(){}
+	MerkleNodePointer MerkleNode::GetParent(){
+		return parent_;
+	}
+	void  MerkleNode::SetChildren(const MerkleNodePointer &children_l, const MerkleNodePointer &children_r){
+		left_node_ = children_l;
+		right_node_ = children_r;
+	}
+	MerkleNodePointer MerkleNode::GetChildrenLeft(){
+		return left_node_;
+	}
+
+	MerkleNodePointer MerkleNode::GetChildrenRight(){
+		return right_node_;
+	}
+
+	void MerkleNode::SetParent(const MerkleNodePointer &parent){
+		parent_ = parent;
+	}
+
+	string MerkleNode::GetHash(){
+		return hash_;
+	}
+
+	int64_t MerkleNode::CheckDir(){
+		return 0;
+	}
+
+	MerkleNodePointer MerkleNode::GetSibling(){
+		// the left child gets the right child, and the right child gets the left child
+		// gets the parent node of the node
+		// determine whether the left child of the parent node is the same as this node
+		// same return right child, different return left child
+		MerkleNodePointer parent = this->GetParent();
+		return parent->GetChildrenLeft() == parent ? parent->GetChildrenRight() : parent->GetChildrenLeft();
+	}
+
+	void MerkleNode::SetHash(const std::string &leaf_hash){
+		hash_ = leaf_hash;
+	}
+
+	MerkleNode::~MerkleNode(){}
+
 	bool MerkleNode::IsLeaf(){ return left_node_ == nullptr && right_node_ == nullptr; }
 
 	MerkleTree::MerkleTree() {}
@@ -298,36 +341,36 @@ namespace bumo {
 	//build merkle tree
 	void MerkleTree::BuildTree(){
 
-		//	do{
-		//		std::vector<MerkleNodePointer> new_nodes;
-		//		MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes
+			do{
+				std::vector<MerkleNodePointer> new_nodes;
+				MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes
 
-		//		for (int64_t i = 0; i < base_nodes_.end()[-1].size(); i += 2){
-		//			MerkleNodePointer new_parent = MerkleNodePointer();
-		//			//Set the parent node.Pass in the last element, ie the i and i + 1 of a node list.
-		//			base_nodes_.end()[-1][i]->SetParent(new_parent);
-		//			base_nodes_.end()[-1][i + 1]->SetParent(new_parent);
+				for (size_t i = 0; i < base_nodes_.end()[-1].size(); i += 2){
+					MerkleNodePointer new_parent = MerkleNodePointer();
+					//Set the parent node.Pass in the last element, ie the i and i + 1 of a node list.
+					base_nodes_.end()[-1][i]->SetParent(new_parent);
+					base_nodes_.end()[-1][i + 1]->SetParent(new_parent);
 
-		//			// set the hash value of the parent node by the hash value of the two child nodes
-		//			new_parent->setHash(base_nodes_.end()[-1][i]->GetHash() + base_nodes_.end()[-1][i + 1]->GetHash());
-		//			// set the left and right child nodes of the parent node to these two
-		//			new_parent->SetChildren(base_nodes_.end()[-1][i], base_nodes_.end()[-1][i + 1]);
-		//			// push new parent into new nodes
-		//			new_nodes.push_back(new_parent);
+					// set the hash value of the parent node by the hash value of the two child nodes
+					new_parent->SetHash(base_nodes_.end()[-1][i]->GetHash() + base_nodes_.end()[-1][i + 1]->GetHash());
+					// set the left and right child nodes of the parent node to these two
+					new_parent->SetChildren(base_nodes_.end()[-1][i], base_nodes_.end()[-1][i + 1]);
+					// push new parent into new nodes
+					new_nodes.push_back(new_parent);
 
-		//			cout << "Hash togther: " << base_nodes_.end()[-1][i]->GetHash() << \
-					//				" and " << base_nodes_.end()[-1][i + 1]->getHash() << " attached: " << \
+					//cout << "Hash togther: " << base_nodes_.end()[-1][i]->GetHash() << \
+					//				" and " << base_nodes_.end()[-1][i + 1]->GetHash() << " attached: " << \
 					//				&new_parent << endl;
-		//		}
-		//		//Push a new round of parent node new_n odes into base
-		//		base_nodes_.push_back(new_nodes);
+				}
+				//Push a new round of parent node new_n odes into base
+				base_nodes_.push_back(new_nodes);
 
-		//		cout << "Hashed level with: " << base_nodes_.end()[-1].size() << '\n';
-		//	} while (base_nodes_.end()[-1].size() > 1); // so that each round gets a new layer of parent nodes, until the root node to exit the loop
+				//cout << "Hashed level with: " << base_nodes_.end()[-1].size() << '\n';
+			} while (base_nodes_.end()[-1].size() > 1); // so that each round gets a new layer of parent nodes, until the root node to exit the loop
 
-		//	merkleRoot = base_nodes_.end()[-1][0]->GetHash(); // the hash value of the root node
+			merkle_root_ = base_nodes_.end()[-1][0]->GetHash(); // the hash value of the root node
 
-		//	cout << "Merkle Root is : " << merkleRoot << endl << endl;
+			/*cout << "Merkle Root is : " << merkle_root_ << endl << endl;*/
 	}
 }
 	
