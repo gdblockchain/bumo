@@ -240,16 +240,28 @@ namespace bumo {
 			} 
 
 			ContractParameter parameter;
+			//contract
 			parameter.code_ = parameter_.code_;
-			parameter.sender_ = parameter_.source_address_;
-			parameter.tx_initiator_ = parameter_.source_address_;
-			parameter.this_address_ = parameter_.contract_address_;
+			parameter.init_ = false;
 			parameter.input_ = parameter_.input_;
-			parameter.ope_index_ = 0;
-			parameter.consensus_value_ = Proto2Json(consensus_value_).toFastString();
 			parameter.ledger_context_ = this;
-			parameter.timestamp_ = consensus_value_.close_time();
-			parameter.blocknumber_ = consensus_value_.ledger_seq();
+			parameter.this_address_ = parameter_.contract_address_;
+
+			//blcok
+			parameter.block_.number_ = consensus_value_.ledger_seq();
+			parameter.block_.timestamp_ = consensus_value_.close_time();
+
+			//tx
+			parameter.tx_.Reset();
+			parameter.tx_.initiator_ = parameter_.source_address_;
+			parameter.tx_.sender_ = parameter_.source_address_;
+			parameter.tx_.gas_price_ = parameter_.gas_price_;
+			parameter.tx_.fee_limit_ = parameter_.fee_limit_;
+
+			//for msg
+			parameter.msg_.Reset();
+			parameter.msg_.initiator_ = parameter_.source_address_;
+			parameter.msg_.sender_ = parameter_.source_address_;
 
 			//Query
 			TransactionFrm::pointer tx_frm = std::make_shared<TransactionFrm>();
