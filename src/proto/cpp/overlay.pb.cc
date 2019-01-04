@@ -71,6 +71,9 @@ const ::google::protobuf::EnumDescriptor* ChainTxStatus_TxStatus_descriptor_ = N
 const ::google::protobuf::Descriptor* ChainInfoMessage_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ChainInfoMessage_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MerkelProofHash_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MerkelProofHash_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* MERKEL_BRANCH_TYPE_descriptor_ = NULL;
@@ -366,6 +369,22 @@ void protobuf_AssignDesc_overlay_2eproto() {
       sizeof(ChainInfoMessage),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainInfoMessage, _internal_metadata_),
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainInfoMessage, _is_default_instance_));
+  MerkelProofHash_descriptor_ = file->message_type(16);
+  static const int MerkelProofHash_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProofHash, hash_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProofHash, direction_),
+  };
+  MerkelProofHash_reflection_ =
+    ::google::protobuf::internal::GeneratedMessageReflection::NewGeneratedMessageReflection(
+      MerkelProofHash_descriptor_,
+      MerkelProofHash::default_instance_,
+      MerkelProofHash_offsets_,
+      -1,
+      -1,
+      -1,
+      sizeof(MerkelProofHash),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProofHash, _internal_metadata_),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MerkelProofHash, _is_default_instance_));
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
   MERKEL_BRANCH_TYPE_descriptor_ = file->enum_type(2);
@@ -414,6 +433,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
       ChainTxStatus_descriptor_, &ChainTxStatus::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
       ChainInfoMessage_descriptor_, &ChainInfoMessage::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+      MerkelProofHash_descriptor_, &MerkelProofHash::default_instance());
 }
 
 }  // namespace
@@ -451,6 +472,8 @@ void protobuf_ShutdownFile_overlay_2eproto() {
   delete ChainTxStatus_reflection_;
   delete ChainInfoMessage::default_instance_;
   delete ChainInfoMessage_reflection_;
+  delete MerkelProofHash::default_instance_;
+  delete MerkelProofHash_reflection_;
 }
 
 void protobuf_AddDesc_overlay_2eproto() GOOGLE_ATTRIBUTE_COLD;
@@ -506,23 +529,25 @@ void protobuf_AddDesc_overlay_2eproto() {
     "imestamp\030\t \001(\003\"P\n\010TxStatus\022\r\n\tUNDEFINED\020"
     "\000\022\r\n\tCONFIRMED\020\001\022\013\n\007PENDING\020\002\022\014\n\010COMPLET"
     "E\020\003\022\013\n\007FAILURE\020\004\"0\n\020ChainInfoMessage\022\013\n\003"
-    "seq\030\001 \001(\003\022\017\n\007address\030\002 \001(\t*\203\002\n\024OVERLAY_M"
-    "ESSAGE_TYPE\022\030\n\024OVERLAY_MSGTYPE_NONE\020\000\022\030\n"
-    "\024OVERLAY_MSGTYPE_PING\020\001\022\031\n\025OVERLAY_MSGTY"
-    "PE_HELLO\020\002\022\031\n\025OVERLAY_MSGTYPE_PEERS\020\003\022\037\n"
-    "\033OVERLAY_MSGTYPE_TRANSACTION\020\004\022\033\n\027OVERLA"
-    "Y_MSGTYPE_LEDGERS\020\005\022\030\n\024OVERLAY_MSGTYPE_P"
-    "BFT\020\006\022)\n%OVERLAY_MSGTYPE_LEDGER_UPGRADE_"
-    "NOTIFY\020\007*\372\001\n\020ChainMessageType\022\023\n\017CHAIN_T"
-    "YPE_NONE\020\000\022\017\n\013CHAIN_HELLO\020\n\022\023\n\017CHAIN_TX_"
-    "STATUS\020\013\022\025\n\021CHAIN_PEER_ONLINE\020\014\022\026\n\022CHAIN"
-    "_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022"
-    "\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHAIN_LE"
-    "DGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n"
-    "\022CHAIN_TX_ENV_STORE\020\022*7\n\022MERKEL_BRANCH_T"
-    "YPE\022\010\n\004LEFT\020\000\022\t\n\005RIGHT\020\001\022\014\n\010OLD_ROOT\020\002B\""
-    "\n io.bumo.sdk.core.extend.protobufb\006prot"
-    "o3", 2362);
+    "seq\030\001 \001(\003\022\017\n\007address\030\002 \001(\t\"P\n\017MerkelProo"
+    "fHash\022\014\n\004hash\030\001 \001(\t\022/\n\tdirection\030\002 \001(\0162\034"
+    ".protocol.MERKEL_BRANCH_TYPE*\203\002\n\024OVERLAY"
+    "_MESSAGE_TYPE\022\030\n\024OVERLAY_MSGTYPE_NONE\020\000\022"
+    "\030\n\024OVERLAY_MSGTYPE_PING\020\001\022\031\n\025OVERLAY_MSG"
+    "TYPE_HELLO\020\002\022\031\n\025OVERLAY_MSGTYPE_PEERS\020\003\022"
+    "\037\n\033OVERLAY_MSGTYPE_TRANSACTION\020\004\022\033\n\027OVER"
+    "LAY_MSGTYPE_LEDGERS\020\005\022\030\n\024OVERLAY_MSGTYPE"
+    "_PBFT\020\006\022)\n%OVERLAY_MSGTYPE_LEDGER_UPGRAD"
+    "E_NOTIFY\020\007*\372\001\n\020ChainMessageType\022\023\n\017CHAIN"
+    "_TYPE_NONE\020\000\022\017\n\013CHAIN_HELLO\020\n\022\023\n\017CHAIN_T"
+    "X_STATUS\020\013\022\025\n\021CHAIN_PEER_ONLINE\020\014\022\026\n\022CHA"
+    "IN_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020"
+    "\016\022\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHAIN_"
+    "LEDGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022"
+    "\026\n\022CHAIN_TX_ENV_STORE\020\022*7\n\022MERKEL_BRANCH"
+    "_TYPE\022\010\n\004LEFT\020\000\022\t\n\005RIGHT\020\001\022\014\n\010OLD_ROOT\020\002"
+    "B\"\n io.bumo.sdk.core.extend.protobufb\006pr"
+    "oto3", 2444);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -541,6 +566,7 @@ void protobuf_AddDesc_overlay_2eproto() {
   ChainResponse::default_instance_ = new ChainResponse();
   ChainTxStatus::default_instance_ = new ChainTxStatus();
   ChainInfoMessage::default_instance_ = new ChainInfoMessage();
+  MerkelProofHash::default_instance_ = new MerkelProofHash();
   Hello::default_instance_->InitAsDefaultInstance();
   HelloResponse::default_instance_->InitAsDefaultInstance();
   Peer::default_instance_->InitAsDefaultInstance();
@@ -557,6 +583,7 @@ void protobuf_AddDesc_overlay_2eproto() {
   ChainResponse::default_instance_->InitAsDefaultInstance();
   ChainTxStatus::default_instance_->InitAsDefaultInstance();
   ChainInfoMessage::default_instance_->InitAsDefaultInstance();
+  MerkelProofHash::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_overlay_2eproto);
 }
 
@@ -7651,6 +7678,345 @@ void ChainInfoMessage::clear_address() {
   }
   address_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), address);
   // @@protoc_insertion_point(field_set_allocated:protocol.ChainInfoMessage.address)
+}
+
+#endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
+
+// ===================================================================
+
+#if !defined(_MSC_VER) || _MSC_VER >= 1900
+const int MerkelProofHash::kHashFieldNumber;
+const int MerkelProofHash::kDirectionFieldNumber;
+#endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
+
+MerkelProofHash::MerkelProofHash()
+  : ::google::protobuf::Message(), _internal_metadata_(NULL) {
+  SharedCtor();
+  // @@protoc_insertion_point(constructor:protocol.MerkelProofHash)
+}
+
+void MerkelProofHash::InitAsDefaultInstance() {
+  _is_default_instance_ = true;
+}
+
+MerkelProofHash::MerkelProofHash(const MerkelProofHash& from)
+  : ::google::protobuf::Message(),
+    _internal_metadata_(NULL) {
+  SharedCtor();
+  MergeFrom(from);
+  // @@protoc_insertion_point(copy_constructor:protocol.MerkelProofHash)
+}
+
+void MerkelProofHash::SharedCtor() {
+    _is_default_instance_ = false;
+  ::google::protobuf::internal::GetEmptyString();
+  _cached_size_ = 0;
+  hash_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  direction_ = 0;
+}
+
+MerkelProofHash::~MerkelProofHash() {
+  // @@protoc_insertion_point(destructor:protocol.MerkelProofHash)
+  SharedDtor();
+}
+
+void MerkelProofHash::SharedDtor() {
+  hash_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  if (this != default_instance_) {
+  }
+}
+
+void MerkelProofHash::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MerkelProofHash::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MerkelProofHash_descriptor_;
+}
+
+const MerkelProofHash& MerkelProofHash::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_overlay_2eproto();
+  return *default_instance_;
+}
+
+MerkelProofHash* MerkelProofHash::default_instance_ = NULL;
+
+MerkelProofHash* MerkelProofHash::New(::google::protobuf::Arena* arena) const {
+  MerkelProofHash* n = new MerkelProofHash;
+  if (arena != NULL) {
+    arena->Own(n);
+  }
+  return n;
+}
+
+void MerkelProofHash::Clear() {
+// @@protoc_insertion_point(message_clear_start:protocol.MerkelProofHash)
+  hash_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  direction_ = 0;
+}
+
+bool MerkelProofHash::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!GOOGLE_PREDICT_TRUE(EXPRESSION)) goto failure
+  ::google::protobuf::uint32 tag;
+  // @@protoc_insertion_point(parse_start:protocol.MerkelProofHash)
+  for (;;) {
+    ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
+    tag = p.first;
+    if (!p.second) goto handle_unusual;
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string hash = 1;
+      case 1: {
+        if (tag == 10) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_hash()));
+          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+            this->hash().data(), this->hash().length(),
+            ::google::protobuf::internal::WireFormatLite::PARSE,
+            "protocol.MerkelProofHash.hash"));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectTag(16)) goto parse_direction;
+        break;
+      }
+
+      // optional .protocol.MERKEL_BRANCH_TYPE direction = 2;
+      case 2: {
+        if (tag == 16) {
+         parse_direction:
+          int value;
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
+                 input, &value)));
+          set_direction(static_cast< ::protocol::MERKEL_BRANCH_TYPE >(value));
+        } else {
+          goto handle_unusual;
+        }
+        if (input->ExpectAtEnd()) goto success;
+        break;
+      }
+
+      default: {
+      handle_unusual:
+        if (tag == 0 ||
+            ::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          goto success;
+        }
+        DO_(::google::protobuf::internal::WireFormatLite::SkipField(input, tag));
+        break;
+      }
+    }
+  }
+success:
+  // @@protoc_insertion_point(parse_success:protocol.MerkelProofHash)
+  return true;
+failure:
+  // @@protoc_insertion_point(parse_failure:protocol.MerkelProofHash)
+  return false;
+#undef DO_
+}
+
+void MerkelProofHash::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // @@protoc_insertion_point(serialize_start:protocol.MerkelProofHash)
+  // optional string hash = 1;
+  if (this->hash().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->hash().data(), this->hash().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "protocol.MerkelProofHash.hash");
+    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+      1, this->hash(), output);
+  }
+
+  // optional .protocol.MERKEL_BRANCH_TYPE direction = 2;
+  if (this->direction() != 0) {
+    ::google::protobuf::internal::WireFormatLite::WriteEnum(
+      2, this->direction(), output);
+  }
+
+  // @@protoc_insertion_point(serialize_end:protocol.MerkelProofHash)
+}
+
+::google::protobuf::uint8* MerkelProofHash::InternalSerializeWithCachedSizesToArray(
+    bool deterministic, ::google::protobuf::uint8* target) const {
+  // @@protoc_insertion_point(serialize_to_array_start:protocol.MerkelProofHash)
+  // optional string hash = 1;
+  if (this->hash().size() > 0) {
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+      this->hash().data(), this->hash().length(),
+      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
+      "protocol.MerkelProofHash.hash");
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->hash(), target);
+  }
+
+  // optional .protocol.MERKEL_BRANCH_TYPE direction = 2;
+  if (this->direction() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
+      2, this->direction(), target);
+  }
+
+  // @@protoc_insertion_point(serialize_to_array_end:protocol.MerkelProofHash)
+  return target;
+}
+
+int MerkelProofHash::ByteSize() const {
+// @@protoc_insertion_point(message_byte_size_start:protocol.MerkelProofHash)
+  int total_size = 0;
+
+  // optional string hash = 1;
+  if (this->hash().size() > 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::StringSize(
+        this->hash());
+  }
+
+  // optional .protocol.MERKEL_BRANCH_TYPE direction = 2;
+  if (this->direction() != 0) {
+    total_size += 1 +
+      ::google::protobuf::internal::WireFormatLite::EnumSize(this->direction());
+  }
+
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MerkelProofHash::MergeFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_merge_from_start:protocol.MerkelProofHash)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  const MerkelProofHash* source = 
+      ::google::protobuf::internal::DynamicCastToGenerated<const MerkelProofHash>(
+          &from);
+  if (source == NULL) {
+  // @@protoc_insertion_point(generalized_merge_from_cast_fail:protocol.MerkelProofHash)
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+  // @@protoc_insertion_point(generalized_merge_from_cast_success:protocol.MerkelProofHash)
+    MergeFrom(*source);
+  }
+}
+
+void MerkelProofHash::MergeFrom(const MerkelProofHash& from) {
+// @@protoc_insertion_point(class_specific_merge_from_start:protocol.MerkelProofHash)
+  if (GOOGLE_PREDICT_FALSE(&from == this)) {
+    ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
+  }
+  if (from.hash().size() > 0) {
+
+    hash_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.hash_);
+  }
+  if (from.direction() != 0) {
+    set_direction(from.direction());
+  }
+}
+
+void MerkelProofHash::CopyFrom(const ::google::protobuf::Message& from) {
+// @@protoc_insertion_point(generalized_copy_from_start:protocol.MerkelProofHash)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MerkelProofHash::CopyFrom(const MerkelProofHash& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:protocol.MerkelProofHash)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MerkelProofHash::IsInitialized() const {
+
+  return true;
+}
+
+void MerkelProofHash::Swap(MerkelProofHash* other) {
+  if (other == this) return;
+  InternalSwap(other);
+}
+void MerkelProofHash::InternalSwap(MerkelProofHash* other) {
+  hash_.Swap(&other->hash_);
+  std::swap(direction_, other->direction_);
+  _internal_metadata_.Swap(&other->_internal_metadata_);
+  std::swap(_cached_size_, other->_cached_size_);
+}
+
+::google::protobuf::Metadata MerkelProofHash::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MerkelProofHash_descriptor_;
+  metadata.reflection = MerkelProofHash_reflection_;
+  return metadata;
+}
+
+#if PROTOBUF_INLINE_NOT_IN_HEADERS
+// MerkelProofHash
+
+// optional string hash = 1;
+void MerkelProofHash::clear_hash() {
+  hash_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ const ::std::string& MerkelProofHash::hash() const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProofHash.hash)
+  return hash_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MerkelProofHash::set_hash(const ::std::string& value) {
+  
+  hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.MerkelProofHash.hash)
+}
+ void MerkelProofHash::set_hash(const char* value) {
+  
+  hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.MerkelProofHash.hash)
+}
+ void MerkelProofHash::set_hash(const char* value, size_t size) {
+  
+  hash_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.MerkelProofHash.hash)
+}
+ ::std::string* MerkelProofHash::mutable_hash() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.MerkelProofHash.hash)
+  return hash_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ ::std::string* MerkelProofHash::release_hash() {
+  // @@protoc_insertion_point(field_release:protocol.MerkelProofHash.hash)
+  
+  return hash_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+ void MerkelProofHash::set_allocated_hash(::std::string* hash) {
+  if (hash != NULL) {
+    
+  } else {
+    
+  }
+  hash_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), hash);
+  // @@protoc_insertion_point(field_set_allocated:protocol.MerkelProofHash.hash)
+}
+
+// optional .protocol.MERKEL_BRANCH_TYPE direction = 2;
+void MerkelProofHash::clear_direction() {
+  direction_ = 0;
+}
+ ::protocol::MERKEL_BRANCH_TYPE MerkelProofHash::direction() const {
+  // @@protoc_insertion_point(field_get:protocol.MerkelProofHash.direction)
+  return static_cast< ::protocol::MERKEL_BRANCH_TYPE >(direction_);
+}
+ void MerkelProofHash::set_direction(::protocol::MERKEL_BRANCH_TYPE value) {
+  
+  direction_ = value;
+  // @@protoc_insertion_point(field_set:protocol.MerkelProofHash.direction)
 }
 
 #endif  // PROTOBUF_INLINE_NOT_IN_HEADERS
