@@ -432,9 +432,9 @@ namespace bumo {
 			// the hash of the parent node is the hash string of the left child + the hash string of the right child
 			// if the left node of the parent of el_node is el_node
 			// gets the parent node of the node
-			MerkleNodePointer parent = el_node->GetParent();
+			auto parent = el_node->GetParent();
 			int64_t flag = parent->GetChildrenLeft() == el_node ? 0 : 1;
-			MerkleNodePointer sibling = parent->GetChildrenLeft() == el_node ? parent->GetChildrenRight() : parent->GetChildrenLeft();
+			auto sibling = parent->GetChildrenLeft() == el_node ? parent->GetChildrenRight() : parent->GetChildrenLeft();
 
 			if (flag == 0){
 				// is the hash string for the left child + the hash string for the right child
