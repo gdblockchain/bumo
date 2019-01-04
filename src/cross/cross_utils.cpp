@@ -392,6 +392,10 @@ namespace bumo {
 		}
 	}
 
+	string MerkleTree::HashMerkleBranches(const std::string &left, const std::string &right){
+		return utils::String::BinToHexString(HashWrapper::Crypto(left + right)).c_str();
+	}
+
 
 }
 	
