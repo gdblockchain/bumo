@@ -340,8 +340,9 @@ namespace bumo {
 	}
 
 	//build merkle tree
-	void MerkleTree::BuildTree(){
-
+	void MerkleTree::BuildTree(const vector<string> &base_leafs){
+		utils::MutexGuard guard(base_nodes_lock_);
+		BuildBaseLeafes(base_leafs);
 		do{
 			std::vector<MerkleNodePointer> new_nodes;
 			MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes

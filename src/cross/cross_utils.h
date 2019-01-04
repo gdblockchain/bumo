@@ -134,9 +134,8 @@ namespace bumo {
 	public:
 		MerkleTree();
 		virtual ~MerkleTree();
-		void BuildTree();
+		void BuildTree(const vector<string> &base_leafs);
 		string GetMerkleRoot();
-		void BuildBaseLeafes(const vector<string> &base_leafs);
 		void IterateUp(const int64_t &element);
 		bool VerifyMerkelLeaf(const std::string &leaf_hash);
 
@@ -148,6 +147,7 @@ namespace bumo {
 	private:
 		int64_t MakeBinary(std::vector<MerkleNodePointer> &node_vector);
 		void PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level);
+		void BuildBaseLeafes(const vector<string> &base_leafs);
 		
 	private:
 		std::string merkle_root_;
