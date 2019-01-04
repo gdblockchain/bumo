@@ -375,7 +375,7 @@ namespace bumo {
 
 		MerkleNodePointer el_node = this->base_nodes_[0][element];
 		do {
-			LOG_INFO("Current Hash:%s", el_node->GetHash());
+			LOG_INFO("Current Hash:%s", el_node->GetHash().c_str());
 		} while ((el_node = el_node->GetParent()) != NULL);
 	}
 
@@ -449,7 +449,7 @@ namespace bumo {
 	// print the hash value of each node
 	void MerkleTree::PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level){
 		for (MerkleNodePointer el : node_level){
-			LOG_INFO("Node hash is:%s", el->GetHash());
+			LOG_INFO("Node hash is:%s", el->GetHash().c_str());
 		}
 	}
 
