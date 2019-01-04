@@ -361,8 +361,8 @@ namespace bumo {
 				new_nodes.push_back(new_parent);
 
 				//cout << "Hash togther: " << base_nodes_.end()[-1][i]->GetHash() << \
-									//				" and " << base_nodes_.end()[-1][i + 1]->GetHash() << " attached: " << \
-									//				&new_parent << endl;
+																	//				" and " << base_nodes_.end()[-1][i + 1]->GetHash() << " attached: " << \
+																	//				&new_parent << endl;
 			}
 			//Push a new round of parent node new_n odes into base
 			base_nodes_.push_back(new_nodes);
@@ -405,6 +405,10 @@ namespace bumo {
 
 	bool MerkleTree::VerifyMerkelLeaf(const std::string &leaf_hash){
 		MerkleNodePointer el_node = nullptr;
+		return VerifyMerkelLeaf(leaf_hash, el_node);
+	}
+
+	bool MerkleTree::VerifyMerkelLeaf(const std::string &leaf_hash, MerkleNodePointer &el_node){
 		string act_hash = leaf_hash; // the hash value of the leaf node to be verified
 		utils::MutexGuard guard(base_nodes_lock_);
 		// if base[0] that is, the hash value of a node in the leaf node is equal to it
@@ -470,6 +474,19 @@ namespace bumo {
 	}
 
 	void MerkleTree::AuditProof(const std::string &leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail){
+		MerkleNodePointer leaf_node = nullptr;
+
+		//Verify MerkelLeaf and build audit trail
+		if (!VerifyMerkelLeaf(leaf_hash, leaf_node)){
+			return;
+		}
+
+		if (leaf_node->GetParent() == nullptr){
+			return;
+		}
+
+		auto parent = leaf_node->GetParent();
+		BuildAuditTrail(audit_trail, parent, leaf_node);
 
 	}
 
@@ -479,14 +496,11 @@ namespace bumo {
 		}
 		std::string test_hash = leaf_hash;
 
-		// TODO: Inefficient - compute hashes directly.
 		for (auto iter = audit_trail.begin(); iter != audit_trail.end(); iter++){
 			test_hash = iter->direction() == protocol::MERKEL_BRANCH_TYPE::LEFT ?
 				HashMerkleBranches(test_hash, iter->hash()) : HashMerkleBranches(iter->hash(), test_hash);
 		}
 		return root_hash == test_hash;
 	}
-
-
 
 }
