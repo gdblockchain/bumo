@@ -380,5 +380,12 @@ namespace bumo {
 		}
 		base_nodes_.push_back(new_nodes);
 	}
+
+	// print the hash value of each node
+	void MerkleTree::PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level){
+		for (MerkleNodePointer el : node_level){
+			LOG_INFO("node hash is:%s", el->GetHash());
+		}
+	}
 }
 	
