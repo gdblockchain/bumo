@@ -434,6 +434,10 @@ namespace bumo {
 			// gets the parent node of the node
 			auto parent = el_node->GetParent();
 			int64_t flag = parent->GetChildrenLeft() == el_node ? 0 : 1;
+			// the left child gets the right child, and the right child gets the left child
+			// gets the parent node of the node
+			// determine whether the left child of the parent node is the same as this node
+			// same return right child, different return left child
 			auto sibling = parent->GetChildrenLeft() == el_node ? parent->GetChildrenRight() : parent->GetChildrenLeft();
 
 			if (flag == 0){
