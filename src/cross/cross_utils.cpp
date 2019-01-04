@@ -503,4 +503,39 @@ namespace bumo {
 		return root_hash == test_hash;
 	}
 
+	void MerkleTree::TestMerkleTree(){
+		string check_str = "10";
+		vector<string> v;
+		v.push_back("0");
+		v.push_back("1");
+		v.push_back("2");
+		v.push_back("3");
+		v.push_back("4");
+		v.push_back("5");
+		v.push_back("6");
+		v.push_back("7");
+		v.push_back("8");
+		v.push_back("9");
+		v.push_back("10");
+		v.push_back("11");
+		v.push_back("12");
+		v.push_back("13");
+		v.push_back("14");
+		v.push_back("15");
+		check_str = utils::String::BinToHexString(HashWrapper::Crypto(check_str)).c_str();
+
+		BuildTree(v);
+		if (VerifyMerkelLeaf(check_str)){
+			cout << "All clear\n";
+		}else{
+			cout << "something is wrong\n";
+		}
+
+		string hash = HashMerkleBranches("5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9", "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b");
+
+		std::vector<protocol::MerkelProofHash> audit_trail;
+		AuditProof("4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5", audit_trail);
+		VerifyAudit("a901f842b0016f1e350d20b751851a7179e26dfbb74b213c7a92d37f3c4fbb6c", "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5", audit_trail);
+	}
+
 }
