@@ -164,16 +164,7 @@ message ChainInfoMessage{
 	string address = 2;
 }
 
-enum MERKEL_BRANCH_TYPE{
-		LEFT = 0;
-		RIGHT = 1;
-		OLD_ROOT = 2;    // used for linear list of hashes to compute the old root in a consistency proof.
-}
 
-message MerkelProofHash{
-    string hash = 1;
-	MERKEL_BRANCH_TYPE direction = 2;
-}
 
 
 
