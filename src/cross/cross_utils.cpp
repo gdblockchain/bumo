@@ -369,6 +369,18 @@ namespace bumo {
 			/*cout << "Merkle Root is : " << merkle_root_ << endl << endl;*/
 	}
 
+	void MerkleTree::IterateUp(const int64_t &element){
+		int64_t length = this->base_nodes_[0].size();
+		if (element<0 || element>length-1){
+			return;
+		}
+
+		MerkleNodePointer el_node = this->base_nodes_[0][element];
+		do {
+			LOG_INFO("Current Hash:%s", el_node->GetHash());
+		} while ((el_node = el_node->GetParent()) != NULL);
+	}
+
 	string MerkleTree::GetMerkleRoot(){
 		return merkle_root_;
 	}
@@ -388,7 +400,7 @@ namespace bumo {
 	// print the hash value of each node
 	void MerkleTree::PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level){
 		for (MerkleNodePointer el : node_level){
-			LOG_INFO("node hash is:%s", el->GetHash());
+			LOG_INFO("Node hash is:%s", el->GetHash());
 		}
 	}
 

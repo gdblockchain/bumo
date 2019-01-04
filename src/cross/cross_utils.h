@@ -136,7 +136,7 @@ namespace bumo {
 		void BuildTree();
 		string GetMerkleRoot();
 		void BuildBaseLeafes(const vector<string> &base_leafs);
-		void IterateUp(const int &element);
+		void IterateUp(const int64_t &element);
 		int VerifyMerkelLeaf(const std::string &leaf_hash);
 
 		void BuildAuditTrail(vector<protocol::MerkelProofHash> &audit_trail, const MerkleNodePointer &parent, const MerkleNodePointer &child);
