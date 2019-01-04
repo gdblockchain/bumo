@@ -4,7 +4,7 @@
 
 namespace bumo {
 	#define ORIGIN_OBJ "Origin"
-	#define BLOCKCHAIN_OBJ "Blockchain"
+	#define BLOCKCHAIN_OBJ "Chain"
 	#define UTILS_OBJ "Utils"
 	#define ToV8Int32(a) (v8::Int32::New(isolate_, (a)))
 	#define ToV8Number(a) (v8::Number::New(isolate_, (double)(a)))
