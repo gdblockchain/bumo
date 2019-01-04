@@ -822,11 +822,7 @@ def PayCoin2LocalAccount():
 
     payload = {'items':[]}
 
-    #m = random.randint(0, len(lines) - 1)
     acc_list = [json.loads(acc)['address'] for acc in getSpan(lines, 0, 10)]
-    #for line in lines:
-    #    acc_list.append(json.loads(line.strip())['address'])
-
     nonce = newNonce(genesis_account)
 
     addPayload(payload, 'pay_coin', acc_list, {}, nonce, amount=10000000)
@@ -907,7 +903,6 @@ def deposit(chainId,src_info):
     addPayload(payload, 'deposit', acc_list, src_info, nonce, amount=m,args=deposit_info)
     success_count = sendRequest(payload)
     print 'deposit to '+ addr + ',amount='+str(m)+',chain_id='+str(chainId)+',success_count='+str(success_count)
-    #print log_str
     return
 
 
