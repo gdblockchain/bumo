@@ -161,6 +161,28 @@ inline bool ChainMessageType_Parse(
   return ::google::protobuf::internal::ParseNamedEnum<ChainMessageType>(
     ChainMessageType_descriptor(), name, value);
 }
+enum MERKEL_BRANCH_TYPE {
+  LEFT = 0,
+  RIGHT = 1,
+  OLD_ROOT = 2,
+  MERKEL_BRANCH_TYPE_INT_MIN_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32min,
+  MERKEL_BRANCH_TYPE_INT_MAX_SENTINEL_DO_NOT_USE_ = ::google::protobuf::kint32max
+};
+bool MERKEL_BRANCH_TYPE_IsValid(int value);
+const MERKEL_BRANCH_TYPE MERKEL_BRANCH_TYPE_MIN = LEFT;
+const MERKEL_BRANCH_TYPE MERKEL_BRANCH_TYPE_MAX = OLD_ROOT;
+const int MERKEL_BRANCH_TYPE_ARRAYSIZE = MERKEL_BRANCH_TYPE_MAX + 1;
+
+const ::google::protobuf::EnumDescriptor* MERKEL_BRANCH_TYPE_descriptor();
+inline const ::std::string& MERKEL_BRANCH_TYPE_Name(MERKEL_BRANCH_TYPE value) {
+  return ::google::protobuf::internal::NameOfEnum(
+    MERKEL_BRANCH_TYPE_descriptor(), value);
+}
+inline bool MERKEL_BRANCH_TYPE_Parse(
+    const ::std::string& name, MERKEL_BRANCH_TYPE* value) {
+  return ::google::protobuf::internal::ParseNamedEnum<MERKEL_BRANCH_TYPE>(
+    MERKEL_BRANCH_TYPE_descriptor(), name, value);
+}
 // ===================================================================
 
 class Hello : public ::google::protobuf::Message /* @@protoc_insertion_point(class_definition:protocol.Hello) */ {
@@ -3541,6 +3563,11 @@ template <> struct is_proto_enum< ::protocol::ChainMessageType> : ::google::prot
 template <>
 inline const EnumDescriptor* GetEnumDescriptor< ::protocol::ChainMessageType>() {
   return ::protocol::ChainMessageType_descriptor();
+}
+template <> struct is_proto_enum< ::protocol::MERKEL_BRANCH_TYPE> : ::google::protobuf::internal::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::protocol::MERKEL_BRANCH_TYPE>() {
+  return ::protocol::MERKEL_BRANCH_TYPE_descriptor();
 }
 
 }  // namespace protobuf

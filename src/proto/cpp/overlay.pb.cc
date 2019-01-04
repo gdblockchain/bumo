@@ -73,6 +73,7 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
   ChainInfoMessage_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* OVERLAY_MESSAGE_TYPE_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ChainMessageType_descriptor_ = NULL;
+const ::google::protobuf::EnumDescriptor* MERKEL_BRANCH_TYPE_descriptor_ = NULL;
 
 }  // namespace
 
@@ -367,6 +368,7 @@ void protobuf_AssignDesc_overlay_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ChainInfoMessage, _is_default_instance_));
   OVERLAY_MESSAGE_TYPE_descriptor_ = file->enum_type(0);
   ChainMessageType_descriptor_ = file->enum_type(1);
+  MERKEL_BRANCH_TYPE_descriptor_ = file->enum_type(2);
 }
 
 namespace {
@@ -517,8 +519,10 @@ void protobuf_AddDesc_overlay_2eproto() {
     "_PEER_OFFLINE\020\r\022\026\n\022CHAIN_PEER_MESSAGE\020\016\022"
     "\033\n\027CHAIN_SUBMITTRANSACTION\020\017\022\027\n\023CHAIN_LE"
     "DGER_HEADER\020\020\022\026\n\022CHAIN_SUBSCRIBE_TX\020\021\022\026\n"
-    "\022CHAIN_TX_ENV_STORE\020\022B\"\n io.bumo.sdk.cor"
-    "e.extend.protobufb\006proto3", 2305);
+    "\022CHAIN_TX_ENV_STORE\020\022*7\n\022MERKEL_BRANCH_T"
+    "YPE\022\010\n\004LEFT\020\000\022\t\n\005RIGHT\020\001\022\014\n\010OLD_ROOT\020\002B\""
+    "\n io.bumo.sdk.core.extend.protobufb\006prot"
+    "o3", 2362);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "overlay.proto", &protobuf_RegisterTypes);
   Hello::default_instance_ = new Hello();
@@ -598,6 +602,21 @@ bool ChainMessageType_IsValid(int value) {
     case 16:
     case 17:
     case 18:
+      return true;
+    default:
+      return false;
+  }
+}
+
+const ::google::protobuf::EnumDescriptor* MERKEL_BRANCH_TYPE_descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MERKEL_BRANCH_TYPE_descriptor_;
+}
+bool MERKEL_BRANCH_TYPE_IsValid(int value) {
+  switch(value) {
+    case 0:
+    case 1:
+    case 2:
       return true;
     default:
       return false;
