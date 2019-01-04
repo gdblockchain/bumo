@@ -301,15 +301,6 @@ namespace bumo {
 		return hash_;
 	}
 
-	MerkleNodePointer MerkleNode::GetSibling(){
-		// the left child gets the right child, and the right child gets the left child
-		// gets the parent node of the node
-		// determine whether the left child of the parent node is the same as this node
-		// same return right child, different return left child
-		MerkleNodePointer parent = this->GetParent();
-		return parent->GetChildrenLeft() == parent ? parent->GetChildrenRight() : parent->GetChildrenLeft();
-	}
-
 	void MerkleNode::SetHash(const std::string &leaf_hash){
 		hash_ = utils::String::BinToHexString(HashWrapper::Crypto(leaf_hash)).c_str();
 	}
