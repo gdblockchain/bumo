@@ -406,7 +406,7 @@ namespace bumo {
 	bool MerkleTree::VerifyMerkelLeaf(const std::string &leaf_hash){
 		MerkleNodePointer el_node = nullptr;
 		string act_hash = leaf_hash; // the hash value of the leaf node to be verified
-
+		utils::MutexGuard guard(base_nodes_lock_);
 		// if base[0] that is, the hash value of a node in the leaf node is equal to it
 		for (int64_t i = 0; i < base_nodes_[0].size(); i++){
 			if (base_nodes_[0][i]->GetHash() == leaf_hash){
@@ -449,6 +449,26 @@ namespace bumo {
 	string MerkleTree::HashMerkleBranches(const std::string &left, const std::string &right){
 		return utils::String::BinToHexString(HashWrapper::Crypto(left + right)).c_str();
 	}
+
+	void MerkleTree::BuildAuditTrail(vector<protocol::MerkelProofHash> &audit_trail, const MerkleNodePointer &parent, const MerkleNodePointer &child){
+		if (parent != nullptr){
+			//Contract(() = > child.Parent == parent, "Parent of child is not expected parent.");
+			auto next_child = parent->GetChildrenLeft() == child ? parent->GetChildrenRight() : parent->GetChildrenLeft();
+			auto direction = parent->GetChildrenLeft() == child ? protocol::MERKEL_BRANCH_TYPE::LEFT : protocol::MERKEL_BRANCH_TYPE::RIGHT;
+
+			// For the last leaf, the right node may not exist.  In that case, we ignore it because it's
+			// the hash we are given to verify.
+			if (next_child != nullptr){
+				protocol::MerkelProofHash proof_hash;
+				proof_hash.set_hash(next_child->GetHash());
+				proof_hash.set_direction(direction);
+				audit_trail.push_back(proof_hash);
+			}
+
+			BuildAuditTrail(audit_trail, child->GetParent()->GetParent(), child->GetParent());
+		}
+	}
+
 
 
 }
