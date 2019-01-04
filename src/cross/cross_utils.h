@@ -149,7 +149,7 @@ namespace bumo {
 		int64_t MakeBinary(std::vector<MerkleNodePointer> &node_vector);
 		void PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level);
 		void BuildBaseLeafes(const vector<string> &base_leafs);
-		bool VerifyMerkelLeaf(const std::string &leaf_hash, MerkleNodePointer &el_node);
+		bool VerifyMerkelLeaf(const std::string &leaf_hash, MerkleNodePointer &node);
 		
 	private:
 		std::string merkle_root_;

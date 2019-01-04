@@ -409,13 +409,15 @@ namespace bumo {
 		return VerifyMerkelLeaf(leaf_hash, el_node);
 	}
 
-	bool MerkleTree::VerifyMerkelLeaf(const std::string &leaf_hash, MerkleNodePointer &el_node){
+	bool MerkleTree::VerifyMerkelLeaf(const std::string &leaf_hash, MerkleNodePointer &node){
+		MerkleNodePointer el_node = nullptr;
 		string act_hash = leaf_hash; // the hash value of the leaf node to be verified
 		utils::MutexGuard guard(base_nodes_lock_);
 		// if base[0] that is, the hash value of a node in the leaf node is equal to it
 		for (int64_t i = 0; i < base_nodes_[0].size(); i++){
 			if (base_nodes_[0][i]->GetHash() == leaf_hash){
-				el_node = base_nodes_[0][i]; // points to the node
+				node = base_nodes_[0][i]; // points to the node
+				el_node = node;
 			}
 		}
 
