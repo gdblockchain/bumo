@@ -121,6 +121,7 @@ namespace bumo {
 		void SetHash(const std::string &leaf_hash);
 		virtual ~MerkleNode();
 		bool IsLeaf();
+		int64_t CheckDir();
 	private:
 		std::string hash_;
 		MerkleNodePointer left_node_;
@@ -137,7 +138,7 @@ namespace bumo {
 		string GetMerkleRoot();
 		void BuildBaseLeafes(const vector<string> &base_leafs);
 		void IterateUp(const int64_t &element);
-		int VerifyMerkelLeaf(const std::string &leaf_hash);
+		bool VerifyMerkelLeaf(const std::string &leaf_hash);
 
 		void BuildAuditTrail(vector<protocol::MerkelProofHash> &audit_trail, const MerkleNodePointer &parent, const MerkleNodePointer &child);
 		void AuditProof(const std::string &leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail);

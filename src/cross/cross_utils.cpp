@@ -11,7 +11,7 @@
 
 	You should have received a copy of the GNU General Public License
 	along with bumo.  If not, see <http://www.gnu.org/licenses/>.
-*/
+	*/
 
 #include <glue/glue_manager.h>
 #include <overlay/peer_manager.h>
@@ -315,6 +315,11 @@ namespace bumo {
 
 	MerkleNode::~MerkleNode(){}
 
+	int64_t MerkleNode::CheckDir(){
+		// returns 1 if the left child of the parent node is 0
+		return parent_->left_node_ == std::shared_ptr<MerkleNode>(this) ? 0 : 1;
+	}
+
 	bool MerkleNode::IsLeaf(){ return left_node_ == nullptr && right_node_ == nullptr; }
 
 	MerkleTree::MerkleTree() {}
@@ -337,41 +342,41 @@ namespace bumo {
 	//build merkle tree
 	void MerkleTree::BuildTree(){
 
-			do{
-				std::vector<MerkleNodePointer> new_nodes;
-				MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes
+		do{
+			std::vector<MerkleNodePointer> new_nodes;
+			MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes
 
-				for (size_t i = 0; i < base_nodes_.end()[-1].size(); i += 2){
-					MerkleNodePointer new_parent = std::make_shared<MerkleNode>();
-					//Set the parent node.Pass in the last element, ie the i and i + 1 of a node list.
-					base_nodes_.end()[-1][i]->SetParent(new_parent);
-					base_nodes_.end()[-1][i + 1]->SetParent(new_parent);
+			for (size_t i = 0; i < base_nodes_.end()[-1].size(); i += 2){
+				MerkleNodePointer new_parent = std::make_shared<MerkleNode>();
+				//Set the parent node.Pass in the last element, ie the i and i + 1 of a node list.
+				base_nodes_.end()[-1][i]->SetParent(new_parent);
+				base_nodes_.end()[-1][i + 1]->SetParent(new_parent);
 
-					// set the hash value of the parent node by the hash value of the two child nodes
-					new_parent->SetHash(base_nodes_.end()[-1][i]->GetHash() + base_nodes_.end()[-1][i + 1]->GetHash());
-					// set the left and right child nodes of the parent node to these two
-					new_parent->SetChildren(base_nodes_.end()[-1][i], base_nodes_.end()[-1][i + 1]);
-					// push new parent into new nodes
-					new_nodes.push_back(new_parent);
+				// set the hash value of the parent node by the hash value of the two child nodes
+				new_parent->SetHash(base_nodes_.end()[-1][i]->GetHash() + base_nodes_.end()[-1][i + 1]->GetHash());
+				// set the left and right child nodes of the parent node to these two
+				new_parent->SetChildren(base_nodes_.end()[-1][i], base_nodes_.end()[-1][i + 1]);
+				// push new parent into new nodes
+				new_nodes.push_back(new_parent);
 
-					//cout << "Hash togther: " << base_nodes_.end()[-1][i]->GetHash() << \
-					//				" and " << base_nodes_.end()[-1][i + 1]->GetHash() << " attached: " << \
-					//				&new_parent << endl;
-				}
-				//Push a new round of parent node new_n odes into base
-				base_nodes_.push_back(new_nodes);
+				//cout << "Hash togther: " << base_nodes_.end()[-1][i]->GetHash() << \
+									//				" and " << base_nodes_.end()[-1][i + 1]->GetHash() << " attached: " << \
+									//				&new_parent << endl;
+			}
+			//Push a new round of parent node new_n odes into base
+			base_nodes_.push_back(new_nodes);
 
-				//cout << "Hashed level with: " << base_nodes_.end()[-1].size() << '\n';
-			} while (base_nodes_.end()[-1].size() > 1); // so that each round gets a new layer of parent nodes, until the root node to exit the loop
+			//cout << "Hashed level with: " << base_nodes_.end()[-1].size() << '\n';
+		} while (base_nodes_.end()[-1].size() > 1); // so that each round gets a new layer of parent nodes, until the root node to exit the loop
 
-			merkle_root_ = base_nodes_.end()[-1][0]->GetHash(); // the hash value of the root node
+		merkle_root_ = base_nodes_.end()[-1][0]->GetHash(); // the hash value of the root node
 
-			/*cout << "Merkle Root is : " << merkle_root_ << endl << endl;*/
+		/*cout << "Merkle Root is : " << merkle_root_ << endl << endl;*/
 	}
 
 	void MerkleTree::IterateUp(const int64_t &element){
 		int64_t length = this->base_nodes_[0].size();
-		if (element<0 || element>length-1){
+		if (element<0 || element>length - 1){
 			return;
 		}
 
@@ -397,6 +402,42 @@ namespace bumo {
 		base_nodes_.push_back(new_nodes);
 	}
 
+	bool MerkleTree::VerifyMerkelLeaf(const std::string &leaf_hash){
+		MerkleNodePointer el_node = nullptr;
+		string act_hash = leaf_hash; // the hash value of the leaf node to be verified
+
+		// if base[0] that is, the hash value of a node in the leaf node is equal to it
+		for (int64_t i = 0; i < base_nodes_[0].size(); i++){
+			if (base_nodes_[0][i]->GetHash() == leaf_hash){
+				el_node = base_nodes_[0][i]; // points to the node
+			}
+		}
+
+		if (el_node == nullptr){
+			return false;
+		}
+
+		LOG_INFO("Hash verify: %s", act_hash.c_str());
+
+		// verify whether merkle tree has changed
+		do{
+			// the hash of the parent node is the hash string of the left child + the hash string of the right child
+			// if the left node of the parent of el_node is el_node
+			if (el_node->CheckDir() == 0){
+				// is the hash string for the left child + the hash string for the right child
+				act_hash = HashMerkleBranches(act_hash, el_node->GetSibling()->GetHash());
+			}
+			else{
+				act_hash = HashMerkleBranches(el_node->GetSibling()->GetHash(), act_hash);
+			}
+
+			LOG_INFO("Hash verify: %s", act_hash.c_str());
+			el_node = el_node->GetParent();
+		} while ((el_node->GetParent()) != nullptr); // to the root node
+
+		return act_hash == merkle_root_ ? true : false;
+	}
+
 	// print the hash value of each node
 	void MerkleTree::PrintTreeLevel(const std::vector<MerkleNodePointer> &node_level){
 		for (MerkleNodePointer el : node_level){
@@ -410,4 +451,3 @@ namespace bumo {
 
 
 }
-	
