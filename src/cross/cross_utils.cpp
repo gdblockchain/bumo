@@ -531,11 +531,9 @@ namespace bumo {
 			cout << "something is wrong\n";
 		}
 
-		string hash = HashMerkleBranches("5feceb66ffc86f38d952786c6d696c79c2dbc239dd4e91b46729d73a27fb57e9", "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b");
-
 		std::vector<protocol::MerkelProofHash> audit_trail;
-		AuditProof("4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5", audit_trail);
-		VerifyAudit("a901f842b0016f1e350d20b751851a7179e26dfbb74b213c7a92d37f3c4fbb6c", "4a44dc15364204a80fe80e9039455cc1608281820fe2b24f1e5233ade6af1dd5", audit_trail);
+		AuditProof(check_str, audit_trail);
+		VerifyAudit(merkle_root_, check_str, audit_trail);
 	}
 
 }
