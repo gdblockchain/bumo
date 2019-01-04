@@ -369,6 +369,10 @@ namespace bumo {
 			/*cout << "Merkle Root is : " << merkle_root_ << endl << endl;*/
 	}
 
+	string MerkleTree::GetMerkleRoot(){
+		return merkle_root_;
+	}
+
 	// create a list of leaf nodes
 	void MerkleTree::BuildBaseLeafes(const vector<string> &base_leafs){
 		std::vector<MerkleNodePointer> new_nodes;
@@ -387,5 +391,7 @@ namespace bumo {
 			LOG_INFO("node hash is:%s", el->GetHash());
 		}
 	}
+
+
 }
 	
