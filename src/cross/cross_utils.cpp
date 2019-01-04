@@ -469,6 +469,24 @@ namespace bumo {
 		}
 	}
 
+	void MerkleTree::AuditProof(const std::string &leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail){
+
+	}
+
+	bool MerkleTree::VerifyAudit(const std::string &root_hash, const std::string& leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail){
+		if (audit_trail.size() < 0){
+			return false;
+		}
+		std::string test_hash = leaf_hash;
+
+		// TODO: Inefficient - compute hashes directly.
+		for (auto iter = audit_trail.begin(); iter != audit_trail.end(); iter++){
+			test_hash = iter->direction() == protocol::MERKEL_BRANCH_TYPE::LEFT ?
+				HashMerkleBranches(test_hash, iter->hash()) : HashMerkleBranches(iter->hash(), test_hash);
+		}
+		return root_hash == test_hash;
+	}
+
 
 
 }
