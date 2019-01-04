@@ -310,7 +310,7 @@ namespace bumo {
 	}
 
 	void MerkleNode::SetHash(const std::string &leaf_hash){
-		hash_ = leaf_hash;
+		hash_ = utils::String::BinToHexString(HashWrapper::Crypto(leaf_hash)).c_str();
 	}
 
 	MerkleNode::~MerkleNode(){}
