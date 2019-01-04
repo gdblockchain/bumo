@@ -296,6 +296,7 @@ namespace bumo {
 		parent_ = parent;
 	}
 
+
 	string MerkleNode::GetHash(){
 		return hash_;
 	}
@@ -428,12 +429,17 @@ namespace bumo {
 		do{
 			// the hash of the parent node is the hash string of the left child + the hash string of the right child
 			// if the left node of the parent of el_node is el_node
-			if (el_node->CheckDir() == 0){
+			// gets the parent node of the node
+			MerkleNodePointer parent = el_node->GetParent();
+			int64_t flag = parent->GetChildrenLeft() == el_node ? 0 : 1;
+			MerkleNodePointer sibling = parent->GetChildrenLeft() == el_node ? parent->GetChildrenRight() : parent->GetChildrenLeft();
+
+			if (flag == 0){
 				// is the hash string for the left child + the hash string for the right child
-				act_hash = HashMerkleBranches(act_hash, el_node->GetSibling()->GetHash());
+				act_hash = HashMerkleBranches(act_hash, sibling->GetHash());
 			}
 			else{
-				act_hash = HashMerkleBranches(el_node->GetSibling()->GetHash(), act_hash);
+				act_hash = HashMerkleBranches(sibling->GetHash(), act_hash);
 			}
 
 			LOG_INFO("Hash verify: %s", act_hash.c_str());

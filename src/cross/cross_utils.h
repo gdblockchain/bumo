@@ -143,7 +143,6 @@ namespace bumo {
 		void AuditProof(const std::string &leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail);
 		bool VerifyAudit(const std::string &root_hash, const std::string& leaf_hash, std::vector<protocol::MerkelProofHash> &audit_trail);
 		string HashMerkleBranches(const std::string &left, const std::string &right);
-
 		void TestMerkleTree();
 
 	private:
