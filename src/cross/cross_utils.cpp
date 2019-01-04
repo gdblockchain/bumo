@@ -342,7 +342,7 @@ namespace bumo {
 				MakeBinary(base_nodes_.end()[-1]); //Incoming tail element is a list of nodes
 
 				for (size_t i = 0; i < base_nodes_.end()[-1].size(); i += 2){
-					MerkleNodePointer new_parent = MerkleNodePointer();
+					MerkleNodePointer new_parent = std::make_shared<MerkleNode>();
 					//Set the parent node.Pass in the last element, ie the i and i + 1 of a node list.
 					base_nodes_.end()[-1][i]->SetParent(new_parent);
 					base_nodes_.end()[-1][i + 1]->SetParent(new_parent);
@@ -374,7 +374,7 @@ namespace bumo {
 		std::vector<MerkleNodePointer> new_nodes;
 		// creates a node for each string and sets the hash value through this string
 		for (auto leaf : base_leafs){
-			MerkleNodePointer new_node = MerkleNodePointer();
+			MerkleNodePointer new_node = std::make_shared<MerkleNode>();
 			new_node->SetHash(leaf);
 			new_nodes.push_back(new_node);
 		}
