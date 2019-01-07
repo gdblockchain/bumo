@@ -90,7 +90,7 @@ namespace bumo {
 		void SendingAll();
 		TransTaskResult SendingSingle(const std::vector<std::string> &paras, const std::string &dest);
 
-		TransactionFrm::pointer BuildTransaction(const std::string &private_key, const std::string &dest, const std::vector<std::string> &paras, int64_t nonce);
+		TransactionFrm::pointer BuildTransaction(const std::string &private_key, const std::string &dest, const std::vector<std::string> &paras, int64_t nonce,int64_t &fee);
 		int32_t SendTransaction(TransactionFrm::pointer tran_ptr);
 
 		bool enabled_;

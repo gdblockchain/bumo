@@ -181,9 +181,9 @@ namespace bumo {
 
 	TransTaskResult TransactionSender::SendingSingle(const std::vector<std::string> &paras, const std::string &dest){
 		int32_t err_code = 0;
-
+		int64_t fee = 0;
 		for (int i = 0; i <= MAX_SEND_TRANSACTION_TIMES; i++){
-			TransactionFrm::pointer trans = BuildTransaction(private_key_, dest, paras, cur_nonce_);
+			TransactionFrm::pointer trans = BuildTransaction(private_key_, dest, paras, cur_nonce_, fee);
 			if (nullptr == trans){
 				LOG_ERROR("Trans pointer is null");
 				continue;
@@ -202,6 +202,10 @@ namespace bumo {
 													cur_nonce_++;
 													continue;
 			}
+			case protocol::ERRCODE_TX_INSERT_QUEUE_FAIL:{
+													fee = fee + fee*0.2;
+													continue;
+			}
 			default:{
 						LOG_ERROR("Send transaction erro code:%d", err_code);
 						continue;
@@ -215,7 +219,7 @@ namespace bumo {
 		return task_result;
 	}
 
-	TransactionFrm::pointer TransactionSender::BuildTransaction(const std::string &private_key, const std::string &dest, const std::vector<std::string> &paras, int64_t nonce){
+	TransactionFrm::pointer TransactionSender::BuildTransaction(const std::string &private_key, const std::string &dest, const std::vector<std::string> &paras, int64_t nonce, int64_t &fee){
 		PrivateKey pkey(private_key);
 		if (!pkey.IsValid()){
 			LOG_ERROR("Private key is not valid");
@@ -247,7 +251,8 @@ namespace bumo {
 			return nullptr;
 		}
 		fee_limit = fee_limit * 5;
-		tran->set_fee_limit(fee_limit);
+		fee = fee > fee_limit ? fee : fee_limit;
+		tran->set_fee_limit(fee);
 
 		std::string content = tran->SerializeAsString();
 		std::string sign = pkey.Sign(content);
