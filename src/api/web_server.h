@@ -22,6 +22,7 @@ limitations under the License.
 #include <utils/singleton.h>
 #include <utils/net.h>
 #include <main/configure.h>
+#include <ledger/account.h>
 
 namespace bumo {
 
@@ -45,6 +46,7 @@ namespace bumo {
 		void GetAccount(const http::server::request &request, std::string &reply);
 		void GetGenesisAccount(const http::server::request &request, std::string &reply);
 		void GetAccountMetaData(const http::server::request &request, std::string &reply);
+		void GetSystemAccountMetaData(const http::server::request &request, std::string &reply);
 		void GetAccountAssets(const http::server::request &request, std::string &reply);
 
 		void Debug(const http::server::request &request, std::string &reply);
@@ -85,6 +87,12 @@ namespace bumo {
 		bool Exit();
 		void GetModuleStatus(Json::Value &data);
 		uint16_t GetListenPort();
+		void UpdateSystemAccount();
+
+		typedef std::map<std::string, AccountFrm::pointer> SystemAccountMap;
+		utils::Mutex account_map_lock_;
+		SystemAccountMap account_map_;
+		int64_t last_update_account_time_;
 	};
 }
 
