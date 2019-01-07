@@ -24,6 +24,11 @@ function payAssetValid(asset){
     assert(x && y && z, 'Insufficient ATP( issuer:' + asset.issuer + ', code:' + asset.code + ' ) paid.');
 }
 
+function payCTP(issuer, from, to, value){
+    let args = { 'method':'transferFrom', 'params':{ 'from':from, 'to':to, 'value':value}};
+    payCoin(issuer, 0, args);
+}
+
 function makeOrder(own, target, fee, expiration){
     assert(blockTimestamp < expiration, 'Order date has expired.'); /*Need add time built-in interfacce*/
     //assert(stoI64Check(own.value) && stoI64Check(target.value), 'Target value must be alphanumeric.');
@@ -49,6 +54,25 @@ function makeOrder(own, target, fee, expiration){
     storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
+function cancelOrder(key){
+    let orderStr = storageLoad(key);
+    assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
+    let order = JSON.parse(orderStr);
+
+    if(order.own.issuer === undefined){ /* BU */
+        payCoin(order.maker, int64Add(order.own.value, order.fee));
+    }
+    else if(order.own.code === undefined){ /* CTP */
+        payCTP(order.own.issuer, thisAddress, order.maker, order.own.value);
+    
+    }
+    else{ /* ATP */
+        payAsset(order.maker, order.own.issuer, order.own.code, order.own.value);
+    }
+
+    storageDel(orderKey);
+}
+
 /**
  * key  :order_n
  * value:{
@@ -66,19 +90,13 @@ function makeOrder(own, target, fee, expiration){
  * }
 **/
 
-function payCTP(issuer, from, to, value){
-    let args = { 'method':'transferFrom', 'params':{ 'from':from, 'to':to, 'value':value}};
-    payCoin(issuer, 0, args);
-}
-
 function takeOrder(orderKey, fee){
     let orderStr = storageLoad(orderKey);
     assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
     let order = JSON.parse(orderStr);
 
     if(blockTimestamp > order.expiration){
-        storageDel(orderKey);
-        return;
+        return cancelOrder(orderKey);
     }
 
     let bilateralFee = 0;
