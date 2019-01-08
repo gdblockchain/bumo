@@ -2179,13 +2179,13 @@ class MessageChannelHello : public ::google::protobuf::Message /* @@protoc_inser
   ::google::protobuf::int64 chain_id() const;
   void set_chain_id(::google::protobuf::int64 value);
 
-  // optional string round_string = 4;
+  // optional bytes round_string = 4;
   void clear_round_string();
   static const int kRoundStringFieldNumber = 4;
   const ::std::string& round_string() const;
   void set_round_string(const ::std::string& value);
   void set_round_string(const char* value);
-  void set_round_string(const char* value, size_t size);
+  void set_round_string(const void* value, size_t size);
   ::std::string* mutable_round_string();
   ::std::string* release_round_string();
   void set_allocated_round_string(::std::string* round_string);
@@ -6209,7 +6209,7 @@ inline void MessageChannelHello::set_chain_id(::google::protobuf::int64 value) {
   // @@protoc_insertion_point(field_set:protocol.MessageChannelHello.chain_id)
 }
 
-// optional string round_string = 4;
+// optional bytes round_string = 4;
 inline void MessageChannelHello::clear_round_string() {
   round_string_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -6227,7 +6227,7 @@ inline void MessageChannelHello::set_round_string(const char* value) {
   round_string_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:protocol.MessageChannelHello.round_string)
 }
-inline void MessageChannelHello::set_round_string(const char* value, size_t size) {
+inline void MessageChannelHello::set_round_string(const void* value, size_t size) {
   
   round_string_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));

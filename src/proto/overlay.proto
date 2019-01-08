@@ -215,7 +215,7 @@ message MessageChannelHello {
     int64 network_id = 1;
     string node_address = 2;
     int64 chain_id = 3;
-	string round_string = 4;
+	bytes round_string = 4;
 }
 
 message MessageChannelHelloResponse {

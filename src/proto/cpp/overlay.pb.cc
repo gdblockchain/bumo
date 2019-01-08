@@ -1086,7 +1086,7 @@ void protobuf_AddDesc_overlay_2eproto() {
     "sageChannelQueryDeposit\022\020\n\010chain_id\030\001 \001("
     "\003\022\013\n\003seq\030\002 \001(\003\"g\n\023MessageChannelHello\022\022\n"
     "\nnetwork_id\030\001 \001(\003\022\024\n\014node_address\030\002 \001(\t\022"
-    "\020\n\010chain_id\030\003 \001(\003\022\024\n\014round_string\030\004 \001(\t\""
+    "\020\n\010chain_id\030\003 \001(\003\022\024\n\014round_string\030\004 \001(\014\""
     "\210\001\n\033MessageChannelHelloResponse\022\'\n\nerror"
     "_code\030\001 \001(\0162\023.protocol.ERRORCODE\022\022\n\nerro"
     "r_desc\030\002 \001(\t\022,\n\017round_signature\030\003 \001(\0132\023."
@@ -8579,16 +8579,12 @@ bool MessageChannelHello::MergePartialFromCodedStream(
         break;
       }
 
-      // optional string round_string = 4;
+      // optional bytes round_string = 4;
       case 4: {
         if (tag == 34) {
          parse_round_string:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+          DO_(::google::protobuf::internal::WireFormatLite::ReadBytes(
                 input, this->mutable_round_string()));
-          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-            this->round_string().data(), this->round_string().length(),
-            ::google::protobuf::internal::WireFormatLite::PARSE,
-            "protocol.MessageChannelHello.round_string"));
         } else {
           goto handle_unusual;
         }
@@ -8640,13 +8636,9 @@ void MessageChannelHello::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->chain_id(), output);
   }
 
-  // optional string round_string = 4;
+  // optional bytes round_string = 4;
   if (this->round_string().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->round_string().data(), this->round_string().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "protocol.MessageChannelHello.round_string");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
+    ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
       4, this->round_string(), output);
   }
 
@@ -8677,14 +8669,10 @@ void MessageChannelHello::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->chain_id(), target);
   }
 
-  // optional string round_string = 4;
+  // optional bytes round_string = 4;
   if (this->round_string().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->round_string().data(), this->round_string().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "protocol.MessageChannelHello.round_string");
     target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+      ::google::protobuf::internal::WireFormatLite::WriteBytesToArray(
         4, this->round_string(), target);
   }
 
@@ -8717,10 +8705,10 @@ int MessageChannelHello::ByteSize() const {
         this->chain_id());
   }
 
-  // optional string round_string = 4;
+  // optional bytes round_string = 4;
   if (this->round_string().size() > 0) {
     total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
+      ::google::protobuf::internal::WireFormatLite::BytesSize(
         this->round_string());
   }
 
@@ -8883,7 +8871,7 @@ void MessageChannelHello::clear_chain_id() {
   // @@protoc_insertion_point(field_set:protocol.MessageChannelHello.chain_id)
 }
 
-// optional string round_string = 4;
+// optional bytes round_string = 4;
 void MessageChannelHello::clear_round_string() {
   round_string_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
@@ -8901,7 +8889,7 @@ void MessageChannelHello::clear_round_string() {
   round_string_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
   // @@protoc_insertion_point(field_set_char:protocol.MessageChannelHello.round_string)
 }
- void MessageChannelHello::set_round_string(const char* value, size_t size) {
+ void MessageChannelHello::set_round_string(const void* value, size_t size) {
   
   round_string_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
       ::std::string(reinterpret_cast<const char*>(value), size));
