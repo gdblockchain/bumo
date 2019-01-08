@@ -203,7 +203,7 @@ namespace bumo {
 													continue;
 			}
 			case protocol::ERRCODE_TX_INSERT_QUEUE_FAIL:{
-													fee = fee + fee*0.2;
+													cur_nonce_++;
 													continue;
 			}
 			default:{
