@@ -2,7 +2,22 @@
 
 
 
-[TOC]
+- [Bumo ATP 10 协议 ](#bumo-atp-10-协议)
+  - [简介](#简介)
+  - [目标](#目标)
+  - [Token 属性](#token-属性)
+  - [功能函数](#功能函数)
+    - [transfer](#transfer)
+    - [approve](#approve)
+    - [transferFrom](#transferfrom)
+    - [tokenInfo](#tokeninfo)
+    - [allowance](#allowance)
+  - [合约入口](#合约入口)
+    - [init](#init)
+    - [main](#main)
+    - [query](#query)
+
+# 
 
 
 
@@ -15,12 +30,16 @@ ATP 10(Account based Tokenization Protocol) 指基于 BuChain的账号结构对�
 **增发Token**：账户继续在原Token代码上发行一定数量的Token，执行成功后账户的Token余额会增加。  
 **查询Token**：查询源账户的Token信息。
 
+
+
 ## 目标
 
 标准协议可以让其它应用程序方便地调用接口在 BUMO 上进行Token的发行、转移和增发操作。
 
 
-## Token属性参数
+
+
+## Token 属性
 发行的Token需要通过设置Token源账户的metadata来记录Token的相关属性。用于应用程序方便去管理和查询Token数据信息。  
 
 | 变量        | 描述                    |

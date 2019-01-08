@@ -2,7 +2,25 @@
 
 
 
-[TOC]
+[Bumo CTP 10 Token 标准](#bumo-ctp-10-协议)
+
+- [简介](#简介)
+- [目标](#目标)
+- [规则](#规则)
+- [Token 属性](#token-属性)
+- [事件](#事件)
+- [功能函数](#功能函数)
+  - [transfer](#transfer)
+  - [approve](#approve)
+  - [transferFrom](#transferfrom)
+  - [tokenInfo](#tokeninfo)
+  - [allowance](#allowance)
+- [合约入口](#合约入口)
+  - [init](#init)
+  - [main](#main)
+  - [query](#query)
+
+
 
 ## 简介
 

@@ -1,8 +1,35 @@
-# BUMO ATP 10 协议
+# BUMO ATP 30 协议
 
 
 
-[TOC]
+[Bumo ATP 30 Token 标准](#bumo-atp-30-协议)
+
+- [简介](#简介)
+
+- [标准](#标准)
+
+  - [NTF ID](#ntf-id)
+
+- [事件](#事件)
+
+- [功能函数](#功能函数)
+
+  - [totalSupply](#totalsupply)
+  - [balanceOf](#balanceof)
+  - [ownerOf](#ownerof)
+  - [approve](#approve)
+  - [transfer](#transfer)
+  - [transferFrom](#transferfrom)
+  - [tokensOfOwner](#tokensofowner)
+  - [tokenInfo](#tokeninfo)
+  - [name](#name)
+  - [symbol](#symbol)
+
+- [合约入口](#合约入口)
+
+  - [init](#init)
+  - [main](#main)
+  - [query](#query)
 
 
 
