@@ -37,11 +37,13 @@ class data_info:
     amount = 0
     address = ''
     block_seq = 0
-    def __init__(self,chain_id,address='',amount=0,seq=0):
+    seq = 0
+    def __init__(self,chain_id,address='',amount=0,block_seq=0,seq=0):
         self.chain_id = chain_id
         self.amount = amount
         self.address = address
-        self.block_seq = seq
+        self.block_seq = block_seq
+        self.seq = seq
 
 def usage():
     u = '''
@@ -110,18 +112,22 @@ def listCommands():
     print "Commands as follow:\n%s" % commands
 
 def req(module, payload, post=False,dest_url = None):
-    if not dest_url:
-        dest_url = base_url
-    if post:
-        r = requests.post(dest_url + module, data=json.dumps(payload))
-    else:
-        r = requests.get(dest_url + module, params=payload)
-        
-    # print json.dumps(r.json(), indent=4)
-    if r.ok:
-        return r.json() 
-    else:
-        return None 
+    try:
+        if not dest_url:
+            dest_url = base_url
+        if post:
+            r = requests.post(dest_url + module, data=json.dumps(payload))
+        else:
+            r = requests.get(dest_url + module, params=payload)
+            
+        # print json.dumps(r.json(), indent=4)
+        if r.ok:
+            return r.json() 
+        else:
+            return None 
+    except Exception,e:
+        print str(e)
+        return None
 
 def newNonce(acc):
     ''' Get nonce value '''
@@ -313,8 +319,8 @@ def addPayload(payload, op_type, acc_list, src_acc = {}, nonce = 1, amount = 0, 
                     "type": 7,
                     "pay_coin": {
                     "dest_address" : CONTRACT_CMC_ADDRESS,
-                    "input":"{ \"method\":\"withdrawalChildChain\",\"params\":{\"chain_id\":%d,\"amount\": \"%d\",\"block_seq\": \"%d\","\
-                    "\"source_address\": \"%s\",\"address\": \"%s\",\"block_hash\": \"11ab\",\"merkel_proof\": \"64ebb\"}}"  % (args.chain_id,args.amount,args.block_seq,acc,acc),
+                    "input":"{ \"method\":\"withdrawalChildChain\",\"params\":{\"chain_id\":%d,\"amount\": \"%d\",\"block_seq\": \"%d\",\"seq\": \"%d\","\
+                    "\"source_address\": \"%s\",\"address\": \"%s\",\"block_hash\": \"11ab\",\"merkel_proof\": \"64ebb\"}}"  % (args.chain_id,args.amount,args.block_seq,args.seq,acc,acc),
                     "amount" : amount
                     }
                   })
@@ -474,6 +480,8 @@ def sendRequest(payload,url=None):
             p['items'].append(payload['items'][i])
     if len(p['items']) > 0:
         res = req('submitTransaction', p, post=True,dest_url=url)
+        if not res:
+            return 0
         with open('./test.log', 'a') as f:
             f.write(json.dumps(res, indent=4))
         err_list = []
@@ -825,11 +833,12 @@ def PayCoin2LocalAccount():
     acc_list = [json.loads(acc)['address'] for acc in getSpan(lines, 0, 10)]
     nonce = newNonce(genesis_account)
 
-    addPayload(payload, 'pay_coin', acc_list, {}, nonce, amount=10000000)
+    addPayload(payload, 'pay_coin', acc_list, {}, nonce, amount=20000000000000)
     success_count = sendRequest(payload)
     return
 
 def test_deposit_withdrawal(chain_id):
+
     global chainID
     chainID = chain_id
     lines = []
@@ -895,10 +904,12 @@ def deposit(chainId,src_info):
         deposit_data['address'] = addr
         deposit_data['nonce'] = newNonce(addr)
         deposit_data['chain_info'] = [{'chain_id':chainId,'amount':m}]
-        deposit_list.append(deposit_data)
+        #deposit_list.append(deposit_data)
         nonce = deposit_data['nonce']
         
-
+    if deposit_data['nonce'] == 0:
+        print 'nonce is 0 return'
+        return
     deposit_info = data_info(chainId, amount=m)
     addPayload(payload, 'deposit', acc_list, src_info, nonce, amount=m,args=deposit_info)
     success_count = sendRequest(payload)
@@ -924,6 +935,9 @@ def withdrawal():
     deposit_msg = recently_deposit['result']['query_rets'][0]['result']['value']
     #deposit_msg.replace("\\","")
     recently_deposit_msg = json.loads(deposit_msg)
+    if not recently_deposit_msg.has_key('deposit_data'):
+        print recently_deposit_msg
+        return
     deposit_address = recently_deposit_msg['deposit_data']['address']
     if already_withdrawal_list.has_key(deposit_address) and already_withdrawal_list[deposit_address] >= int(recently_deposit_msg['index']):
         return
@@ -944,7 +958,9 @@ def withdrawal():
     #m = random.randint(0, deposit_len)
     nonce = newNonce(deposit_address)
     #n = random.randint(0, len(deposit_list[m]['chain_info']))
-
+    if nonce == 0:
+        print 'withdrawal nonce is 0 return'
+        return
     withdrawal_info = data_info(chainID, amount=100+nonce%100)
     addPayload(payload, 'withdrawal', acc_list, src_info, nonce, amount=0,args=withdrawal_info)
     success_count = sendRequest(payload)
@@ -959,13 +975,23 @@ def withdrawal_client():
         numOpPerTx: number of accounts to create per transaction
     '''
     contract_address = CONTRACT_CPC_ADDRESS
-    #input_str = "{\"method\":\"queryChildWithdrawal\",\"params\":{\"chain_id\":\"1\",\"seq\":\"\"}}"
-    input_str = "{\"method\":\"queryChildWithdrawal\"}"
+    #
+    #input_str = "{\"method\":\"queryChildWithdrawal\"}"
     #url = 'http://127.0.0.1:'
-    urls = ['http://192.168.10.120:36002/','http://192.168.10.110:36002/','http://192.168.10.130:36002/']
+    urls = ['http://127.0.0.1:36102/','http://127.0.0.1:36202/','http://127.0.0.1:36302/']
     global already_withdrawal_list
     for i in range(len(urls)):
+        child_seq = 1
+        main_witndrawal_str = "{\"method\":\"queryChildWithdrawal\",\"params\":{\"chain_id\":\"%s\",\"seq\":\"\"}}" % bytes(i+1)
+        main_withdrawal_ret = callContract_fun(CONTRACT_CMC_ADDRESS,main_witndrawal_str)
+        if not main_withdrawal_ret  :
+            continue
+        if not main_withdrawal_ret['result']['query_rets'][0].has_key('error'):
+            main_withdrawal_ret_json = json.loads(main_withdrawal_ret['result']['query_rets'][0]['result']['value'])
+            child_seq = int(main_withdrawal_ret_json['seq']) + 1
         child_url = urls[i]
+        
+        input_str = "{\"method\":\"queryChildWithdrawal\",\"params\":{\"seq\":\"%d\"}}" % child_seq
         recently_withdrawal_ret = callContract_fun(contract_address,input_str,child_url)
         if not recently_withdrawal_ret or recently_withdrawal_ret['result']['query_rets'][0].has_key('error') :
             continue
@@ -994,8 +1020,11 @@ def withdrawal_client():
         
         nonce = newNonce(withdrawal_address)
 
+        if nonce == 0:
+            print 'withdrawal_client nonce is 0 return'
+            return
 
-        withdrawal_info = data_info(int(recently_withdrawal['chain_id']),"", int(recently_withdrawal['amount']),int(recently_withdrawal['block_seq']))
+        withdrawal_info = data_info(int(recently_withdrawal['chain_id']),"", int(recently_withdrawal['amount']),int(recently_withdrawal['block_seq']),int(recently_withdrawal['seq']))
         addPayload(payload, 'withdrawal_client', acc_list, src_info, nonce, amount=0,args=withdrawal_info)
         
         success_count = sendRequest(payload)
