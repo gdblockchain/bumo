@@ -36,7 +36,7 @@ function payCTP(issuer, from, to, value){
     payCoin(issuer, 0, args);
 }
 
-function revocation(order){
+function revocation(key, order){
     if(order.own.issuer === undefined){ /* BU */
         payCoin(order.maker, int64Add(order.own.value, order.fee));
     }
@@ -47,7 +47,7 @@ function revocation(order){
         payAsset(order.maker, order.own.issuer, order.own.code, order.own.value);
     }
 
-    storageDel(orderKey);
+    storageDel(key);
 }
 
 function makeOrder(own, target, fee, expiration){
@@ -77,10 +77,127 @@ function makeOrder(own, target, fee, expiration){
 
 function cancelOrder(key){
     let orderStr = storageLoad(key);
-    assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
+    assert(orderStr !== false, 'Order: ' + key + ' does not exist');
 
     let order = JSON.parse(orderStr);
-    revocation(order);
+    revocation(key, order);
+}
+
+function changeOrder(key, order, makerValue, takerValue, realFee){
+    order.fee = int64Sub(order.fee, realFee);
+    order.own.value = int64Sub(order.own.value, makerValue);
+    order.target.value = int64Sub(order.target.value, takerValue);
+
+    storageStore(key, stringify(order));
+}
+
+function asset2bu(key, order, takerFee){ 
+    assert(feeValid(takerFee), 'Invalid fee.');
+
+    let total      = int64Add(order.target.value, takerFee);
+    let com        = int64Compare(thisPayCoinAmount, total);
+    let makerValue = order.own.value;
+    if(com === -1){ /* partially take */
+        let takerValue = int64Sub(thisPayCoinAmount, takerFee);
+        makerValue     = int64Div(int64Mul(order.own.value, takerValue), order.target.value));
+        changeOrder(key, order, makerValue, takerValue, takerFee);
+    }
+    else{
+        storageDel(key);
+    } 
+
+    if(order.own.code === undefined){ /*CTP*/
+        payCTP(order.own.issuer, order.maker, sender, makerValue);
+    }
+    else{ /*ATP*/
+        payAsset(sender, order.own.issuer, order.own.code, makerValue);
+    }
+
+    let bilateralFee = int64Add(takerFee, takerFee);
+    payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
+    if(com === 1){ /* Return the excess*/
+        payCoin(sender, int64Sub(thisPayCoinAmount, total); 
+    }
+
+    return bilateralFee;
+}
+
+function bu2ctp(key, order){
+    let fee = 0;
+    let ctpValue = ctpAllownce(order.target.issuer);
+    let check    = int64Compare(ctpValue, order.target.value);
+
+    if(check === 0 || check === 1){
+        fee = order.fee;
+        payCoin(sender, int64Sub(order.own.value, fee));
+        storageDel(key);
+    }
+    else{
+        let buValue = int64Div(int64Mul(order.own.value, ctpValue), order.target.value));
+        let fee     = int64Div(int64Mul(order.fee, ctpValue), order.target.value);
+
+        changeOrder(key, order, buValue, ctpValue, fee);
+        payCoin(sender, int64Sub(buValue, fee));
+    }
+
+    payCTP(order.target.issuer, sender, order.maker, ctpValue);
+    return int64Add(fee, fee);
+}
+
+function bu2atp(key, order){
+    let com = checkPayAsset(order.target);
+
+    if(com === 0 || com === 1){
+        fee = order.fee.
+        payCoin(sender, int64Sub(order.own.value, fee));
+        storageDel(key);
+    }
+    else{
+        let buValue = int64Div(int64Mul(order.own.value, thisPayAsset.amount), order.target.value));
+        let fee     = int64Div(int64Mul(order.fee, thisPayAsset.amount), order.target.value);
+
+        payCoin(sender, int64Sub(buValue, fee));
+        changeOrder(key, order, buValue, thisPayAsset.amount, fee);
+    }
+
+    payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
+    return int64Add(fee, fee);
+}
+
+function takeOrder(key, fee){
+    let orderStr = storageLoad(key);
+    assert(orderStr !== false, 'Order: ' + key + ' does not exist');
+    let order = JSON.parse(orderStr);
+
+    if(blockTimestamp > order.expiration){
+        return revocation(order);
+    }
+
+    let bilateralFee = 0;
+    if(order.target.issuer === undefined){
+        bilateralFee = asset2bu(key, order, fee);
+    }
+    else if(order.target.code === undefined){
+        bilateralFee = bu2ctp(key, order);
+    }
+    else{
+        bilateralFee = bu2atp(key, order);
+    }
+
+    globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
+}
+
+function init(input_str){
+    let params = JSON.parse(input_str).params;
+    
+    globalAttribute.owner = params.owner || sender;
+    globalAttribute.feeRate = params.feeRate || 50000;
+    globalAttribute.version = params.version || '1.0';
+    globalAttribute.serviceFee = 0;
+    globalAttribute.orderInterval = [0, 0];
+
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 /**
@@ -99,127 +216,6 @@ function cancelOrder(key){
  *    'expiration':'2018...'
  * }
 **/
-
-function asset2bu(order, takerFee){ 
-    assert(feeValid(takerFee), 'Invalid fee.');
-
-    let bilateralFee = int64Add(takerFee, takerFee);
-
-    let total = int64Add(order.target.value, takerFee);
-    let com   = int64Compare(thisPayCoinAmount, total);
-    if(com === 0 || com === 1){ /*full take*/
-        payCoin(order.maker, int64Sub(order.target.value, takerFee));
-        if(com === 1){ /* Return the excess*/
-            payCoin(sender, int64Sub(thisPayCoinAmount, total); 
-        }
-
-        if(order.own.code === undefined){ /*maker is CTP*/
-            payCTP(order.own.issuer, order.maker, sender, order.own.value);
-        }
-        else{ /*maker is ATP*/
-            payAsset(sender, order.own.issuer, order.own.code, order.own.value);
-        }
-
-        storageDel(orderKey);
-    } 
-    else if(com === -1){ /* partial take */
-        let takerValue = int64Sub(thisPayCoinAmount, takerFee);
-        payCoin(order.maker, int64Sub(takerValue, takerFee));
-
-        let makerValue = int64Div(int64Mul(order.own.value, takerValue), order.target.value));
-        if(order.own.code === undefined){ /*maker is CTP*/
-            payCTP(order.own.issuer, order.maker, sender, makerValue);
-        }
-        else{ /*maker is ATP*/
-            payAsset(sender, order.own.issuer, order.own.code, makerValue);
-        }
-
-        order.fee = int64Sub(order.fee, takerFee);
-        order.own.value = int64Sub(order.own.value, makerValue);
-        order.target.value = int64Sub(order.target.value, takerValue);
-        storageStore(orderKey, stringify(order));
-    }
-
-    return bilateralFee;
-}
-
-function bu2ctp(order){
-    let fee = 0;
-    let ctpValue = ctpAllownce(order.target.issuer);
-    let check    = int64Compare(ctpValue, order.target.value);
-
-    if(check === 0 || check === 1){
-        payCoin(sender, int64Sub(order.own.value, order.fee));
-        storageDel(orderKey);
-
-        fee = order.fee;
-    }
-    else{
-        let buValue = int64Div(int64Mul(order.own.value, ctpValue), order.target.value));
-        let fee     = int64Div(int64Mul(order.fee, ctpValue), order.target.value);
-
-        payCoin(sender, int64Sub(buValue, fee));
-    }
-
-    payCTP(order.target.issuer, sender, order.maker, ctpValue);
-    return int64Add(fee, fee);
-}
-
-function bu2atp(order){
-    let com = checkPayAsset(order.target);
-
-    if(com === 0 || com === 1){
-        payCoin(sender, int64Sub(order.own.value, order.fee));
-        storageDel(orderKey);
-
-        fee = order.fee.
-    }
-    else{
-        let buValue = int64Div(int64Mul(order.own.value, thisPayAsset.amount), order.target.value));
-        let fee     = int64Div(int64Mul(order.fee, thisPayAsset.amount), order.target.value);
-
-        payCoin(sender, int64Sub(buValue, fee));
-    }
-
-    payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
-    return int64Add(fee, fee);
-}
-
-function takeOrder(orderKey, fee){
-    let orderStr = storageLoad(orderKey);
-    assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
-    let order = JSON.parse(orderStr);
-
-    if(blockTimestamp > order.expiration){
-        return revocation(order);
-    }
-
-    let bilateralFee = 0;
-    if(order.target.issuer === undefined){
-        bilateralFee = asset2bu(order, fee);
-    }
-    else if(order.target.code === undefined){ /*taker is CTP*/
-        bilateralFee = bu2ctp(order);
-    }
-    else{
-        bilateralFee = bu2atp(order);
-    }
-
-    globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
-    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
-}
-
-function init(input_str){
-    let params = JSON.parse(input_str).params;
-    
-    globalAttribute.owner = params.owner || sender;
-    globalAttribute.feeRate = params.feeRate || 50000;
-    globalAttribute.version = params.version || '1.0';
-    globalAttribute.serviceFee = 0;
-    globalAttribute.orderInterval = [0, 0];
-
-    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
-}
 
 function main(input_str){
     let input = JSON.parse(input_str);
