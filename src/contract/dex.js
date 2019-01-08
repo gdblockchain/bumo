@@ -102,47 +102,48 @@ function partlyTakeOrder(orderKey, fee){
 
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
-        if(int64Add(order.target.value, fee) === thisPayCoinAmount){ /*full take*/
+        feeValid(fee);
+        bilateralFee = int64Add(fee, fee);
 
-        } 
-        else{
-            let rate = int64Add(1BU, globalAttribute.feeRate);
-            let realTakeValue = int64Mul(int64Div(thisPayCoinAmount, rate), 1BU);
-            let realFee = int64Sub(thisPayCoinAmount, txAmount);
+        let total = int64Add(order.target.value, fee);
+        let com   = int64Compare(total, thisPayCoinAmount);
+        if(com === 0 || com === 1){ /*full take*/
+            payCoin(order.maker, int64Sub(order.target.value, fee));
+            if(com === 1){ /* Return the excess*/
+                payCoin(sender, int64Sub(thisPayCoinAmount, total); 
+            }
 
-            bilateralFee = int64Add(realFee, realFee);
-            payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
-
-            let realMakeValue = int64Mul(order.own.value, int64Div(realTakeValue, order.target.value));
             if(order.own.code === undefined){ /*maker is CTP*/
-                payCTP(order.own.issuer, order.maker, sender, realMakeValue);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' +  realMakeValue), sender, realTakeValue);
+                payCTP(order.own.issuer, order.maker, sender, order.own.value);
+                tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
             }
             else{ /*maker is ATP*/
-                payAsset(sender, order.own.issuer, order.own.code, realMakeValue);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + realMakeValue), sender, realTakeValue);
+                payAsset(sender, order.own.issuer, order.own.code, order.own.value);
+                tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + order.own.value), sender, order.target.value);
+            }
+        } 
+        else if(com === -1){ /* partial take */
+            payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
+
+            let partMake = int64Div(int64Mul(order.own.value, realTake), order.target.value));
+            if(order.own.code === undefined){ /*maker is CTP*/
+                payCTP(order.own.issuer, order.maker, sender, partMake);
+                tlog(orderKey, order.maker, (order.own.issuer + ':' +  partMake), sender, realTake);
+            }
+            else{ /*maker is ATP*/
+                payAsset(sender, order.own.issuer, order.own.code, partMake);
+                tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + partMake), sender, realTake);
             }
 
-            order.own.value = int64Sub(order.own.value, realMakeValue);
-            order.target.value = int64Sub(order.target.value, realTakeValue);
+            order.fee = int64Sub(order.fee, fee);
+            order.own.value = int64Sub(order.own.value, partMake);
+            order.target.value = int64Sub(order.target.value, realTake);
             storageStore(orderKey, stringify(order));
         }
     }
 
     if(order.target.issuer === undefined){ /* taker is BU */
-        feeValid(fee);
 
-        bilateralFee = int64Add(fee, fee);
-        payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
-
-        if(order.own.code === undefined){ /*maker is CTP*/
-            payCTP(order.own.issuer, order.maker, sender, order.own.value);
-            tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
-        }
-        else{ /*maker is ATP*/
-            payAsset(sender, order.own.issuer, order.own.code, order.own.value);
-            tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + order.own.value), sender, order.target.value);
-        }
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
         ctpApproveValid(order.target.issuer, order.target.value);
