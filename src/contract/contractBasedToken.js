@@ -110,7 +110,7 @@ function init(input_str){
     globalAttribute.totalSupply = params.totalSupply;
     globalAttribute.name = params.name;
     globalAttribute.symbol = params.symbol;
-    globalAttribute.version = 'CTP10';
+    globalAttribute.version = 'ATP20';
     globalAttribute.decimals = params.decimals;
     
     storageStore(globalAttributeKey, JSON.stringify(globalAttribute));

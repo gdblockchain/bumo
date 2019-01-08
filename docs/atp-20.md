@@ -1,8 +1,8 @@
-# Bumo CTP 10 协议
+# Bumo ATP 20 协议
 
 
 
-[Bumo CTP 10 Token 标准](#bumo-ctp-10-协议)
+[Bumo ATP 20 Token 标准](#bumo-atp-20-协议)
 
 - [简介](#简介)
 - [目标](#目标)
@@ -24,7 +24,7 @@
 
 ## 简介
 
-CTP 10(Contract Token Protocol) 指基于 BUMO 智能合约发行 token 的标准协议。该协议提供了转移 token 的基本功能，并允许 token 授权给第三方使用。
+ATP 20(Contract Token Protocol) 指基于 BUMO 智能合约发行 token 的标准协议。该协议提供了转移 token 的基本功能，并允许 token 授权给第三方使用。
 
 
 
@@ -60,7 +60,7 @@ Token 属性可以通过合约的 `tokenInfo` 功能函数查询到，存储在�
 - symbol：推荐使用大写首字母缩写。如 DT
 - decimals：小数位在 0~8 的范围，0 表示无小数位
 - totalSupply：范围是 1~2^63-1
-- version：ctp 的版本。如 CTP10
+- version：atp 的版本。如 ATP20
 
 
 

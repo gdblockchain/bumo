@@ -7,7 +7,6 @@
 - [简介](#简介)
 
 - [标准](#标准)
-
   - [NTF ID](#ntf-id)
 
 - [事件](#事件)
@@ -258,7 +257,7 @@ symbol() {
 
 ```javascript
 function init(arg) {
-
+	
 }
 ```
 
@@ -268,7 +267,7 @@ function init(arg) {
 
 ```javascript
 function main(arg) {
-
+	
 }
 ```
 
@@ -278,7 +277,7 @@ function main(arg) {
 
 ```javascript
 function query(arg) {
-
+	
 }
 ```
 
