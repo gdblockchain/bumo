@@ -189,7 +189,7 @@ function bu2atp(order){
     return bilateralFee;
 }
 
-function partlyTakeOrder(orderKey, fee){
+function takeOrder(orderKey, fee){
     let orderStr = storageLoad(orderKey);
     assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
     let order = JSON.parse(orderStr);
@@ -211,55 +211,6 @@ function partlyTakeOrder(orderKey, fee){
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
     storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
-}
-
-function takeOrder(orderKey, fee){
-    let orderStr = storageLoad(orderKey);
-    assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
-    let order = JSON.parse(orderStr);
-
-    if(blockTimestamp > order.expiration){
-        return revocation(order);
-    }
-
-    let bilateralFee = 0;
-    if(order.target.issuer === undefined){ /* taker is BU */
-        assert(feeValid(fee), 'Invalid fee.');
-
-        bilateralFee = int64Add(fee, fee);
-        payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
-
-        if(order.own.code === undefined){ /*maker is CTP*/
-            payCTP(order.own.issuer, order.maker, sender, order.own.value);
-            tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
-        }
-        else{ /*maker is ATP*/
-            payAsset(sender, order.own.issuer, order.own.code, order.own.value);
-            tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + order.own.value), sender, order.target.value);
-        }
-    }
-    else if(order.target.code === undefined){ /*taker is CTP*/
-        checkCtpApprove(order.target.issuer, order.target.value);
-
-        bilateralFee = int64Add(order.own.fee, order.own.fee);
-        payCTP(order.target.issuer, sender, order.maker, order.target.value);
-        payCoin(sender, int64Sub(order.own.value, bilateralFee));
-
-        tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
-    }
-    else{ /*take is ATP*/
-        checkPayAsset(order.target);
-
-        bilateralFee = int64Add(order.own.fee, order.own.fee);
-        payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
-        payCoin(sender, int64Sub(order.own.value, bilateralFee));
-
-        tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.code + ':' + order.target.value));
-    }
-
-    globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
-    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
-    storageDel(orderKey);
 }
 
 function init(input_str){
