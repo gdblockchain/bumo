@@ -4,25 +4,27 @@ const 1BU                = 100000000;
 
 function feeValid(fee){
     let amount  = int64Sub(thisPayCoinAmount, fee);
-    let real    = int64Mul(amount, globalAttribute.feeRate) / 1BU;
-    let trunc   = int64Mul(int64Div(real, 1000), 1000);
+    let realFee = int64Mul(amount, globalAttribute.feeRate) / 1BU;
+    let trunc   = int64Mul(int64Div(realFee, 1000), 1000);
 
     let com = int64Compare(fee, trunc);
-    assert(com === 0 || com === 1, 'unqualified fee.');
+    return com === 0 || com === 1;
 }
 
 function ctpApproveValid(issuer, value){
     let arg = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
     let res = contractQuery(issuer, arg);
-    assert(value === res.allowance, 'Insufficient CTP(contract address:' + issuer + ') paid.');
+
+    return value === res.allowance;
 }
 
 function payAssetValid(asset){
     let x = asset.issuer === thisPayAsset.key.issuer;
     let y = asset.code === thisPayAsset.key.code;
-    let z = asset.value === thisPayAsset.amount;
+    assert(x && y, 'Wrong ATP( issuer:' + asset.issuer + ', code:' + asset.code + ' ) paid.');
 
-    assert(x && y && z, 'Insufficient ATP( issuer:' + asset.issuer + ', code:' + asset.code + ' ) paid.');
+    return asset.value === thisPayAsset.amount;
+
 }
 
 function payCTP(issuer, from, to, value){
@@ -115,11 +117,9 @@ function partlyTakeOrder(orderKey, fee){
 
             if(order.own.code === undefined){ /*maker is CTP*/
                 payCTP(order.own.issuer, order.maker, sender, order.own.value);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' +  order.own.value), sender, order.target.value);
             }
             else{ /*maker is ATP*/
                 payAsset(sender, order.own.issuer, order.own.code, order.own.value);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + order.own.value), sender, order.target.value);
             }
         } 
         else if(com === -1){ /* partial take */
@@ -128,11 +128,9 @@ function partlyTakeOrder(orderKey, fee){
             let partMake = int64Div(int64Mul(order.own.value, realTake), order.target.value));
             if(order.own.code === undefined){ /*maker is CTP*/
                 payCTP(order.own.issuer, order.maker, sender, partMake);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' +  partMake), sender, realTake);
             }
             else{ /*maker is ATP*/
                 payAsset(sender, order.own.issuer, order.own.code, partMake);
-                tlog(orderKey, order.maker, (order.own.issuer + ':' + order.own.code + ':' + partMake), sender, realTake);
             }
 
             order.fee = int64Sub(order.fee, fee);
@@ -141,18 +139,12 @@ function partlyTakeOrder(orderKey, fee){
             storageStore(orderKey, stringify(order));
         }
     }
-
-    if(order.target.issuer === undefined){ /* taker is BU */
-
-    }
     else if(order.target.code === undefined){ /*taker is CTP*/
         ctpApproveValid(order.target.issuer, order.target.value);
 
         bilateralFee = int64Add(order.own.fee, order.own.fee);
         payCTP(order.target.issuer, sender, order.maker, order.target.value);
         payCoin(sender, int64Sub(order.own.value, bilateralFee));
-
-        tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
     }
     else{ /*take is ATP*/
         payAssetValid(order.target);
@@ -160,8 +152,6 @@ function partlyTakeOrder(orderKey, fee){
         bilateralFee = int64Add(order.own.fee, order.own.fee);
         payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
         payCoin(sender, int64Sub(order.own.value, bilateralFee));
-
-        tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.code + ':' + order.target.value));
     }
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
