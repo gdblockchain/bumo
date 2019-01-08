@@ -4,8 +4,11 @@ const 1BU                = 100000000;
 
 function feeValid(fee){
     let amount  = int64Sub(thisPayCoinAmount, fee);
-    let realFee = int64Mul(amount, globalAttribute.feeRate) / 1BU;
-    assert(realFee === fee, 'Insufficient fee.');
+    let real    = int64Mul(amount, globalAttribute.feeRate) / 1BU;
+    let trunc   = int64Mul(int64Div(real, 1000), 1000);
+
+    let com = int64Compare(fee, trunc);
+    assert(com === 0 || com === 1, 'unqualified fee.');
 }
 
 function ctpApproveValid(issuer, value){
