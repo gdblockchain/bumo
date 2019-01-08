@@ -38,15 +38,15 @@ function makeOrder(own, target, fee, expiration){
 
     if(own.issuer === undefined){ /* BU */
         assert(addressCheck(target.issuer), 'The peer asset issuance address is invalid.');
-        feeValid(fee);
+        assert(feeValid(fee), 'Invalid fee.');
     }
     else if(own.code === undefined){ /* CTP */
         assert(target.issuer === undefined, 'Must have a party asset is BU.');
-        ctpApproveValid(own.issuer, own.value);
+        assert(ctpApproveValid(own.issuer, own.value), 'Insufficient payment of CTP(ctp address: ' + own.issuer + ', value: ' + own.value + ').');
     }
     else{ /* ATP */
         assert(target.issuer === undefined, 'Must have a party asset is BU.');
-        payAssetValid(own);
+        assert(payAssetValid(own), 'Insufficient payment of ATP(issuer: ' + own.issuer + ' code: ' + own.code + ', value: ' + own.value + ').');
     }
     
     let orderKey   = 'order_' + (globalAttribute.orderInterval[1] + 1);
@@ -104,7 +104,7 @@ function partlyTakeOrder(orderKey, fee){
 
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
-        feeValid(fee);
+        assert(feeValid(fee), 'Invalid fee.');
         bilateralFee = int64Add(fee, fee);
 
         let total = int64Add(order.target.value, fee);
@@ -170,7 +170,7 @@ function takeOrder(orderKey, fee){
 
     let bilateralFee = 0;
     if(order.target.issuer === undefined){ /* taker is BU */
-        feeValid(fee);
+        assert(feeValid(fee), 'Invalid fee.');
 
         bilateralFee = int64Add(fee, fee);
         payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
