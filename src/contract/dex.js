@@ -100,6 +100,95 @@ function cancelOrder(key){
  * }
 **/
 
+function asset2bu(order, takerFee){ 
+    assert(feeValid(takerFee), 'Invalid fee.');
+
+    let bilateralFee = int64Add(takerFee, takerFee);
+
+    let total = int64Add(order.target.value, takerFee);
+    let com   = int64Compare(thisPayCoinAmount, total);
+    if(com === 0 || com === 1){ /*full take*/
+        payCoin(order.maker, int64Sub(order.target.value, takerFee));
+        if(com === 1){ /* Return the excess*/
+            payCoin(sender, int64Sub(thisPayCoinAmount, total); 
+        }
+
+        if(order.own.code === undefined){ /*maker is CTP*/
+            payCTP(order.own.issuer, order.maker, sender, order.own.value);
+        }
+        else{ /*maker is ATP*/
+            payAsset(sender, order.own.issuer, order.own.code, order.own.value);
+        }
+
+        storageDel(orderKey);
+    } 
+    else if(com === -1){ /* partial take */
+        payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
+
+        let partMake = int64Div(int64Mul(order.own.value, realTake), order.target.value));
+        if(order.own.code === undefined){ /*maker is CTP*/
+            payCTP(order.own.issuer, order.maker, sender, partMake);
+        }
+        else{ /*maker is ATP*/
+            payAsset(sender, order.own.issuer, order.own.code, partMake);
+        }
+
+        order.fee = int64Sub(order.fee, takerFee);
+        order.own.value = int64Sub(order.own.value, partMake);
+        order.target.value = int64Sub(order.target.value, realTake);
+        storageStore(orderKey, stringify(order));
+    }
+
+    return bilateralFee;
+}
+
+function bu2ctp(order){
+    let bilateralFee = 0;
+
+    let ctpValue = ctpAllownce(order.target.issuer);
+    let check = int64Compare(ctpValue, order.target.value);
+    if(check === 0 || check === 1){
+        bilateralFee = int64Add(order.own.fee, order.own.fee);
+        payCTP(order.target.issuer, sender, order.maker, order.target.value);
+        payCoin(sender, int64Sub(order.own.value, bilateralFee));
+        storageDel(orderKey);
+    }
+    else{
+        payCTP(order.target.issuer, sender, order.maker, ctpValue);
+
+        let partBU = int64Div(int64Mul(order.own.value, ctpValue), order.target.value));
+        let realFee = int64Div(int64Mul(partBU, globalAttribute.feeRate), 1BU);
+        bilateralFee = int64Add(realFee, realFee);
+
+        payCoin(sender, int64Sub(partBU, realFee));
+    }
+
+    return bilateralFee;
+}
+
+function bu2atp(order){
+    let bilateralFee = 0;
+
+    let com = checkPayAsset(order.target);
+    if(com === 0 || com === 1){
+        bilateralFee = int64Add(order.own.fee, order.own.fee);
+        payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
+        payCoin(sender, int64Sub(order.own.value, bilateralFee));
+        storageDel(orderKey);
+    }
+    else{
+        payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
+
+        let partBU = int64Div(int64Mul(order.own.value, thisPayAsset.amount), order.target.value));
+        let realFee = int64Div(int64Mul(partBU, globalAttribute.feeRate), 1BU);
+        bilateralFee = int64Add(realFee, realFee);
+
+        payCoin(sender, int64Sub(partBU, realFee));
+    }
+
+    return bilateralFee;
+}
+
 function partlyTakeOrder(orderKey, fee){
     let orderStr = storageLoad(orderKey);
     assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
@@ -110,82 +199,18 @@ function partlyTakeOrder(orderKey, fee){
     }
 
     let bilateralFee = 0;
-    if(order.target.issuer === undefined){ /* taker is BU */
-        assert(feeValid(fee), 'Invalid fee.');
-        bilateralFee = int64Add(fee, fee);
-
-        let total = int64Add(order.target.value, fee);
-        let com   = int64Compare(thisPayCoinAmount, total);
-        if(com === 0 || com === 1){ /*full take*/
-            payCoin(order.maker, int64Sub(order.target.value, fee));
-            if(com === 1){ /* Return the excess*/
-                payCoin(sender, int64Sub(thisPayCoinAmount, total); 
-            }
-
-            if(order.own.code === undefined){ /*maker is CTP*/
-                payCTP(order.own.issuer, order.maker, sender, order.own.value);
-            }
-            else{ /*maker is ATP*/
-                payAsset(sender, order.own.issuer, order.own.code, order.own.value);
-            }
-        } 
-        else if(com === -1){ /* partial take */
-            payCoin(order.maker, int64Sub(thisPayCoinAmount, bilateralFee));
-
-            let partMake = int64Div(int64Mul(order.own.value, realTake), order.target.value));
-            if(order.own.code === undefined){ /*maker is CTP*/
-                payCTP(order.own.issuer, order.maker, sender, partMake);
-            }
-            else{ /*maker is ATP*/
-                payAsset(sender, order.own.issuer, order.own.code, partMake);
-            }
-
-            order.fee = int64Sub(order.fee, fee);
-            order.own.value = int64Sub(order.own.value, partMake);
-            order.target.value = int64Sub(order.target.value, realTake);
-            storageStore(orderKey, stringify(order));
-        }
+    if(order.target.issuer === undefined){
+        bilateralFee = asset2bu(order, fee);
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
-        let ctpValue = ctpAllownce(order.target.issuer);
-        let check = int64Compare(ctpValue, order.target.value);
-        if(check === 0 || check === 1){
-            bilateralFee = int64Add(order.own.fee, order.own.fee);
-            payCTP(order.target.issuer, sender, order.maker, order.target.value);
-            payCoin(sender, int64Sub(order.own.value, bilateralFee));
-        }
-        else{
-            payCTP(order.target.issuer, sender, order.maker, ctpValue);
-
-            let partBU = int64Div(int64Mul(order.own.value, ctpValue), order.target.value));
-            let realFee = int64Div(int64Mul(partBU, globalAttribute.feeRate), 1BU);
-            bilateralFee = int64Add(realFee, realFee);
-
-            payCoin(sender, int64Sub(partBU, realFee));
-        }
-
+        bilateralFee = bu2ctp(order);
     }
-    else{ /*take is ATP*/
-        let com = checkPayAsset(order.target);
-        if(com === 0 || com === 1){
-            bilateralFee = int64Add(order.own.fee, order.own.fee);
-            payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
-            payCoin(sender, int64Sub(order.own.value, bilateralFee));
-        }
-        else{
-            payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
-
-            let partBU = int64Div(int64Mul(order.own.value, thisPayAsset.amount), order.target.value));
-            let realFee = int64Div(int64Mul(partBU, globalAttribute.feeRate), 1BU);
-            bilateralFee = int64Add(realFee, realFee);
-
-            payCoin(sender, int64Sub(partBU, realFee));
-        }
+    else{
+        bilateralFee = bu2atp(order);
     }
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
     storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
-    storageDel(orderKey);
 }
 
 function takeOrder(orderKey, fee){
