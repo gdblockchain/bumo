@@ -1,30 +1,20 @@
-- [Bumo CTP1.0 Token 标准](#bumo-ctp1.0-token-标准)
-    - [简介](#简介)
-    - [目标](#目标)
-    - [规则](#规则)
-    - [Token 属性](#token-属性)
-    - [功能函数](#功能函数)
-         - [transfer](#transfer)
-         - [approve](#approve)
-         - [transferFrom](#transferfrom)
-         - [tokenInfo](#tokeninfo)
-         - [allowance](#allowance)
-         
-    - [合约入口](#合约入口)
-        - [init](#init)
-        - [main](#main)
-        - [query](#query)
+# Bumo CTP 10 协议
 
 
-# Bumo CTP1.0 Token 标准
+
+[TOC]
 
 ## 简介
 
-CTP 1.0(Contract Token Protocol) 指基于 BUMO 智能合约发行 token 的标准协议。该协议提供了转移 token 的基本功能，并允许 token 授权给第三方使用。
+CTP 10(Contract Token Protocol) 指基于 BUMO 智能合约发行 token 的标准协议。该协议提供了转移 token 的基本功能，并允许 token 授权给第三方使用。
+
+
 
 ## 目标
 
 基于这套标准接口，可以让发行的 token 被其他应用程序和第三方快速对接和使用，比如钱包和交易所。
+
+
 
 
 ## 规则
@@ -32,11 +22,13 @@ CTP 1.0(Contract Token Protocol) 指基于 BUMO 智能合约发行 token 的标�
 Bumo 智能合约由 JavaScript 语言实现, 包含初始化函数 init 和两个入口函数 main、query 。init 函数用于合约创建时初始化; main 函数主要负责数据写入，query 函数负责数据查询。
 
 
+
+
 ## Token 属性
 
 Token 属性可以通过合约的 `tokenInfo` 功能函数查询到，存储在智能合约的账号里。包含以下内容
 
-| 变量         | 描述                     |  
+| 变量         | 描述                     |
 | :----------- | --------------------------- |
 |name          | Token 名称                  |
 |symbol        | Token 符号                  |
@@ -50,7 +42,25 @@ Token 属性可以通过合约的 `tokenInfo` 功能函数查询到，存储在�
 - symbol：推荐使用大写首字母缩写。如 DT
 - decimals：小数位在 0~8 的范围，0 表示无小数位
 - totalSupply：范围是 1~2^63-1
-- version：ctp 的版本。如 1.0
+- version：ctp 的版本。如 CTP10
+
+
+
+## 事件
+
+​       函数transfer，approve，transferFrom会触发事件，事件是调用tlog接口，在区块链上记录一条交易日志，该日志记录了函数调用详情，方便用户阅读。
+
+​       tlog定义如下:
+
+```
+tlog(topic,args...);
+```
+
+- tlog会产生一笔交易写在区块上
+- topic: 日志主题，必须为字符串类型,参数长度(0,128]
+- args...: 最多可以包含5个参数，参数类型可以是字符串、数值或者布尔类型,每个参数长度(0,1024]
+
+
 
 ## 功能函数
 
@@ -202,6 +212,7 @@ Token 属性可以通过合约的 `tokenInfo` 功能函数查询到，存储在�
     }
 } 
 ```
+
 
 
 ## 合约入口

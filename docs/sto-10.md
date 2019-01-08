@@ -1,8 +1,16 @@
+# Bumo STO 10 协议
+
+
+
+[TOC]
+
+
+
 ## 简介
 
 
 
-STO.10(Security Token Standard)是指基于BUMO智能合约发行证券型Token的标准协议。该标准在CTP 1.0的基础上制定了增发Token，销毁Token，存储相关法律文件，将Token进行tranche(tranche)，为tranche设置锁定期等约束条件，允许将指定tranche的Token授权给第三方操作人，添加控制者(如监控部门)的相关功能。
+STO 10(Security Token Standard)是指基于BUMO智能合约发行证券型Token的标准协议。该标准在CTP 10的基础上制定了增发Token，销毁Token，存储相关法律文件，将Token进行分片(tranche)，为tranche设置锁定期等约束条件，允许将指定tranche的Token授权给第三方操作人，添加控制者(如监控部门)的相关功能。
 
 
 
@@ -12,7 +20,7 @@ STO.10(Security Token Standard)是指基于BUMO智能合约发行证券型Token�
 
 
 
-基于该协议标准发行的Token，能够在任何司法管辖区内发型和管理，并能够符合相关的监管限制。
+基于该协议标准发行的Token，能够在任何司法管辖区内发行和管理，并能够符合相关的监管限制。
 
 
 
@@ -22,7 +30,7 @@ STO.10(Security Token Standard)是指基于BUMO智能合约发行证券型Token�
 
 
 
-Bumo 智能合约由 JavaScript 语言实现, 包含初始化函数 init 和两个入口函数 main、query 。init 函数用于合约创建时初始化; main 函数主要负责数据写入，query 函数负责数据查询。
+Bumo 智能合约由 JavaScript 语言实现, 包含初始化函数 init 和两个入口函数 main、query 。init 函数用于合约创建时初始化，main 函数主要负责数据写入，query 函数负责数据查询。
 
 
 
@@ -121,13 +129,11 @@ value: "10000"
 
 ```
 key: operator_tokenHolder_operatorAddress
-value: {
-	"tranches": ["0", "1", ……]
-}
+value: ["0", "1", ……]
 ```
 - tokenHolder: Token持有人
 - operatorAddress: 操作者地址
-- tranches: trancheid列表 
+- tranches: trancheid列表, 空列表表示授权所有分片，非空列表表示授权到指定的分片
 
 
 
@@ -139,9 +145,7 @@ value: {
 
 ```
 key: global_controller
-value: {
-			controllers: [address1, addres2, ...]
-		}
+value: [address1, addres2, ...]
 ```
 - controllers: 控制者列表
 - address: 控制者地址
@@ -186,6 +190,21 @@ value: {
 - data: 提供日期
 
 
+
+## 事件
+
+​       函数transfer，approve，transferFrom会触发事件，事件是调用tlog接口，在区块链上记录一条交易日志，该日志记录了函数调用详情，方便用户阅读。
+
+​       tlog定义如下:
+
+```
+tlog(topic,args...);
+
+```
+
+- tlog会产生一笔交易写在区块上
+- topic: 日志主题，必须为字符串类型,参数长度(0,128]
+- args...: 最多可以包含5个参数，参数类型可以是字符串、数值或者布尔类型,每个参数长度(0,1024]
 
 
 
@@ -617,7 +636,7 @@ value: {
 
 ```json
 {
-    "method": "transferTranche",
+    "method": "transferFromToTranche",
     "params":{
     	"from": "buQm44k6VxqyLM8gQ7bJ49tJSjArhFsrVUKY",
     	"fromTranche": "0",
@@ -738,7 +757,7 @@ value: {
     "method": "transfersToTranche",
     "params":{
         "fromTranche": "0",
-        "toTranche": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
+        "toTranche": "1",
         "tokenHolders": {
             Address1: value1,
             Address2: value2,
@@ -778,7 +797,7 @@ value: {
 
 ```json
 {
-    "method": "isControllable",
+    "method": "isControllable"
 }
 ```
 
@@ -1154,7 +1173,7 @@ value: {
 
 ```json
 {
-    "method": "isIssuable",
+    "method": "isIssuable"
 }
 ```
 
@@ -1185,7 +1204,7 @@ value: {
     "method": "issue",
     "params":{
         "tokenHolder": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
-        "value": "1000000000000",
+        "nowSupply": "1000000000000",
         "data": ""
     }
 }
@@ -1219,7 +1238,7 @@ value: {
     "params":{
         "tranche": "",
         "tokenHolder": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
-        "value": "1000000000000",
+        "nowSupply": "1000000000000",
         "data": ""
     }
 }
@@ -1673,4 +1692,3 @@ value: {
 	}
 }
 ```
-
