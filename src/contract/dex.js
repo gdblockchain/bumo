@@ -11,50 +11,29 @@ function feeValid(fee){
     return com === 0 || com === 1;
 }
 
-function ctpApproveValid(issuer, value){
+function ctpAllownce(issuer){
+    let arg = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
+    return contractQuery(issuer, arg);
+}
+
+function checkCtpApprove(issuer, value){
     let arg = { 'method':'allowance', 'params':{ 'own':sender, 'spender':thisAddress } };
     let res = contractQuery(issuer, arg);
 
-    return value === res.allowance;
+    return int64Compare(res.allowance, value);
 }
 
-function payAssetValid(asset){
+function checkPayAsset(asset){
     let x = asset.issuer === thisPayAsset.key.issuer;
     let y = asset.code === thisPayAsset.key.code;
     assert(x && y, 'Wrong ATP( issuer:' + asset.issuer + ', code:' + asset.code + ' ) paid.');
 
-    return asset.value === thisPayAsset.amount;
-
+    return int64Compare(thisPayAsset.amount, asset.value);
 }
 
 function payCTP(issuer, from, to, value){
     let args = { 'method':'transferFrom', 'params':{ 'from':from, 'to':to, 'value':value}};
     payCoin(issuer, 0, args);
-}
-
-function makeOrder(own, target, fee, expiration){
-    assert(blockTimestamp < expiration, 'Order date has expired.'); /*Need add time built-in interfacce*/
-    //assert(stoI64Check(own.value) && stoI64Check(target.value), 'Target value must be alphanumeric.');
-
-    if(own.issuer === undefined){ /* BU */
-        assert(addressCheck(target.issuer), 'The peer asset issuance address is invalid.');
-        assert(feeValid(fee), 'Invalid fee.');
-    }
-    else if(own.code === undefined){ /* CTP */
-        assert(target.issuer === undefined, 'Must have a party asset is BU.');
-        assert(ctpApproveValid(own.issuer, own.value), 'Insufficient payment of CTP(ctp address: ' + own.issuer + ', value: ' + own.value + ').');
-    }
-    else{ /* ATP */
-        assert(target.issuer === undefined, 'Must have a party asset is BU.');
-        assert(payAssetValid(own), 'Insufficient payment of ATP(issuer: ' + own.issuer + ' code: ' + own.code + ', value: ' + own.value + ').');
-    }
-    
-    let orderKey   = 'order_' + (globalAttribute.orderInterval[1] + 1);
-    let orderValue = {'maker': sender, 'own':own, 'target':target, 'fee':fee, 'expiration': expiration};
-    storageStore(orderKey, JSON.stringify(orderValue));
-
-    globalAttribute.orderInterval[1] = globalAttribute.orderInterval[1] + 1;
-    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 function revocation(order){
@@ -69,7 +48,31 @@ function revocation(order){
     }
 
     storageDel(orderKey);
+}
 
+function makeOrder(own, target, fee, expiration){
+    assert(blockTimestamp < expiration, 'Order date has expired.'); /*Need add time built-in interfacce*/
+    //assert(stoI64Check(own.value) && stoI64Check(target.value), 'Target value must be alphanumeric.');
+
+    if(own.issuer === undefined){ /* BU */
+        assert(addressCheck(target.issuer), 'The peer asset issuance address is invalid.');
+        assert(feeValid(fee), 'Invalid fee.');
+    }
+    else if(own.code === undefined){ /* CTP */
+        assert(target.issuer === undefined, 'Must have a party asset is BU.');
+        assert(checkCtpApprove(own.issuer, own.value) === 0, 'Insufficient payment of CTP(ctp address: ' + own.issuer + ', value: ' + own.value + ').');
+    }
+    else{ /* ATP */
+        assert(target.issuer === undefined, 'Must have a party asset is BU.');
+        assert(checkPayAsset(own) === 0, 'Insufficient payment of ATP(issuer: ' + own.issuer + ' code: ' + own.code + ', value: ' + own.value + ').');
+    }
+    
+    let orderKey   = 'order_' + (globalAttribute.orderInterval[1] + 1);
+    let orderValue = {'maker': sender, 'own':own, 'target':target, 'fee':fee, 'expiration': expiration};
+    storageStore(orderKey, JSON.stringify(orderValue));
+
+    globalAttribute.orderInterval[1] = globalAttribute.orderInterval[1] + 1;
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 function cancelOrder(key){
@@ -112,7 +115,7 @@ function partlyTakeOrder(orderKey, fee){
         bilateralFee = int64Add(fee, fee);
 
         let total = int64Add(order.target.value, fee);
-        let com   = int64Compare(total, thisPayCoinAmount);
+        let com   = int64Compare(thisPayCoinAmount, total);
         if(com === 0 || com === 1){ /*full take*/
             payCoin(order.maker, int64Sub(order.target.value, fee));
             if(com === 1){ /* Return the excess*/
@@ -144,18 +147,40 @@ function partlyTakeOrder(orderKey, fee){
         }
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
-        ctpApproveValid(order.target.issuer, order.target.value);
+        let ctpValue = ctpAllownce(order.target.issuer);
+        let check = int64Compare(ctpValue, order.target.value);
+        if(check === 0 || check === 1){
+            bilateralFee = int64Add(order.own.fee, order.own.fee);
+            payCTP(order.target.issuer, sender, order.maker, order.target.value);
+            payCoin(sender, int64Sub(order.own.value, bilateralFee));
+        }
+        else{
+            payCTP(order.target.issuer, sender, order.maker, ctpValue);
 
-        bilateralFee = int64Add(order.own.fee, order.own.fee);
-        payCTP(order.target.issuer, sender, order.maker, order.target.value);
-        payCoin(sender, int64Sub(order.own.value, bilateralFee));
+            let partBU = int64Div(int64Mul(order.own.value, ctpValue), order.target.value));
+            let realFee = int64Div(int64Mul(partBU, globalAttribute.feeRate), 1BU);
+            bilateralFee = int64Add(realFee, realFee);
+
+            payCoin(sender, int64Sub(partBU, realFee));
+        }
+
     }
     else{ /*take is ATP*/
-        payAssetValid(order.target);
+        let com = checkPayAsset(order.target);
+        if(com === 0 || com === 1){
+            bilateralFee = int64Add(order.own.fee, order.own.fee);
+            payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
+            payCoin(sender, int64Sub(order.own.value, bilateralFee));
+        }
+        else{
+            payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
 
-        bilateralFee = int64Add(order.own.fee, order.own.fee);
-        payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
-        payCoin(sender, int64Sub(order.own.value, bilateralFee));
+            let partBU = int64Div(int64Mul(order.own.value, thisPayAsset.amount), order.target.value));
+            let realFee = int64Div(int64Mul(partBU, globalAttribute.feeRate), 1BU);
+            bilateralFee = int64Add(realFee, realFee);
+
+            payCoin(sender, int64Sub(partBU, realFee));
+        }
     }
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, bilateralFee);
@@ -189,7 +214,7 @@ function takeOrder(orderKey, fee){
         }
     }
     else if(order.target.code === undefined){ /*taker is CTP*/
-        ctpApproveValid(order.target.issuer, order.target.value);
+        checkCtpApprove(order.target.issuer, order.target.value);
 
         bilateralFee = int64Add(order.own.fee, order.own.fee);
         payCTP(order.target.issuer, sender, order.maker, order.target.value);
@@ -198,7 +223,7 @@ function takeOrder(orderKey, fee){
         tlog(orderKey, order.maker, order.own.value, sender, (order.target.issuer + ':' + order.target.value));
     }
     else{ /*take is ATP*/
-        payAssetValid(order.target);
+        checkPayAsset(order.target);
 
         bilateralFee = int64Add(order.own.fee, order.own.fee);
         payAsset(order.maker, thisPayAsset.key.issuer, thisPayAsset.key.code, thisPayAsset.amount);
