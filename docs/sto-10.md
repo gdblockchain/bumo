@@ -1,8 +1,75 @@
+# Bumo STO 10 协议
+
+
+
+[Bumo STO 10 协议](#bumo-sto-10-协议)
+
+- [简介](#简介)
+- [目标](#目标)
+- [规则](#规则)
+- [Metadata 存储](#metadata-存储)
+  - [Token 基本信息](#token-基本信息)
+  - [Tranche 属性及限制](#tranche-属性及限制)
+  - [所有 tranche 余额总和](#所有-tranche-余额总和)
+  - [Tranche 余额](#tranche-余额)
+  - [操作者](#操作者)
+  - [控制者](#控制者)
+  - [授权](#授权)
+  - [文档](#文档)
+- [事件](#事件)
+- [功能函数](#功能函数)
+  - [tokenInfo](#tokeninfo)
+  - [setDocument](#setdocument)
+  - [getDocument](#getdocument)
+  - [createTranche](#createtranche)
+  - [balanceOf](#balanceof)
+  - [balanceOfTranche](#balanceoftranche)
+  - [tranchesOf](#tranchesof)
+  - [transferWithData](#transferwithdata)
+  - [transferFromToTranche](#transferfromtotranche)
+  - [transferTranche](#transfertranche)
+  - [transferToTranche](#transfertotranche)
+  - [transfersToTranche](#transferstotranche)
+  - [isControllable](#iscontrollable)
+  - [controllerTransfer](#controllertransfer)
+  - [controllerRedeem](#controllerredeem)
+  - [authorizeOperator](#authorizeoperator)
+  - [revokeOperator](#revokeoperator)
+  - [authorizeOperatorForTranche](#authorizeoperatorfortranche)
+  - [revokeOperatorForTranche](#revokeOperatorfortranche)
+  - [isOperator](#isoperator)
+  - [isOperatorForTranche](#isoperatorfortranche)
+  - [operatorTransferTranche](#operatortransfertranche)
+  - [operatorRedeemTranche](#operatorredeemtranche)
+  - [isIssuable](#isissuable)
+  - [issue](#issue)
+  - [issueToTranche](#issuetotranche)
+  - [redeem](#redeem)
+  - [redeemFrom](#redeemfrom)
+  - [redeemTranche](#redeemtranche)
+  - [redeemFromTranche](#redeemfromtranche)
+  - [canTransfer](#cantransfer)
+  - [canTransferTranche](#cantransfertranche)
+  - [canTransferToTranche](#cantransfertotranche)
+  - [transfer](#transfer)
+  - [transferFrom](#transferfrom)
+  - [approve](#approve)
+  - [approveTranche](#approvetranche)
+  - [allowance](#allowance)
+- [合约入口](#合约入口)
+  - [init](#init)
+  - [main](#main)
+  - [query](#query)
+
+
+
+
+
 ## 简介
 
 
 
-STO.10(Security Token Standard)是指基于BUMO智能合约发行证券型Token的标准协议。该标准在CTP 1.0的基础上制定了增发Token，销毁Token，存储相关法律文件，将Token进行tranche(tranche)，为tranche设置锁定期等约束条件，允许将指定tranche的Token授权给第三方操作人，添加控制者(如监控部门)的相关功能。
+STO 10(Security Token Standard)是指基于BUMO智能合约发行证券型Token的标准协议。该标准在CTP 10的基础上制定了增发Token，销毁Token，存储相关法律文件，将Token进行分片(tranche)，为tranche设置锁定期等约束条件，允许将指定tranche的Token授权给第三方操作人，添加控制者(如监控部门)的相关功能。
 
 
 
@@ -12,7 +79,7 @@ STO.10(Security Token Standard)是指基于BUMO智能合约发行证券型Token�
 
 
 
-基于该协议标准发行的Token，能够在任何司法管辖区内发型和管理，并能够符合相关的监管限制。
+基于该协议标准发行的Token，能够在任何司法管辖区内发行和管理，并能够符合相关的监管限制。
 
 
 
@@ -22,13 +89,13 @@ STO.10(Security Token Standard)是指基于BUMO智能合约发行证券型Token�
 
 
 
-Bumo 智能合约由 JavaScript 语言实现, 包含初始化函数 init 和两个入口函数 main、query 。init 函数用于合约创建时初始化; main 函数主要负责数据写入，query 函数负责数据查询。
+Bumo 智能合约由 JavaScript 语言实现, 包含初始化函数 init 和两个入口函数 main、query 。init 函数用于合约创建时初始化，main 函数主要负责数据写入，query 函数负责数据查询。
 
 
 
 
 
-## metadata存储
+## Metadata 存储
 
 
 
@@ -58,7 +125,7 @@ value: {
 
 
 
-### Tranche属性及限制
+### Tranche 属性及限制
 
 
 
@@ -82,7 +149,7 @@ value: {
 
 
 
-### 所有tranche的余额总和
+### 所有 tranche 余额总和
 
 
 
@@ -101,7 +168,7 @@ value: {
 
 
 
-### Tranche的余额
+### Tranche 余额
 
 
 
@@ -121,13 +188,11 @@ value: "10000"
 
 ```
 key: operator_tokenHolder_operatorAddress
-value: {
-	"tranches": ["0", "1", ……]
-}
+value: ["0", "1", ……]
 ```
 - tokenHolder: Token持有人
 - operatorAddress: 操作者地址
-- tranches: trancheid列表 
+- tranches: trancheid列表, 空列表表示授权所有分片，非空列表表示授权到指定的分片
 
 
 
@@ -139,16 +204,14 @@ value: {
 
 ```
 key: global_controller
-value: {
-			controllers: [address1, addres2, ...]
-		}
+value: [address1, addres2, ...]
 ```
 - controllers: 控制者列表
 - address: 控制者地址
 
 
 
-### 授权数量
+### 授权
 
 
 
@@ -187,58 +250,28 @@ value: {
 
 
 
+## 事件
 
+​       函数transfer，approve，transferFrom会触发事件，事件是调用tlog接口，在区块链上记录一条交易日志，该日志记录了函数调用详情，方便用户阅读。
 
-## 函数功能
+​       tlog定义如下:
 
+```
+tlog(topic,args...);
 
-
-### init
-
-
-
-- 描述
-
-> 初始化参数并发行Token。
-
-- 入口函数
-
-> init
-
-- 参数
-
-```json
-{
-    "params":{
-        "name": "123",
-        "symbol": "STP",
-        "description": "STP",
-        "decimals": 8,
-        "nowSupply": "10000000",
-        "scheduledTotalSupply": "10000000",
-        "icon": "",
-        "controllers": ["buQnTmK9iBFHyG2oLce7vcejPQ1g5xLVycsj"]
-    }
-}
-- name: Token名称，长度范围[1,64]
-- code: Token符号，长度范围[1,64]
-- description: Token描述，长度范围[1,64k]
-- decimals: Token符号，即能支持的小数点位置，大小范围[0,8]
-- nowSupply: Token当前发行量，大小范围[0,2^63-1]，其值等于10^decimals*发行量。假如当前要发行一笔数量是10000, 精度为8的Token，nowSupply = 10 ^ 8 * 10000, 结果是1000000000000。
-- scheduledTotalSuppl: Token计划发行总量，大小范围[0,2^63-1]，0表示不限量发行，大于0表示限量发行，其值等于10^decimals*计划发行量。假如计划要发行总量是10000, 精度为8的Token，scheduledTotalSuppl = 10 ^ 8 * 10000, 结果是1000000000000。
-- icon: base64位编码，图标文件大小是32k以内,推荐200*200像素。
-- controllers: Token的控制者列表，即监管者列表
 ```
 
-- 返回值
-
-> 成功：无
->
-> 失败：抛出异常
+- tlog会产生一笔交易写在区块上
+- topic: 日志主题，必须为字符串类型,参数长度(0,128]
+- args...: 最多可以包含5个参数，参数类型可以是字符串、数值或者布尔类型,每个参数长度(0,1024]
 
 
 
-### tokenInfo
+## 功能函数
+
+
+
+### tranchesOftokenInfo
 
 
 
@@ -617,7 +650,7 @@ value: {
 
 ```json
 {
-    "method": "transferTranche",
+    "method": "transferFromToTranche",
     "params":{
     	"from": "buQm44k6VxqyLM8gQ7bJ49tJSjArhFsrVUKY",
     	"fromTranche": "0",
@@ -738,7 +771,7 @@ value: {
     "method": "transfersToTranche",
     "params":{
         "fromTranche": "0",
-        "toTranche": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
+        "toTranche": "1",
         "tokenHolders": {
             Address1: value1,
             Address2: value2,
@@ -778,7 +811,7 @@ value: {
 
 ```json
 {
-    "method": "isControllable",
+    "method": "isControllable"
 }
 ```
 
@@ -1154,7 +1187,7 @@ value: {
 
 ```json
 {
-    "method": "isIssuable",
+    "method": "isIssuable"
 }
 ```
 
@@ -1185,7 +1218,7 @@ value: {
     "method": "issue",
     "params":{
         "tokenHolder": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
-        "value": "1000000000000",
+        "nowSupply": "1000000000000",
         "data": ""
     }
 }
@@ -1219,7 +1252,7 @@ value: {
     "params":{
         "tranche": "",
         "tokenHolder": "buQoP2eRymAcUm3uvWgQ8RnjtrSnXBXfAzsV",
-        "value": "1000000000000",
+        "nowSupply": "1000000000000",
         "data": ""
     }
 }
@@ -1674,3 +1707,190 @@ value: {
 }
 ```
 
+## 合约入口
+
+### init
+
+```js
+function init(input_str){
+}
+
+```
+
+创建合约时候，触发合约 `init` 入口函数，传递 `JSON` 参数格式如下：
+
+```json
+{
+    "params":{
+        "name": "123",
+        "symbol": "STP",
+        "description": "STP",
+        "decimals": 8,
+        "nowSupply": "10000000",
+        "scheduledTotalSupply": "10000000",
+        "icon": "",
+        "controllers": ["buQnTmK9iBFHyG2oLce7vcejPQ1g5xLVycsj"]
+    }
+}
+- name: Token名称，长度范围[1,64]
+- code: Token符号，长度范围[1,64]
+- description: Token描述，长度范围[1,64k]
+- decimals: Token符号，即能支持的小数点位置，大小范围[0,8]
+- nowSupply: Token当前发行量，大小范围[0,2^63-1]，其值等于10^decimals*发行量。假如当前要发行一笔数量是10000, 精度为8的Token，nowSupply = 10 ^ 8 * 10000, 结果是1000000000000。
+- scheduledTotalSuppl: Token计划发行总量，大小范围[0,2^63-1]，0表示不限量发行，大于0表示限量发行，其值等于10^decimals*计划发行量。假如计划要发行总量是10000, 精度为8的Token，scheduledTotalSuppl = 10 ^ 8 * 10000, 结果是1000000000000。
+- icon: base64位编码，图标文件大小是32k以内,推荐200*200像素。
+- controllers: Token的控制者列表，即监管者列表
+```
+返回值：
+
+​	成功：无
+
+​	失败：抛出异常
+
+
+### main
+
+```js
+function main(input_str){
+    let input = JSON.parse(input_str);
+
+    if (input.method === 'setDocument'){
+      setDocument(input.params.name, input.params.url, input.params.hashType, input.params.documentHash);
+    }
+    else if(input.method === 'createTranche'){
+      createTranche(input.params.tranche);
+    }
+    else if(input.method === 'changeOwnership'){
+      changeOwnership(input.params.owner);
+    }
+    else if(input.method === 'issue'){
+      issue(input.params.tokenHolder, input.params.nowSupply, input.params.data);
+    }
+    else if(input.method === 'issueToTranche'){
+      issueToTranche(input.params.tranche, input.params.tokenHolder, input.params.nowSupply, input.params.data);
+    }
+    else if (input.method === 'approveTranche'){
+      approveTranche(input.params.tranche, input.params.spender, input.params.value, input.params.data);
+    }
+    else if(input.method === 'approve'){
+      approve(input.params.spender, input.params.value);
+    }
+    else if(input.method === 'transfer'){
+      transfer(input.params.to, input.params.value);
+    }
+    else if(input.method === 'transferFrom'){
+      transferFrom(input.params.from, input.params.to, input.params.value);
+    }
+    else if(input.method === 'transferWithData'){
+      transferWithData(input.params.to, input.params.value, input.params.data);
+    }
+    else if(input.method === 'transferFromWithData'){
+      transferFromWithData(input.params.from, input.params.to, input.params.value, input.params.data);
+    }
+    else if(input.method === 'transferTranche'){
+      transferTranche(input.params.tranche, input.params.to, input.params.value, input.params.data);
+    }
+    else if(input.method === 'transferToTranche'){
+      transferToTranche(input.params.fromTranche, input.params.to ,input.params.toTranche, input.params.value, input.params.data);
+    }
+    else if(input.method === 'transfersToTranche'){
+      transfersToTranche(input.params.fromTranche, input.params.toTranche, input.params.tokenHolders);
+    }
+    else if(input.method === 'transferFromToTranche'){
+      transferFromToTranche(input.params.from, input.params.fromTranche, input.params.to ,input.params.toTranche, input.params.value, input.params.data);
+    }
+    else if (input.method === 'controllerTransfer'){
+      controllerTransfer(input.params.from, input.params.fromTranche, input.params.to, input.params.toTranche, input.params.value, input.params.data, input.params.operatorData);
+    }
+    else if(input.method === 'controllerRedeem'){
+      controllerRedeem(input.params.tokenHolder, input.params.tranche, input.params.value, input.params.data, input.params.operatorData);
+    }
+    else if(input.method === 'authorizeOperator'){
+      authorizeOperator(input.params.operator);
+    }
+    else if(input.method === 'authorizeOperatorForTranche'){
+      authorizeOperatorForTranche(input.params.tranche, input.params.operator);
+    }
+    else if(input.method === 'revokeOperator'){
+      revokeOperator(input.params.operator);
+    }
+    else if(input.method === 'revokeOperatorForTranche'){
+      revokeOperatorForTranche(input.params.tranche, input.params.operator);
+    }
+    else if(input.method === 'operatorTransferTranche'){
+      operatorTransferTranche(input.params.tranche, input.params.from, input.params.to, input.params.value, input.params.data, input.params.operatorData);
+    }
+    else if(input.method === 'redeem'){
+      redeem(input.params.value, input.params.data);
+    }
+    else if(input.method === 'redeemFrom'){
+      redeemFrom(input.params.tokenHolder, input.params.value, input.params.data);
+    }
+    else if(input.method === 'redeemTranche'){
+      redeemTranche(input.params.tranche, input.params.value, input.params.data);
+    }
+    else if(input.method === 'operatorRedeemTranche'){
+      operatorRedeemTranche(input.params.tranche, input.params.tokenHolder, input.params.value, input.params.operatorData);
+    }
+    else{
+        throw '<unidentified operation type>';
+    }
+}
+```
+
+### query
+
+```js
+function query(input_str){
+    let result = {};
+    let input  = JSON.parse(input_str);
+
+    if(input.method === 'getDocument'){
+      result.document = getDocument(input.params.name);
+    }
+    else if(input.method === 'isIssuable'){
+      result.isIssuable = isIssuable();
+    }
+    else if(input.method === 'tokenInfo'){
+      globalAttribute = JSON.parse(storageLoad(globalAttributeKey));
+      result.tokenInfo = globalAttribute;
+    }
+    else if(input.method === 'balanceOf'){
+      result.balance = balanceOf(input.params.address);
+    }
+    else if(input.method === 'tranchesOf'){
+      result.tranches = tranchesOf(input.params.address);
+    }
+    else if(input.method === 'balanceOfTranche'){
+      result.balance = balanceOfTranche(input.params.tranche, input.params.address);
+    }
+    else if(input.method === 'allowance'){
+      result.allowance = allowance(input.params.owner, input.params.spender);
+    }
+    else if (input.method === 'allowanceForTranche'){
+      result.allowance = allowanceForTranche(input.params.tranche, input.params.owner, input.params.spender);
+    }
+    else if(input.method === 'isControllable'){
+      result.isControllable = isControllable();
+    }
+    else if(input.method === 'isOperator'){
+      result.isOperator = isOperator(input.params.operator, input.params.tokenHolder);
+    }
+    else if(input.method === 'isOperatorForTranche'){
+      result.isOperator = isOperatorForTranche(input.params.tranche, input.params.operator, input.params.tokenHolder);
+    }
+    else if(input.method === 'canTransfer'){
+      result.canTransfer = canTransfer(input.params.from, input.params.to, input.params.value, input.params.data);
+    }
+    else if(input.method === 'canTransferTranche'){
+      result.canTransfer = canTransferTranche(input.params.from, input.params.to, input.params.tranche, input.params.value, input.params.data);
+    }
+    else if (input.method === 'canTransferToTranche'){
+      result.canTransfer = canTransferToTranche(input.params.from, input.params.fromTranche, input.params.to, input.params.toTranche, input.params.value, input.params.data);
+    }
+    else{
+        throw '<Query interface passes an invalid operation type>';
+    }
+    return JSON.stringify(result);
+}
+```
