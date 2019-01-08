@@ -57,23 +57,27 @@ function makeOrder(own, target, fee, expiration){
     storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
-function cancelOrder(key){
-    let orderStr = storageLoad(key);
-    assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
-    let order = JSON.parse(orderStr);
-
+function revocation(order){
     if(order.own.issuer === undefined){ /* BU */
         payCoin(order.maker, int64Add(order.own.value, order.fee));
     }
     else if(order.own.code === undefined){ /* CTP */
         payCTP(order.own.issuer, thisAddress, order.maker, order.own.value);
-    
     }
     else{ /* ATP */
         payAsset(order.maker, order.own.issuer, order.own.code, order.own.value);
     }
 
     storageDel(orderKey);
+
+}
+
+function cancelOrder(key){
+    let orderStr = storageLoad(key);
+    assert(orderStr !== false, 'Order: ' + orderKey + ' does not exist');
+
+    let order = JSON.parse(orderStr);
+    revocation(order);
 }
 
 /**
@@ -99,7 +103,7 @@ function partlyTakeOrder(orderKey, fee){
     let order = JSON.parse(orderStr);
 
     if(blockTimestamp > order.expiration){
-        return cancelOrder(orderKey);
+        return revocation(order);
     }
 
     let bilateralFee = 0;
@@ -165,7 +169,7 @@ function takeOrder(orderKey, fee){
     let order = JSON.parse(orderStr);
 
     if(blockTimestamp > order.expiration){
-        return cancelOrder(orderKey);
+        return revocation(order);
     }
 
     let bilateralFee = 0;
