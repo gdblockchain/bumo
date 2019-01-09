@@ -67,7 +67,6 @@ function makeOrder(own, target, fee, expiration){
     storageStore(orderKey, JSON.stringify(orderValue));
 
     globalAttribute.orderInterval[1] = globalAttribute.orderInterval[1] + 1;
-    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 function cancelOrder(key){
@@ -99,7 +98,7 @@ function other2bu(key, order, takerFee){
     }
     else{
         storageDel(key);
-        globalAttribute.orderInterval[0] = globalAttribute.orderInterval[0] - 1;
+        globalAttribute.orderInterval[0] = globalAttribute.orderInterval[0] + 1;
     } 
 
     if(order.own.code === undefined){ /*CTP*/
@@ -145,7 +144,7 @@ function bu2other(key, order){
         payCoin(sender, int64Sub(order.own.value, fee));
         storageDel(key);
 
-        globalAttribute.orderInterval[0] = globalAttribute.orderInterval[0] - 1;
+        globalAttribute.orderInterval[0] = globalAttribute.orderInterval[0] + 1;
     }
 
     globalAttribute.serviceFee = int64Add(globalAttribute.serviceFee, int64Add(fee, fee));
@@ -166,8 +165,6 @@ function takeOrder(key, fee){
     else{
         other2bu(key, order, fee);
     }
-
-    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 function init(input_str){
@@ -227,6 +224,8 @@ function main(input_str){
     else{
         throw '<Main interface passes an invalid operation type>';
     }
+
+    storageStore(globalAttributeKey, JSON.stringify(globalAttribute));
 }
 
 function query(input_str){
