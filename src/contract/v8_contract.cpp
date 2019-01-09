@@ -521,7 +521,7 @@ namespace bumo {
 				v8::Local<v8::Object> asset = v8::Object::New(isolate_);
 				asset->Set(ToV8String("amount"), ToV8String(utils::String::ToString(msg_asset.amount()).c_str()));
 				asset->Set(ToV8String("key"), v8_asset_key);
-				msg->Set(ToV8String("asset"), block);
+				msg->Set(ToV8String("asset"), asset);
 			}
 		}
 		block_chain_obj->Set(ToV8String("msg"), msg);
