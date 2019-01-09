@@ -200,26 +200,27 @@ function main(input_str){
     let input = JSON.parse(input_str);
     globalAttribute = JSON.parse(storageLoad(globalAttributeKey));
 
+    let params = input.params;
     if(input.method === 'makeOrder'){
-        makeOrder(input.params.own, input.params.target, input.params.fee, input.params.expiration);
+        makeOrder(params.own, params.target, params.fee, params.expiration);
     }
     else if(input.method === 'cancelOrder'){
-        cancelOrder(input.params.order);
+        cancelOrder(params.order);
     }
     else if(input.method === 'takeOrder'){
-        takeOrder(input.params.order, input.params.fee);
+        takeOrder(params.order, params.fee);
     }
     else if(input.method === 'updateFeeRate'){
-        updateFeeRate(input.params.rate);
+        updateFeeRate(params.rate);
     }
     else if(input.method === 'updateOwner'){
-        updateOwner(input.params.owner);
+        updateOwner(params.owner);
     }
     else if(input.method === 'clearExpiredOrder'){
         clearExpiredOrder();
     }
     else if(input.method === 'withdrawFee'){
-        withdrawFee(input.params.value);
+        withdrawFee(params.value);
     }
     else{
         throw '<Main interface passes an invalid operation type>';
@@ -237,7 +238,7 @@ function query(input_str){
         result.dexInfo = dexInfo();
     }
     else if(input.method === 'getOrder'){
-        result.order = getOrder(input.params.order);
+        result.order = getOrder(params.order);
     }
     else if(input.method === 'getOrderInterval'){
         result.interval = getOrderInterval();
