@@ -852,6 +852,7 @@ def test_deposit_withdrawal(chain_id):
         if chainID == 0:
             if not os.path.exists(keypairs):
                 testCreateAccount(10, 1,1000000000000)
+                time.sleep(30)
             with open(keypairs, 'r') as f:
                     lines = f.readlines() 
             src_info = {}
@@ -861,7 +862,7 @@ def test_deposit_withdrawal(chain_id):
             src_info['private_key'] = json.loads(lines[m].strip())['private_key']
 
             deposit(temp_chain_id,src_info)
-            temp_chain_id = temp_chain_id%4 +1
+            temp_chain_id = temp_chain_id%3 +1
             time.sleep(60)
 
             withdrawal_client()
@@ -887,7 +888,7 @@ def deposit(chainId,src_info):
     deposit_data = {}
     addr = src_info['address']
     deposit_len = len(deposit_list)
-    m = random.randint(200, 1000)
+    m = random.randint(2000000000, 20000000000)
     nonce = 0
 
     #for index in range(deposit_len):
@@ -963,11 +964,15 @@ def withdrawal():
     if nonce == 0:
         print 'withdrawal nonce is 0 return'
         return
-    withdrawal_info = data_info(chainID, amount=100+nonce%100)
+    ran = random.randint(2000000000, 20000000000)
+    #m = int(recently_deposit_msg['deposit_data']['amount'])
+    withdrawal_info = data_info(chainID, amount=ran)
     addPayload(payload, 'withdrawal', acc_list, src_info, nonce, amount=0,args=withdrawal_info)
     success_count = sendRequest(payload)
     print 'withdrawal to '+ deposit_address + ',chain_id='+str(chainID)+',success_count='+str(success_count)
     #print 'success_count:' + success_count
+    if success_count == 1:
+        already_withdrawal_list[deposit_address] = int(recently_deposit_msg['index'])
     return
 
 def withdrawal_client():
