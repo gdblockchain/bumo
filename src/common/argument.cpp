@@ -141,11 +141,11 @@ namespace bumo {
 				create_hardfork_ = true;
 			}
 			else if (s == "--version") {
-				std::string sk_hash = utils::String::BinToHexString(bumo::HashWrapper::Crypto(bumo::GetDataSecuretKey())).substr(0, 7);
+				std::string sk_hash = utils::String::BinToHexString(bumo::HashWrapper::Crypto(bumo::GetDataSecuretKey())).substr(0, 2);
 #ifdef SVNVERSION
-				printf("%s;%u;sk:%s;git:" SVNVERSION "\n", General::BUMO_VERSION, General::LEDGER_VERSION, sk_hash.c_str());
+				printf("%s;%u;secure:%s;git:" SVNVERSION "\n", General::BUMO_VERSION, General::LEDGER_VERSION, sk_hash.c_str());
 #else
-				printf("%s;%u;sk:%s\n", General::BUMO_VERSION, General::LEDGER_VERSION, sk_hash.c_str());
+				printf("%s;%u;secure:%s\n", General::BUMO_VERSION, General::LEDGER_VERSION, sk_hash.c_str());
 #endif 
 				return true;
 			}
