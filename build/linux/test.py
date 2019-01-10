@@ -465,6 +465,7 @@ def sendRequest(payload,url=None):
             res = req('submitTransaction', p, post=True,dest_url=url)
             with open('./test.log', 'a') as f:
                 f.write(json.dumps(res, indent=4))
+            print res
             err_list = []
             for err in res['results']:
                 if err['error_code'] != 0:
@@ -482,6 +483,7 @@ def sendRequest(payload,url=None):
         res = req('submitTransaction', p, post=True,dest_url=url)
         if not res:
             return 0
+        print res
         with open('./test.log', 'a') as f:
             f.write(json.dumps(res, indent=4))
         err_list = []
