@@ -931,20 +931,24 @@ def withdrawal():
     payload = {'items':[]}
     global already_withdrawal_list
     recently_deposit = callContract_fun(contract_address,input_str)
-    if recently_deposit['error_code'] != 0 or recently_deposit['result']['query_rets'][0].has_key('error'):
+    if not recently_deposit or recently_deposit['error_code'] != 0 or recently_deposit['result']['query_rets'][0].has_key('error'):
         print recently_deposit
         return
     
     deposit_msg = recently_deposit['result']['query_rets'][0]['result']['value']
     #deposit_msg.replace("\\","")
-    recently_deposit_msg = json.loads(deposit_msg)
+    try:
+        recently_deposit_msg = json.loads(deposit_msg)
+    except ValueError:
+        print 'queryChildDeposit error:%s ' % deposit_msg
+        return
     if not recently_deposit_msg.has_key('deposit_data'):
         print recently_deposit_msg
         return
     deposit_address = recently_deposit_msg['deposit_data']['address']
     if already_withdrawal_list.has_key(deposit_address) and already_withdrawal_list[deposit_address] >= int(recently_deposit_msg['index']):
         return
-    already_withdrawal_list[deposit_address] = int(recently_deposit_msg['index'])
+    
 #{"address":"buQXmJsPuZSstzMGXrVxswHoBgqiRcb6ajA5","amount":"1000"
     lines = []
     src_info = {}
@@ -994,8 +998,12 @@ def withdrawal_client():
         if not main_withdrawal_ret  :
             continue
         if not main_withdrawal_ret['result']['query_rets'][0].has_key('error'):
-            main_withdrawal_ret_json = json.loads(main_withdrawal_ret['result']['query_rets'][0]['result']['value'])
-            child_seq = int(main_withdrawal_ret_json['seq']) + 1
+            try:
+                main_withdrawal_ret_json = json.loads(main_withdrawal_ret['result']['query_rets'][0]['result']['value'])
+                child_seq = int(main_withdrawal_ret_json['seq']) + 1
+            except ValueError:
+                print 'queryChildWithdrawal error:%s ' % main_withdrawal_ret['result']['query_rets'][0]['result']['value']
+                continue
         child_url = urls[i]
         
         input_str = "{\"method\":\"queryChildWithdrawal\",\"params\":{\"seq\":\"%d\"}}" % child_seq
@@ -1005,7 +1013,11 @@ def withdrawal_client():
 
         withdrawal_msg = recently_withdrawal_ret['result']['query_rets'][0]['result']['value']
         #withdrawal_msg.replace("\\","")
-        recently_withdrawal = json.loads(withdrawal_msg)
+        try:
+            recently_withdrawal = json.loads(withdrawal_msg)
+        except ValueError:
+            print 'queryChildWithdrawal2 error:%s ' % withdrawal_msg
+            continue
         if already_withdrawal_list.has_key(child_url) and already_withdrawal_list[child_url] >= int(recently_withdrawal['seq']):
             continue
         already_withdrawal_list[child_url] = int(recently_withdrawal['seq'])
