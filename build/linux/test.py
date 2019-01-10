@@ -1034,14 +1034,18 @@ def withdrawal_client():
             if json.loads(line.strip())['address'] == withdrawal_address:
                 src_info['private_key'] = json.loads(line.strip())['private_key']
                 break
-    
+        nonce = 0
+        if not src_info.has_key('private_key'):
+            print 'withdrawal_address:%s not in keypairs' % withdrawal_address
+            src_info = None
+            nonce = newNonce(genesis_account)
+        else:
+            nonce = newNonce(withdrawal_address)
         acc_list = [withdrawal_address]
-        
-        nonce = newNonce(withdrawal_address)
 
         if nonce == 0:
             print 'withdrawal_client nonce is 0 return'
-            return
+            continue
 
         withdrawal_info = data_info(int(recently_withdrawal['chain_id']),"", int(recently_withdrawal['amount']),int(recently_withdrawal['block_seq']),int(recently_withdrawal['seq']))
         addPayload(payload, 'withdrawal_client', acc_list, src_info, nonce, amount=0,args=withdrawal_info)
