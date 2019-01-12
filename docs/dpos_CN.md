@@ -75,13 +75,20 @@
  - effectiveVoteInterval 有效期，单位为微秒，应用在投票有效期以及退出锁定期；
 
 ### 申请类型
-
+任意 BuChain 账户可以申请成为委员会委员或候选KOL(Key Opinion Leader)，拥有节点的账户还可以申请成为候选节点，所以，对BuChain账户来说，有以下可申请的类型。
+```
+let applyType = {
+  committee:1,
+  validator:2,
+  KOL:3
+};
+```
 ### 申请成为验证节点候选人
 
-任意一个拥有网络节点的账户可以通过向验证节点选举账户转移一笔 coin 作为押金，申请成为验证节点候选人。但能否成为验证节点，是根据一定周期内获得的总票数决定的。
+任意一个拥有网络节点的账户可以通过向验证节点选举账户转移一笔 coin 作为押金，申请成为验证节点候选人。经委员会投票审核通过后，可成为正式的候选节点。但能否成为验证节点，是根据一定周期内获得的总票数决定的。
 
 - 申请者向验证节点选举账户转移一笔 coin 作为押金（参见开发文档‘[转移BU资产](#转移bu资产)’），该押金可通过 ‘[收回押金](#收回押金)’ 操作收回。
-- ‘转移货币’操作的 input 字段填入 { "method" : "candidatePledgeCoin"}，注意使用转义字符。
+- ‘转移货币’操作的 input 字段填入`{ "method" : "apply", "params":{"type":2}}`,注意使用转义字符。
 - 候选节点可以多次质押，增加质押金额，提高自己的排名。
 
 >例
@@ -92,41 +99,85 @@
     "dest_address" : "buQqzdS9YSnokDjvzg4YaNatcFQfkgXqk6ss",
     "amount" :10000000000000,
     "input":
-    "{\"method\":\"candidatePledgeCoin\"}"
+    "{
+      \"method\":\"apply\",
+      \"params\":
+      {
+        \"type\":2
+      }
+    }"
   }
 ```
 
 申请成功后可以通过[查询功能](#查询功能)，查询验证节点候选人信息。
 
-注意：申请成为验证节点候选人的账户必须拥有节点，且节点地址和账户地址相同，
+注意：申请成为验证节点候选人的账户必须拥有节点，且节点地址和账户地址相同。
 
 ### 投票支持候选人
 
 - 任意用户向验证节点选举账户转移一笔一定数额的 coin 支持某个验证节点候选人。
 - 验证节点候选人的得票总数为所有支持者的投票金额加上候选人自身的质押金额，候选人增加质押金额相当于给自己投票。
-- ‘转移货币’操作的 input 字段填入 { "method" : "voteForCandidate", "params" : { "address" : "填入验证节点候选人地址"} }，注意使用转义字符。
+- 投票实行覆盖操作，对同一地址重复投票，后值将覆盖前值。后值大，则视为增加投票，后值小，则视为减少投票。
+- 如果投票额为0，且投票地址为空，视为用户撤销投票。
+- ‘转移货币’操作的 input 字段填入` { "method" : "vote", "params" : { "type":"2", "address" : "填入验证节点候选人地址"} }`，注意使用转义字符。
 
->例
+>例：投票
 
 ```json
   "pay_coin" :
   {
     "dest_address" : "buQqzdS9YSnokDjvzg4YaNatcFQfkgXqk6ss",
-    "amount" :100000000000,
+    "amount" :100000000000, /*投票1000BU*/
     "input":
     "{
-        \"method\":\"voteForCandidate\",
+        \"method\":\"vote\",
         \"params\":
         {
+          \"type\":2,
           \"address\":\"buQtZrMdBQqYzfxvqKX3M8qLZD3LNAuoSKj4\",
         }
     }"
   }
 ```
 
-- 投票信息记录在合约中，可以通过获取投票信息接口getVoteInfo查询
-- 用户可以继续向选举账户转移coin以增加投票金额
-- 用户也可以在参数字段中加入reduceVotes字段表示减少投票金额，该操作会触发合约将制定金额转账会投票账户。
+>例：减少投票（承接前例）
+
+```json
+  "pay_coin" :
+  {
+    "dest_address" : "buQqzdS9YSnokDjvzg4YaNatcFQfkgXqk6ss",
+    "amount" :50000000000, /*减少500BU投票*/
+    "input":
+    "{
+        \"method\":\"vote\",
+        \"params\":
+        {
+          \"type\":2,
+          \"address\":\"buQtZrMdBQqYzfxvqKX3M8qLZD3LNAuoSKj4\",
+        }
+    }"
+  }
+```
+
+>例：取消投票（承接前例）
+
+```json
+  "pay_coin" :
+  {
+    "dest_address" : "buQqzdS9YSnokDjvzg4YaNatcFQfkgXqk6ss",
+    "amount" :0,
+    "input":
+    "{
+        \"method\":\"vote\",
+        \"params\":
+        {
+          \"type\":2,
+          \"address\":\"\",
+        }
+    }"
+  }
+```
+投票信息记录在合约中，可以通过获取投票信息接口getVoteInfo查询
 
 >例
 
