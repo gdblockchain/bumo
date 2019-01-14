@@ -94,6 +94,8 @@ totalSupply() {
 }
 ```
 
+
+
 #### balanceOf
 
 > 查询一个地址所拥有的token数量
@@ -112,6 +114,8 @@ balanceOf(owner) {
 
 }
 ```
+
+
 
 #### ownerOf
 
@@ -134,6 +138,8 @@ function ownerOf(tokenId) {
 }
 ```
 
+
+
 #### approve
 
 > 批准地址to具有转移tokenId的能力, 只有token的拥有者才可以调用
@@ -152,6 +158,22 @@ approve(to, tokenId) {
 }
 ```
 
+##### 事件：
+
+```javascript
+  tlog('approve', sender, to, tokenId);
+```
+
+​           topic: 方法名，这里是'approve'
+
+​           sender:  合约调用账户地址
+
+​           To: 被授权账户地址
+
+​           tokenId: 转移的tokenId
+
+
+
 #### transfer
 
 > 转移token，只有token的拥有者才可以调用
@@ -169,6 +191,21 @@ function transfer(to, tokenId) {
 
 }
 ```
+
+##### 事件：
+```javascript
+tlog('transfer', sender, to, tokenId);
+```
+
+​       topic: 方法名，这里是'transfer'
+
+​       sender:  合约调用账户地址
+
+​       to: 目标账户地址
+
+​       tokenId: 转移的tokenId
+
+
 
 #### transferFrom
 
@@ -189,6 +226,24 @@ transferFrom(from, to, tokenId) {
 }
 ```
 
+##### 事件：
+
+```javascript
+tlog('transferFrom', sender, from, to, tokenId);
+```
+
+​      topic: 方法名，这里是'transferFrom'
+
+​      sender:  合约调用账户地址
+
+​      from: 源账户地址
+
+​      to: 目标账户地址
+
+​      tokenId: 转移的tokenId
+
+
+
 #### tokensOfOwner
 
 > 返回地址owner的所有token
@@ -206,6 +261,8 @@ transferFrom(from, to, tokenId) {
 function tokensOfOwner(owner) {
  }
 ```
+
+
 
 #### tokenInfo
 
@@ -225,6 +282,8 @@ function tokenInfo(tokenId) {
 }
 ```
 
+
+
 #### name
 
 > 返回本合约token的名称
@@ -234,6 +293,8 @@ name() {
 
 }
 ```
+
+
 
 #### symbol
 
@@ -261,6 +322,8 @@ function init(arg) {
 }
 ```
 
+
+
 #### main
 
 > 合约执行的入口函数
@@ -270,6 +333,8 @@ function main(arg) {
 	
 }
 ```
+
+
 
 #### query
 

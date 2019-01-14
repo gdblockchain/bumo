@@ -252,7 +252,7 @@ value: {
 
 ## 事件
 
-​       函数transfer，approve，transferFrom会触发事件，事件是调用tlog接口，在区块链上记录一条交易日志，该日志记录了函数调用详情，方便用户阅读。
+​       函数setDocument，createTranche，transferWithData，transferFromWithData，transferFromToTranche，transferTranche，transferToTranche，transfersToTranche，controllerTransfer，controllerRedeem，authorizeOperator，revokeOperator，authorizeOperatorForTranche，revokeOperatorForTranche，operatorTransferTranche，operatorRedeemTranche，issue，issueToTranche，redeemFrom，redeemTranche，redeemFromTranche，transfer，approve，transferFrom会触发事件，事件是调用tlog接口，在区块链上记录一条交易日志，该日志记录了函数调用详情，方便用户阅读。
 
 ​       tlog定义如下:
 
@@ -271,7 +271,7 @@ tlog(topic,args...);
 
 
 
-### tranchesOftokenInfo
+### tranchesOfTokenInfo
 
 
 
@@ -349,6 +349,24 @@ tlog(topic,args...);
 > 成功：true
 >
 > 失败：抛出异常
+
+- 事件
+
+```javascript
+  tlog('setDocument', sender, name, url, hashType, documentHash);
+```
+
+​           topic: 方法名，这里是'setDocument'
+
+​           sender:  合约调用账户地址
+
+​           name: 文档名称
+
+​           url: 文档在线链接地址
+
+​           hashType: 哈希类型
+
+​           documentHash: 哈希16进制字符串
 
 
 
@@ -596,6 +614,22 @@ tlog(topic,args...);
 >
 > 失败：抛出异常
 
+- 事件
+
+```javascript
+  tlog('transferWithData', sender, to, value, data);
+```
+
+​          topic: 方法名，这里是'transfer'
+
+​          sender:  合约调用账户地址
+
+​          to: 目标账户地址
+
+​          value: 转移数量(字符串类型)
+
+​          data: 附加信息
+
 
 
 ### transferFromWithData
@@ -631,6 +665,24 @@ tlog(topic,args...);
 > 成功：true
 >
 > 失败：抛出异常
+
+- 事件
+
+```javascript
+  tlog('transferFromWithData', sender, from, to, value, data);
+```
+
+​          topic: 方法名，这里是'transfer'
+
+​          sender:  合约调用账户地址
+
+​          from: Token支出方地址
+
+​          to: 目标账户地址
+
+​          value: 转移数量(字符串类型)
+
+​          data: 附加信息
 
 
 
@@ -1530,6 +1582,20 @@ tlog(topic,args...);
 >
 > 失败：抛出异常
 
+- 事件
+
+```javascript
+  tlog('transfer', sender, to, value);
+```
+
+​          topic: 方法名，这里是'transfer'
+
+​          sender:  合约调用账户地址
+
+​          to: 目标账户地址
+
+​          value: 转移数量(字符串类型)
+
 
 
 ### transferFrom
@@ -1563,6 +1629,22 @@ tlog(topic,args...);
 >
 > 失败：抛出异常
 
+- 事件
+
+```javascript
+tlog('transferFrom', sender, from, to, value);
+```
+
+​      topic: 方法名，这里是'transferFrom'
+
+​      sender:  合约调用账户地址
+
+​      from: 源账户地址
+
+​      to: 目标账户地址
+
+​      value: 转移数量（字符串类型）
+
 
 
 ### approve
@@ -1594,6 +1676,20 @@ tlog(topic,args...);
 > 成功：true
 >
 > 失败：抛出异常
+
+- 事件
+
+```javascript
+  tlog('approve', sender, spender, value);
+```
+
+​           topic: 方法名，这里是'approve'
+
+​           sender:  合约调用账户地址
+
+​           spender: 被授权账户地址
+
+​           value: 被授权可转移数量（字符串类型）
 
 
 
