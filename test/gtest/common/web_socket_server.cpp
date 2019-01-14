@@ -1396,8 +1396,6 @@ namespace bumo{
 #endif
 
 
-
-
 		FILE* pfile = fopen(logpath2.c_str(),"r");
 
 		char actual_err_log_timestamp[40] = { 0 };
