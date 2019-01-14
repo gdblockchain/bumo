@@ -112,6 +112,28 @@ function checkPledge(type){
     }
 }
 
+function updateCandidates(type, address){
+    let canKey = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    let candidates = loadObj(canKey);
+    let candidate = candidates.find(function(x){
+        return x[0] === address;
+    });
+
+    candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
+    candidates.sort(doubleSort);
+    saveObj(canKey, candidates);
+
+    if(type === memberType.validator && candidates.indexOf(candidate) < validatorSetSize){
+        let validators = candidates.slice(0, validatorSetSize);
+        return setValidators(JSON.stringify(validators));
+    }
+    else if(type === memberType.kol && candidates.indexOf(candidate) < kolSetSize){
+        let kols = candidates.slice(0, kolSetSize);
+        return saveObj(kolSetKey, kols);
+    }
+
+}
+
 function apply(type){
     let key = createApplyKey(key, sender);
     let proposal = loadObj(key);
@@ -130,25 +152,7 @@ function apply(type){
     }
 
     saveObj(key, proposal);
-
-    let canKey = type === memberType.validators ? validatorCandidatesKey : kolCandidatesKey;
-    let candidates = loadObj(canKey);
-    let candidate = candidates.find(function(x){
-        return x[0] === sender;
-    });
-
-    candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
-    candidates.sort(doubleSort);
-    saveObj(canKey, candidates);
-
-    if(type === memberType.validator && candidates.indexOf(candidate) < validatorSetSize){
-        let validators = candidates.slice(0, validatorSetSize);
-        return setValidators(JSON.stringify(validators));
-    }
-    else if(type === memberType.kol && candidates.indexOf(candidate) < kolSetSize){
-        let kols = candidates.slice(0, kolSetSize);
-        return saveObj(kolSetKey, kols);
-    }
+    updateCandidates(type, sender);
 }
 
 function approveIn(type, address){
