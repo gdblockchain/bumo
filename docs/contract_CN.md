@@ -122,7 +122,7 @@ BUMO 智能合约内提供了全局对象 `Chain` 和 `Utils`, 这两个对象�
 ### 返回值介绍
    所有内部函数的调用，如果失败则返回 false 或者直接抛出异常执行终止，成功则为其他对象。如果遇到参数错误，会在错误描述中提示参数位置出错，这里的位置指参数的索引号，即从 __0__ 开始计数。例如 `parameter 1` 表示第 __2__ 个参数错误。如下例子：
 ```
-issueAsset("CNY", 10000);
+Chain.issueAsset("CNY", 10000);
 /*
     错误描述：
     Contract execute error,issueAsset parameter 1 should be a string
