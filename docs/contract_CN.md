@@ -102,7 +102,7 @@ BUMO 智能合约内提供了全局对象 `Chain` 和 `Utils`, 这两个对象�
 对象.方法(变量)
 
 - 获取账号余额：	`Chain.getBalance('buQsZNDpqHJZ4g5hz47CqVMk5154w1bHKsHY');`
-- 打印日志		    	`Utils.log(‘hello’);`
+- 打印日志		    	`Utils.log('hello');`
 - 当前区块号：		`Chain.block.number;`
 
 ### 读写权限
