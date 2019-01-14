@@ -15,6 +15,7 @@
 
 #include <utils/headers.h>
 #include <common/pb2json.h>
+#include "proto/cpp/chain.pb.h"
 #include "bft.h"
 
 namespace bumo {
@@ -230,11 +231,8 @@ namespace bumo {
 	}
 
 	void Pbft::OnTimer(int64_t current_time) {
-
-		
 		utils::MutexGuard guard(lock_);
 
-		
 		PbftInstance *last_prepared_instance = NULL;
 		const PbftInstanceIndex *index = NULL;
 		PbftInstanceMap::iterator last_prepared_iter = instances_.end();
@@ -822,7 +820,6 @@ namespace bumo {
 
 		LOG_INFO("Send prepare message: view number(" FMT_I64 "), replica id(" FMT_I64 "), sequence(" FMT_I64 "), round number(1), value(%s)",
 			pre_prepare.view_number(), replica_id_, pre_prepare.sequence(), notify_->DescConsensusValue(pre_prepare.value()).c_str());
-
 		PbftEnvPointer prepare_msg = NewPrepare(pre_prepare, 1);
 		if (!SendMessage(prepare_msg)) {
 			return false;
@@ -1064,7 +1061,7 @@ namespace bumo {
 		}
 
 		ClearViewChanges();
-		OnViewChanged("");
+		OnViewChanged("", "");
 		return true;
 	}
 
@@ -1130,7 +1127,7 @@ namespace bumo {
 			LOG_INFO("View-change instance got the prepared value, desc(%s)", PbftDesc::GetPbft(pbft).c_str());
 		}
 
-		//Delete uncommited instances
+		//Delete uncommitted instances
 		for (PbftInstanceMap::iterator iter_inst = instances_.begin();
 			iter_inst != instances_.end();
 			) {
@@ -1146,6 +1143,17 @@ namespace bumo {
 
 		ValueSaver saver;
 		//Enter the new view
+		std::string abnormal_node;
+		int32_t vsize = validators_.size();
+		for (std::map<std::string, int64_t>::iterator iter = validators_.begin();
+			iter != validators_.end();
+			iter++) {
+			if (iter->second == view_number_ % vsize) {
+				abnormal_node = iter->first;
+				break;
+			}
+		}
+
 		view_number_ = vc_instance.view_number_;
 		view_active_ = true;
 		saver.SaveValue(PbftDesc::VIEW_ACTIVE, view_active_ ? 1 : 0);
@@ -1157,7 +1165,7 @@ namespace bumo {
 		ClearViewChanges();
 
 		notify_->OnResetCloseTimer();
-		OnViewChanged(last_cons_value);
+		OnViewChanged(last_cons_value, abnormal_node);
 
 		return true;
 	}
