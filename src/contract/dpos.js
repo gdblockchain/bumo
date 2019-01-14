@@ -94,14 +94,6 @@ function abolishProposal(proof){
     return proposal;
 }
 
-function topX(set, n){
-    let validators    = set.slice(0, n);
-    let validatorsStr = JSON.stringify(validators);
-    setValidators(validatorsStr);
-    log('Set new validator sets(' + validatorsStr + ') succeed.');
-    return true;
-}
-
 function checkPledge(type){
     let com = -1;
 
@@ -136,20 +128,21 @@ function apply(type){
         return true;
     }
 
-    let setKey = type === memberType.validators ? validatorCandidatesKey : kolCandidatesKey;
-    let set = loadObj(setKey);
-    let candidate = set.find(function(x){
+    let canKey = type === memberType.validators ? validatorCandidatesKey : kolCandidatesKey;
+    let candidates = loadObj(canKey);
+    let candidate = candidates.find(function(x){
         return x[0] === sender;
     });
 
     candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
-    set.sort(doubleSort);
-    saveObj(setKey, set);
-    if(set.indexOf(candidate) >= validatorSetSize){
+    candidates.sort(doubleSort);
+    saveObj(canKey, candidates);
+
+    if(candidates.indexOf(candidate) >= validatorSetSize){
         return true;
     }
 
-    let validators = set.slice(0, validatorSetSize);
+    let validators = candidates.slice(0, validatorSetSize);
     let str = JSON.stringify(validators); 
     return setValidators(str);
 }
