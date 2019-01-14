@@ -190,7 +190,28 @@ function approveIn(type, applicant){
 }
 
 function vote(type, address){
+    let key = '';
 
+    if(type === memberType.validators){
+        key = 'voter_' + sender + '_validator_' + address;
+    }
+    else if(type === memberType.kol){
+        key = 'voter_' + sender + '_kol_' + address;
+    }
+    else{
+        assert('Unkown voting type.');
+    }
+
+    let voteAmount = loadObj(key);
+    if(voteAmount === false){
+        voteAmount = thisPayCoinAmount;
+    }
+    else{
+        voteAmount = int64Add(voteAmount, thisPayCoinAmount);
+    }
+
+    saveObj(key, thisPayCoinAmount);
+    updateCandidates(type, address);
 }
 
 function abolish(type, address, proof){
