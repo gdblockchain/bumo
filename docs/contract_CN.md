@@ -399,7 +399,7 @@ Chain.issueAsset("CNY", 10000);
     ```
 
 - ### 创建合约
-      `Chain.contractCreate(balance, type, code, input);`
+    `Chain.contractCreate(balance, type, code, input);`
 
     - balance: 字符串类型，转移给被创建的合约的资产。
     - type : 整型，0代表javascript。
@@ -423,35 +423,35 @@ Chain.issueAsset("CNY", 10000);
 
 ### 区块信息 Chain.block
 - #### 当前区块时间戳
-    Chain.block.timestamp
+    `Chain.block.timestamp`
 
 - #### 当前区块高度
-    Chain.block.number
+    `Chain.block.number`
 
 ### 交易信息 Chain.tx
 - #### 交易的发起者
-    Chain.tx.initiator
+   `Chain.tx.initiator`
 
 - #### 交易的触发者
-    Chain.tx.sender
+    `Chain.tx.sender`
 
 - #### 交易的gas价格
-    Chain.tx.gasPrice
+    `Chain.tx.gasPrice`
 
 - #### 交易的哈希值
-    Chain.tx.hash
+    `Chain.tx.hash`
     
 - #### 交易的限制费用
-    Chain.tx.feeLimit
+    `Chain.tx.feeLimit`
 
 ### 消息 Chain.msg
 
 - #### 消息的发起者
-    Chain.msg.initiator
+    `Chain.msg.initiator`
 
 - #### 消息的触发者
-     Chain.msg.sender
-     该值等于本次调用该合约的账号。
+    `Chain.msg.sender`
+    该值等于本次调用该合约的账号。
 
     例如某账号发起了一笔交易，该交易中有个操作是调用合约Y（该操作的source_address是x），那么合约Y执行过程中，sender的值就是x账号的地址。
 
@@ -463,18 +463,18 @@ Chain.issueAsset("CNY", 10000);
     ```
 
 - #### 本次支付操作的 BU coin
-    Chain.msg.coinAmount
+    `Chain.msg.coinAmount`
 
 
 - #### 本次支付操作的资产
-    Chain.msg.asset
+    `Chain.msg.asset`
     为对象类型{"amount": 1000, "key" : {"issuer": "buQsZNDpqHJZ4g5hz47CqVMk5154w1bHKsHY", "code":"CNY"}}
 
 - #### 本次交易里的发起者的nonce值
-    Chain.msg.nonce
+    `Chain.msg.nonce`
 
 - #### 触发本次合约调用的操作的序号
-    Chain.msg.triggerIndex
+    `Chain.msg.triggerIndex`
 
     该值等于触发本次合约的操作的序号。
 
@@ -486,7 +486,7 @@ Chain.issueAsset("CNY", 10000);
     ```
 
 ### 当前合约账号的地址
-    Chain.thisAddress
+    `Chain.thisAddress`
 
     该值等于该合约账号的地址。
 
