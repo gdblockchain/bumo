@@ -24,35 +24,32 @@ function doubleSort(a, b){
     return com;
 }
 
-function getObjectMetaData(key){
-    assert(typeof key === 'string', 'Args type error, key must be a string.');
-
+function loadObj(key)
+{
     let data = storageLoad(key);
     assert(data !== false, 'Get ' + key + ' from metadata failed.');
 
-    let value = JSON.parse(data);
-    return value;
+    return JSON.parse(data);
 }
 
-function setMetaData(key, value)
+function delObj(key)
 {
-    assert(typeof key === 'string', 'Args type error. key must be a string.');
+    storageDel(key);
+    log('Delete (' + key + ') from metadata succeed.');
+}
 
-    if(value === undefined){
-        storageDel(key);
-        log('Delete (' + key + ') from metadata succeed.');
-    }
-    else{
-        let strVal = JSON.stringify(value);
-        storageStore(key, strVal);
-        log('Set key(' + key + '), value(' + strVal + ') in metadata succeed.');
-    }
+function saveObj(key, value)
+{
+    let str = JSON.stringify(value);
+    storageStore(key, str);
+    log('Set key(' + key + '), value(' + str + ') in metadata succeed.');
 }
 
 function transferCoin(dest, amount)
 {
-    assert((typeof dest === 'string') && (typeof amount === 'string'), 'Args type error. arg-dest and arg-amount must be a string.');
-    if(amount === '0'){ return true; }
+    if(amount === '0'){
+        return true; 
+    }
 
     payCoin(dest, amount);
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
@@ -92,7 +89,9 @@ function insertCandidatesSorted(applicant, amount, candidates){
 
     let i = 0;
     while(i < candidates.length){
-        if(int64Compare(amount, candidates[i][1]) >= 0){ break; }
+        if(int64Compare(amount, candidates[i][1]) >= 0){
+            break;
+        }
         i += 1;
     }
 
