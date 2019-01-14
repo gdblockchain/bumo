@@ -380,9 +380,8 @@ Chain.issueAsset("CNY", 10000);
 
 
 - ### 查询合约
-  Chain.contractQuery
 
-      `Chain.delegateQuery(contractAddress, input);`
+    `Chain.delegateQuery(contractAddress, input);`
 
     - contractAddress: 被调用的合约地址。
     - input：调用参数。
