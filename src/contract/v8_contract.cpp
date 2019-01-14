@@ -99,7 +99,7 @@ namespace bumo {
 		JsFuncList &blockchain = js_obj_[BLOCKCHAIN_OBJ];
 		blockchain.read_["getBalance"] = V8Contract::CallBackGetBalance;
 		blockchain.read_["getAccountAsset"] = V8Contract::CallBackGetAccountAsset;
-		blockchain.read_["storageLoad"] = V8Contract::CallBackStorageLoad;
+		blockchain.read_["load"] = V8Contract::CallBackStorageLoad;
 		blockchain.read_["getBlockHash"] = V8Contract::CallBackGetBlockHash;
 		blockchain.read_["delegateQuery"] = V8Contract::CallBackDelegateQuery;
 		blockchain.read_["contractQuery"] = V8Contract::CallBackContractQuery;
@@ -108,8 +108,8 @@ namespace bumo {
 		blockchain.read_["getContractProperty"] = V8Contract::CallBackGetContractProperty;
 
 		//for blockchain object write
-		blockchain.write_["storageStore"] = V8Contract::CallBackStorageStore;
-		blockchain.write_["storageDel"] = V8Contract::CallBackStorageDel;
+		blockchain.write_["store"] = V8Contract::CallBackStorageStore;
+		blockchain.write_["del"] = V8Contract::CallBackStorageDel;
 		blockchain.write_["configFee"] = V8Contract::CallBackConfigFee;
 		blockchain.write_["setValidators"] = V8Contract::CallBackSetValidators;
 		blockchain.write_["payCoin"] = V8Contract::CallBackPayCoin;
@@ -521,7 +521,7 @@ namespace bumo {
 				v8::Local<v8::Object> asset = v8::Object::New(isolate_);
 				asset->Set(ToV8String("amount"), ToV8String(utils::String::ToString(msg_asset.amount()).c_str()));
 				asset->Set(ToV8String("key"), v8_asset_key);
-				msg->Set(ToV8String("asset"), block);
+				msg->Set(ToV8String("asset"), asset);
 			}
 		}
 		block_chain_obj->Set(ToV8String("msg"), msg);
