@@ -29,7 +29,7 @@
         - [Chain.block](#区块信息-chain.block)
             - [Chain.block.timestamp](#当前区块时间戳)
             - [Chain.block.number](#当前区块高度)
-        - [Chain.tx](#交易信息-chain.tx)
+        - [Chain.tx](#交易-chain.tx)
             - [Chain.tx.initiator](#交易的发起者)
             - [Chain.tx.sender](#交易的触发者)
             - [Chain.tx.gasPrice](#交易的gas价格)
@@ -424,34 +424,52 @@ Chain.issueAsset("CNY", 10000);
 ### 区块信息 Chain.block
 - #### 当前区块时间戳
     `Chain.block.timestamp`
+    当前交易执行时候所在的区块时间戳。
 
 - #### 当前区块高度
     `Chain.block.number`
+    当前交易执行时候所在的区块高度。
 
-### 交易信息 Chain.tx
+### 交易 Chain.tx
+交易是用户签名的那笔交易信息。
+
 - #### 交易的发起者
    `Chain.tx.initiator`
+    交易最原始的发起者，即交易的费用付款者。
 
 - #### 交易的触发者
     `Chain.tx.sender`
+    交易最原始的触发者，即交易里触发合约执行的操作的账户。
+    例如某账号发起了一笔交易，该交易中有个操作是调用合约Y（该操作的source_address是x），那么合约Y执行过程中，sender的值就是x账号的地址。
+    
+    ```javascript
+    let bar = Chain.msg.sender;
+    /*
+    那么bar的值是x的账号地址。
+    */
+    ```
 
 - #### 交易的gas价格
     `Chain.tx.gasPrice`
+    交易签名里的gas价格。
 
 - #### 交易的哈希值
     `Chain.tx.hash`
+    交易的hash值
     
 - #### 交易的限制费用
     `Chain.tx.feeLimit`
 
 ### 消息 Chain.msg
+消息是在交易里触发智能合约执行产生的信息。在触发的合约执行的过程中，交易信息不会被改变，消息会发生变化。例如在合约中调用`contractCall`，`contractQuery`的时候，消息会变化。
 
 - #### 消息的发起者
     `Chain.msg.initiator`
+    本消息的原始的发起者账号。
 
 - #### 消息的触发者
     `Chain.msg.sender`
-    该值等于本次调用该合约的账号。
+    本次消息的触发者账号。
 
     例如某账号发起了一笔交易，该交易中有个操作是调用合约Y（该操作的source_address是x），那么合约Y执行过程中，sender的值就是x账号的地址。
 
@@ -465,13 +483,12 @@ Chain.issueAsset("CNY", 10000);
 - #### 本次支付操作的 BU coin
     `Chain.msg.coinAmount`
 
-
 - #### 本次支付操作的资产
     `Chain.msg.asset`
-    为对象类型{"amount": 1000, "key" : {"issuer": "buQsZNDpqHJZ4g5hz47CqVMk5154w1bHKsHY", "code":"CNY"}}
+    为对象类型{"amount": 1000, "key" : {"issuer": "buQsZNDpqHJZ4g5hz47CqVMk5154w1bHKsHY", "code":"CNY"}}。
 
 - #### 本次交易里的发起者的nonce值
-    `Chain.msg.nonce`
+    `Chain.msg.nonce`。即`Chain.msg.initiator`账号的 nonce值。
 
 - #### 触发本次合约调用的操作的序号
     `Chain.msg.triggerIndex`
