@@ -4,15 +4,16 @@ const validatorSetSize       = 30;
 const inPassRate             = 0.5;
 const outPassRate            = 0.7;
 const effectiveVoteInterval  = 15 * 24 * 60 * 60 * 1000 * 1000;
-const minPledgeAmount        = 5000000 * 100000000;
-const applicantVar    = 'apply_';
-const abolishVar      = 'abolish_';
-const proposerVar     = 'proposer';
-const reasonVar       = 'reason';
-const ballotVar       = 'ballot';
-const candidatesVar   = 'validator_candidates';
-const pledgeAmountVar = 'pledge_coin_amount';
-const expiredTimeVar  = 'voting_expired_time';
+const validatorMinPledge     = 5000000 * 100000000;
+const kolMinPledge           = 5 * 100000000;
+const validatorCandidatesKey = 'validator_candidates';
+const kolCandidatesKey       = 'kol_candidates';
+
+const memberType = {
+   'committee' : 1,
+   'validator' : 2,
+   'kol' : 3
+};
 
 function doubleSort(a, b){
     let com = int64Compare(b[1], a[1]) ;
@@ -27,9 +28,11 @@ function doubleSort(a, b){
 function loadObj(key)
 {
     let data = storageLoad(key);
-    assert(data !== false, 'Get ' + key + ' from metadata failed.');
+    if(data !== false){
+        return JSON.parse(data);
+    }
 
-    return JSON.parse(data);
+    return false;
 }
 
 function delObj(key)
@@ -55,70 +58,116 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function findI0(arr, key){
-    assert((typeof arr === 'object') && (typeof key === 'string'), 'Args type error. arg-arr must be an object, and arg-key must be a string.');
-
-    let i = 0;
-    while(i < arr.length){
-        if(arr[i][0] === key){
-            break;
-        }
-        i += 1;
+function getKey(type){
+    let key = '';
+    if(type == memberType.committee){
+        key = 'apply_committee_' + sender; 
     }
-
-    if(i !== arr.length){
-        return i;
+    else if(type === member.validators){
+        key = 'apply_validator_' + sender; 
     }
     else{
-        return false;
+        key = 'apply_KOL_' + sender; 
     }
+
+    return key;
 }
 
-function insertCandidatesSorted(applicant, amount, candidates){
-    assert(typeof applicant === 'string' && typeof amount === 'string' && typeof candidates === 'object', 'args error, arg-applicant and arg-amount must be string, arg-candidates must be arrary.');
+function applyProposal(){
+    let proposal = {
+        'pledge':thisPayCoinAmount,
+        'expiration':blockTimestamp + effectiveVoteInterval,
+        'ballot':[]
+    };
 
-    if(candidates.length >= (validatorSetSize * 2)){
-        log('Validator candidates is enough.');
-        return false;
-    }
-
-    if(candidates.length === 0){
-        candidates.push([applicant, amount]);
-        return candidates;
-    }
-
-    let i = 0;
-    while(i < candidates.length){
-        if(int64Compare(amount, candidates[i][1]) >= 0){
-            break;
-        }
-        i += 1;
-    }
-
-    if(i >= candidates.length){
-        candidates.splice(i, 0, [applicant, amount]);
-        return candidates;
-    }
-
-    if(amount === candidates[i][1]){
-        while(i < candidates.length){
-            if(applicant <= candidates[i][0] || int64Compare(amount, candidates[i][1]) > 0){ break; }
-            i += 1;
-        }
-    }
-
-    candidates.splice(i, 0, [applicant, amount]);
-    return candidates;
+    return proposal;
 }
 
-function setValidatorsFromCandidate(candidates){
-    let validators    = candidates.slice(0, validatorSetSize);
+function abolishProposal(proof){
+    let proposal = {
+        'Informer': sender,
+        'reason': proof,
+        'expiration': blockTimestamp + effectiveVoteInterval,
+        'ballot': [sender]
+    };
+
+    return proposal;
+}
+
+function topX(set, n){
+    let validators    = set.slice(0, n);
     let validatorsStr = JSON.stringify(validators);
     setValidators(validatorsStr);
     log('Set new validator sets(' + validatorsStr + ') succeed.');
     return true;
 }
 
+function apply(type){
+    assert(type === memberType.committee && thisPayCoinAmount === '0', 'No deposit is required to apply to join the committee');
+
+    let key = getKey(key);
+    let proposal = loadObj(key);
+
+    if(proposal === false){
+        proposal = applyProposal();
+        return saveObj(key, proposal);
+    }
+
+    assert(type !== memberType.committee, sender + ' has already applied for committee.');
+    proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
+    saveObj(key, proposal);
+
+    if(proposal.passTime === undefined){
+        return true;
+    }
+
+    let setKey = type === memberType.validators ? validatorCandidatesKey : kolCandidatesKey;
+    let set = loadObj(setKey);
+    let candidate = set.find(function(x){
+        return x[0] === sender;
+    });
+
+    candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
+    set.sort(doubleSort);
+    saveObj(setKey, set);
+    if(set.indexOf(candidate) >= validatorSetSize){
+        return true;
+    }
+
+    let validators = set.slice(0, validatorSetSize);
+    let str = JSON.stringify(validators); 
+    return setValidators(str);
+}
+
+function approveIn(type, address){
+
+}
+
+function vote(type, address){
+
+}
+
+function abolish(type, address, proof){
+
+}
+
+function approveOut(type){
+
+}
+
+function withdraw(type){
+
+}
+
+
+function setValidatorsFromCandidate(candidates){
+    //candidates = candidates.sort(doubleSort);
+    let validators    = candidates.slice(0, validatorSetSize);
+    let validatorsStr = JSON.stringify(validators);
+    setValidators(validatorsStr);
+    log('Set new validator sets(' + validatorsStr + ') succeed.');
+    return true;
+}
 
 function query(input_str){
     let input  = JSON.parse(input_str);
@@ -128,7 +177,7 @@ function query(input_str){
         result.current_validators = getValidators();
     }
     else if(input.method === 'getCandidates'){
-        result.current_candidates = storageLoad(candidatesVar);
+        result.current_candidates = storageLoad(candidatesKey);
     }
     else{
        	throw '<unidentified operation type>';
@@ -158,7 +207,7 @@ function main(input_str){
     	approveOut(params.type, params.address);
     }
     else if(input.method === 'withdraw'){
-    	withdraw(input.params.address);
+    	withdraw(params.type);
     }
     else{
         throw '<undidentified operation type>';
@@ -177,7 +226,7 @@ function init(input_str){
 
     let candidates = validators.sort(doubleSort);
     let str = JSON.stringify(candidates);
-    storageStore(candidatesVar, str);
+    storageStore(candidatesKey, str);
 
     return true;
 }
