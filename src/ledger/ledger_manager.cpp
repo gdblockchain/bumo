@@ -90,7 +90,7 @@ namespace bumo {
 		}
 
 		if (!ledger_db->Put(General::KEY_LEDGER_SEQ, account_db_seq)) {
-			LOG_ERROR("Failed to get ledger seq from account-db");
+			LOG_ERROR("Failed to set ledger seq to account-db");
 			return false;
 		}
 
@@ -306,6 +306,56 @@ namespace bumo {
 		return fee.ParseFromString(str);
 	}
 
+	bool LedgerManager::ReadSharerRate(){
+		std::vector<std::string> vec = utils::String::split(election_config_.fee_allocation_share(), ":");
+		if (vec.size() != SHARER_MAX) {
+			return false;
+		}
+
+		for (int i = 0; i < SHARER_MAX; i++) {
+			uint32_t value = 0;
+			if (!utils::String::SafeStoui(vec[i], value)) {
+				LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
+				return false;
+			}
+			fee_sharer_rate_.push_back(value);
+		}
+
+		return true;
+	}
+
+	uint32_t LedgerManager::GetFeesSharerRate(FeeSharerType owner) {
+		return fee_sharer_rate_[owner];
+	}
+
+	bool LedgerManager::SetProtoElectionConfig(const protocol::ElectionConfig& ecfg) {
+		election_config_ = ecfg;
+		return ReadSharerRate();
+	}
+
+	void LedgerManager::AddAbnormalRecord(const std::string& abnormal_node) {
+		std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.find(abnormal_node);
+		if (it != abnormal_records_.end()) {
+			it->second++;
+		}
+		else {
+			abnormal_records_.insert(std::make_pair(abnormal_node, 1));
+		}
+	}
+
+	void LedgerManager::UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch) {
+		Json::Value abnormal_json;
+		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
+			it != abnormal_records_.end();
+			it++) {
+			Json::Value item;
+			item["address"] = it->first;
+			item["count"] = it->second;
+			abnormal_json.append(item);
+		}
+		batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
+	}
+
 	bool LedgerManager::CreateGenesisAccount() {
 		LOG_INFO("There is no ledger, then create an init ledger.");
 
@@ -495,7 +545,7 @@ namespace bumo {
 				PROCESS_EXIT("Failed to write ledger and transaction to database(%s)", ledger_db->error_desc().c_str());
 			}
 
-			//Write acount db
+			//Write account db
 			if (!Storage::Instance().account_db()->WriteBatch(*batch)) {
 				PROCESS_EXIT("Failed to write account to database, %s", Storage::Instance().account_db()->error_desc().c_str());
 			}
@@ -561,7 +611,7 @@ namespace bumo {
 		data["name"] = "ledger_manager";
 		data["tx_count"] = GetLastClosedLedger().tx_count();
 		data["account_count"] = GetAccountNum();
-		data["ledger_sequence"] = GetLastClosedLedger().seq();
+		data["ledger_sequence"] = GetLastClosedLedger().seq(); 
 		data["time"] = utils::String::Format(FMT_I64 " ms",
 			(utils::Timestamp::HighResolution() - begin_time) / utils::MICRO_UNITS_PER_MILLI);
 		data["hash_type"] = HashWrapper::GetLedgerHashType() == HashWrapper::HASH_TYPE_SM3 ? "sm3" : "sha256";
@@ -570,6 +620,16 @@ namespace bumo {
 
 		data["chain_max_ledger_seq"] = chain_max_ledger_probaly_ > data["ledger_sequence"].asInt64() ?
 		chain_max_ledger_probaly_ : data["ledger_sequence"].asInt64();
+		Json::Value abnormal_json;
+		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
+			it != abnormal_records_.end();
+			it++) {
+			Json::Value item;
+			item["address"] = it->first;
+			item["count"] = it->second;
+			abnormal_json.append(item);
+		}
+		data["abnormal_records"] = abnormal_json;
 	}
 
 	bool LedgerManager::CloseLedger(const protocol::ConsensusValue& consensus_value, const std::string& proof) {

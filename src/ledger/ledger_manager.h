@@ -43,6 +43,12 @@ namespace bumo {
 		public bumo::StatusModule {
 		friend class utils::Singleton<bumo::LedgerManager>;
 	public:
+		enum FeeSharerType {
+			SHARER_DAPP = 0,
+			SHARER_BLOCK_REWARD = 1,
+			SHARER_CREATOR = 2,
+			SHARER_MAX = 3
+		};
 
 		bool Initialize();
 		bool Exit();
@@ -66,6 +72,14 @@ namespace bumo {
 		static bool FeesConfigGet(const std::string& hash, protocol::FeeConfig &fee);
 		bool ConsensusValueFromDB(int64_t seq, protocol::ConsensusValue& request);
 		protocol::FeeConfig GetCurFeeConfig();
+        
+        // dpos
+        const protocol::ElectionConfig& GetProtoElectionConfig();
+        bool SetProtoElectionConfig(const protocol::ElectionConfig& ecfg);
+		bool ReadSharerRate();
+		uint32_t LedgerManager::GetFeesSharerRate(FeeSharerType owner);
+		void UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch);
+        void AddAbnormalRecord(const std::string& abnormal_node);
 
 		Result DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context); // -1: false, 0 : successs, > 0 exception
 		void NotifyLedgerClose(LedgerFrm::pointer closing_ledger, bool has_upgrade);
@@ -83,6 +97,9 @@ namespace bumo {
 		Json::Value statistics_;
 		utils::ReadWriteLock tree_mutex_;
 		KVTrie* tree_;
+		std::unordered_map<std::string, int64_t> abnormal_records_;
+		protocol::ElectionConfig election_config_;
+        std::vector<uint32_t> fee_sharer_rate_;
 
 		LedgerContextManager context_manager_;
 	private:
