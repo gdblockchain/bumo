@@ -102,13 +102,28 @@ function topX(set, n){
     return true;
 }
 
-function apply(type){
-    assert(type === memberType.committee && thisPayCoinAmount === '0', 'No deposit is required to apply to join the committee');
+function checkPledge(type){
+    let com = -1;
 
+    if(type === memberType.validators){
+        com = int64Compare(thisPayCoinAmount, validatorMinPledge);
+        assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of validator.');
+    }
+    else if(type === memberType.kol){
+        com = int64Compare(thisPayCoinAmount, kolMinPledge);
+        assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of KOL.');
+    }
+    else if(type === memberType.committee){
+        assert(thisPayCoinAmount === '0', 'No deposit is required to apply to join the committee');
+    }
+}
+
+function apply(type){
     let key = getKey(key);
     let proposal = loadObj(key);
 
     if(proposal === false){
+        checkPledge(type);
         proposal = applyProposal();
         return saveObj(key, proposal);
     }
