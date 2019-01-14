@@ -10,6 +10,7 @@ const kolMinPledge           = 5 * 100000000;
 const validatorCandidatesKey = 'validator_candidates';
 const kolCandidatesKey       = 'kol_candidates';
 const kolSetKey              = 'kolset';
+const committeeKey           = 'committee';
 
 const memberType = {
    'committee' : 1,
@@ -112,14 +113,20 @@ function checkPledge(type){
     }
 }
 
-function updateCandidates(type, address){
+function updateCandidates(type, address, pledge){
     let canKey = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
     let candidates = loadObj(canKey);
     let candidate = candidates.find(function(x){
         return x[0] === address;
     });
 
-    candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
+    if(candidate === undefined){
+        candidates.push([address, pledge]);
+    }
+    else{
+        candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
+    }
+
     candidates.sort(doubleSort);
     saveObj(canKey, candidates);
 
@@ -131,7 +138,6 @@ function updateCandidates(type, address){
         let kols = candidates.slice(0, kolSetSize);
         return saveObj(kolSetKey, kols);
     }
-
 }
 
 function apply(type){
@@ -155,12 +161,32 @@ function apply(type){
     updateCandidates(type, sender);
 }
 
-function approveIn(type, address){
+function approveIn(type, applicant){
+    let committee = loadObj(committeeKey);
+    assert(committee.includes(sender), 'Only committee members have the right to approve.');
+
     let key = createApplyKey(type, address);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
-    if()
+    if(blockTimestamp >= proposal.expiration){
+        transferCoin(applicant, proposal.pledge);
+        return delObj(key);
+    }
+
+    assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
+    proposal.ballot.push(sender);
+    if(proposal.ballot.length <= parseInt(committee.length * inPassRate + 0.5)){
+        return saveObj(key, proposal);
+    }
+
+    if(type === memberType.committee){
+        committee.push(applicant);
+        return saveObj(key, committee);
+    }
+    else{
+        return updateCandidates(type, applicant, proposal.pledge);
+    }
 }
 
 function vote(type, address){
