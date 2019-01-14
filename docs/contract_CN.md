@@ -13,7 +13,7 @@
         - [Chain.getBlockHash](#获取区块信息)
         - [Chain.tlog](#输出交易日志)
         - [Chain.getAccountMetadata](#获取指定账号的metadata)
-        - [Chain.getBalance](#获取账号信息(不包含metada和资产))
+        - [Chain.getBalance](#获取账号coin-amount)
         - [Chain.getAccountAsset](#获取某个账号的资产信息)
         - [Chain.getContractProperty](#获取合约账号属性)
         - [Chain.payCoin](#转账)
@@ -219,7 +219,7 @@ Chain.issueAsset("CNY", 10000);
       返回：成功返回字符串，如 'values', 失败返回false
     */
     ```
-- ### 获取账号信息(不包含metada和资产)
+- ### 获取账号coin amount
 
     `Chain.getBalance(address);`
     - address: 账号地址
