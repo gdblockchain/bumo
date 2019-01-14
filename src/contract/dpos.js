@@ -1,6 +1,7 @@
 'use strict';
 
 const validatorSetSize       = 30;
+const kolSetSize             = 100;
 const inPassRate             = 0.5;
 const outPassRate            = 0.7;
 const effectiveVoteInterval  = 15 * 24 * 60 * 60 * 1000 * 1000;
@@ -8,6 +9,7 @@ const validatorMinPledge     = 5000000 * 100000000;
 const kolMinPledge           = 5 * 100000000;
 const validatorCandidatesKey = 'validator_candidates';
 const kolCandidatesKey       = 'kol_candidates';
+const kolSetKey              = 'kolset';
 
 const memberType = {
    'committee' : 1,
@@ -58,16 +60,16 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function getKey(type){
+function createApplyKey(type, address){
     let key = '';
     if(type == memberType.committee){
-        key = 'apply_committee_' + sender; 
+        key = 'apply_committee_' + address; 
     }
     else if(type === member.validators){
-        key = 'apply_validator_' + sender; 
+        key = 'apply_validator_' + address; 
     }
     else{
-        key = 'apply_KOL_' + sender; 
+        key = 'apply_KOL_' + address; 
     }
 
     return key;
@@ -111,7 +113,7 @@ function checkPledge(type){
 }
 
 function apply(type){
-    let key = getKey(key);
+    let key = createApplyKey(key, sender);
     let proposal = loadObj(key);
 
     if(proposal === false){
@@ -120,13 +122,14 @@ function apply(type){
         return saveObj(key, proposal);
     }
 
-    assert(type !== memberType.committee, sender + ' has already applied for committee.');
     proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
-    saveObj(key, proposal);
-
     if(proposal.passTime === undefined){
+        proposal.expiration = blockTimestamp + effectiveVoteInterval,
+        saveObj(key, proposal);
         return true;
     }
+
+    saveObj(key, proposal);
 
     let canKey = type === memberType.validators ? validatorCandidatesKey : kolCandidatesKey;
     let candidates = loadObj(canKey);
@@ -138,17 +141,22 @@ function apply(type){
     candidates.sort(doubleSort);
     saveObj(canKey, candidates);
 
-    if(candidates.indexOf(candidate) >= validatorSetSize){
-        return true;
+    if(type === memberType.validator && candidates.indexOf(candidate) < validatorSetSize){
+        let validators = candidates.slice(0, validatorSetSize);
+        return setValidators(JSON.stringify(validators));
     }
-
-    let validators = candidates.slice(0, validatorSetSize);
-    let str = JSON.stringify(validators); 
-    return setValidators(str);
+    else if(type === memberType.kol && candidates.indexOf(candidate) < kolSetSize){
+        let kols = candidates.slice(0, kolSetSize);
+        return saveObj(kolSetKey, kols);
+    }
 }
 
 function approveIn(type, address){
-
+    let key = createApplyKey(type, address);
+    let proposal = loadObj(key);
+    assert(proposal !== false, 'failed to get metadata: ' + key + '.');
+        
+    if()
 }
 
 function vote(type, address){
