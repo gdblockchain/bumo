@@ -20,6 +20,12 @@ const memberType = {
    'kol' : 3
 };
 
+const motionType = {
+    'apply':'application',
+    'abolish':'abolition',
+    'withdraw':'withdraw',
+};
+
 function doubleSort(a, b){
     let com = int64Compare(b[1], a[1]) ;
 
@@ -138,16 +144,16 @@ function getProfit(){
     log(sender + ' extracted block reward ' + income);
 }
 
-function applicationKey(type, address){
+function proposalKey(proposalType, memType, address){
     let key = '';
-    if(type == memberType.committee){
-        key = 'apply_committee_' + address; 
+    if(memType == memberType.committee){
+        key = proposalType + '_committee_' + address; 
     }
-    else if(type === memberType.validator){
-        key = 'apply_validator_' + address; 
+    else if(memType === memberType.validator){
+        key = proposalType + '_validator_' + address; 
     }
-    else if(type === memberType.kol){
-        key = 'apply_KOL_' + address; 
+    else if(memType === memberType.kol){
+        key = proposalType + '_KOL_' + address; 
     }
     else{
         throw 'Unkown member type.';
@@ -211,7 +217,7 @@ function updateCandidates(type, address, pledge){
 }
 
 function apply(type){
-    let key = applicationKey(key, sender);
+    let key = proposalKey(motionType.apply, key, sender);
     let proposal = loadObj(key);
 
     if(proposal === false){
@@ -235,7 +241,7 @@ function approveIn(type, applicant){
     let committee = loadObj(committeeKey);
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = applicationKey(type, address);
+    let key = proposalKey(motionType,apply, type, address);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -283,24 +289,6 @@ function vote(type, address){
     updateCandidates(type, address);
 }
 
-function abolitionKey(type, address){
-    let key = '';
-    if(type == memberType.committee){
-        key = 'abolish_committee_' + address; 
-    }
-    else if(type === memberType.validator){
-        key = 'abolish_validator_' + address; 
-    }
-    else if(type === memberType.kol){
-        key = 'abolish_KOL_' + address; 
-    }
-    else{
-        throw 'Unkown member type.';
-    }
-
-    return key;
-}
-
 function abolitionProposal(proof){
     let proposal = {
         'Informer': sender,
@@ -341,7 +329,7 @@ function abolish(type, address, proof){
         throw 'Unkown abolish type.';
     }
 
-    let key = abolitionKey(type, address);
+    let key = proposalKey(motionType.abolish, type, address);
     let proposal = loadObj(key);
     if(proposal === false){
         proposal = abolitionProposal(proof);
@@ -356,7 +344,7 @@ function approveOut(type, evil){
     let committee = loadObj(committeeKey);
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = abolitionKey(type, address);
+    let key = proposalKey(motionType.abolish, type, address);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -389,7 +377,7 @@ function approveOut(type, evil){
             setValidators(JSON.stringify(validators));
         }
 
-        let recordKey = applicationKey(type, evil);
+        let recordKey = proposalKey(motionType.apply, type, evil);
         let record = loadObj(recordKey);
         distribute(dpos.validatorCandidates, record.pledge);
     }
