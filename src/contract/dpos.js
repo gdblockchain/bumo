@@ -116,8 +116,7 @@ function checkPledge(type){
 }
 
 function updateCandidates(type, address, pledge){
-    let canKey = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
-    let candidates = loadObj(canKey);
+    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let candidate = candidates.find(function(x){
         return x[0] === address;
     });
@@ -130,16 +129,13 @@ function updateCandidates(type, address, pledge){
     }
 
     candidates.sort(doubleSort);
-    saveObj(canKey, candidates);
 
     if(type === memberType.validator && candidates.indexOf(candidate) < validatorSetSize){
         let validators = candidates.slice(0, validatorSetSize);
         return setValidators(JSON.stringify(validators));
     }
-    else if(type === memberType.kol && candidates.indexOf(candidate) < kolSetSize){
-        let kols = candidates.slice(0, kolSetSize);
-        return saveObj(kolSetKey, kols);
-    }
+
+    return true;
 }
 
 function apply(type){
@@ -193,7 +189,6 @@ function approveIn(type, applicant){
 
 function vote(type, address){
     let key = '';
-
     if(type === memberType.validators){
         key = 'voter_' + sender + '_validator_' + address;
     }
@@ -201,7 +196,7 @@ function vote(type, address){
         key = 'voter_' + sender + '_kol_' + address;
     }
     else{
-        assert('Unkown voting type.');
+        throw 'Unkown voting type.';
     }
 
     let voteAmount = loadObj(key);
@@ -347,7 +342,7 @@ function init(input_str){
 
     let reward= {};
     reward.allStake     = balance;
-    reward.distribution = [];
+    reward.distribution = {};
     saveObj(rewardKey, reward);
 
     return true;
