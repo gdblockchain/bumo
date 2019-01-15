@@ -448,7 +448,7 @@ function main(input_str){
         throw '<undidentified operation type>';
     }
 
-    saveObj();
+    dposSave();
 }
 
 function init(input_str){
