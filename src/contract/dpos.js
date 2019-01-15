@@ -311,7 +311,7 @@ function approveOut(type, evil){
 
         if(type === memberType.validator && index < validatorSetSize){
             let validators = candidates.slice(0, validatorSetSize);
-            return setValidators(JSON.stringify(validators));
+            setValidators(JSON.stringify(validators));
         }
 
         let recordKey = applicationKey(type, evil);
