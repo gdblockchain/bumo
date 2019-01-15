@@ -277,8 +277,47 @@ function abolish(type, address, proof){
     saveObj(key, proposal);
 }
 
-function approveOut(type){
+function approveOut(type, evil){
+    let committee = loadObj(committeeKey);
+    assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
+    let key = abolitionKey(type, address);
+    let proposal = loadObj(key);
+    assert(proposal !== false, 'failed to get metadata: ' + key + '.');
+        
+    if(blockTimestamp >= proposal.expiration){
+        return delObj(key);
+    }
+
+    assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
+    proposal.ballot.push(sender);
+    if(proposal.ballot.length <= parseInt(committee.length * outPassRate + 0.5)){
+        return saveObj(key, proposal);
+    }
+
+    if(type === memberType.committee){
+        committee.splice(committee.indexOf(evil), 1);
+        return saveObj(key, committee);
+    }
+    else{
+        let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+        let candidate = candidates.find(function(x){
+            return x[0] === evil;
+        });
+
+        let index = committee.indexOf(candidate);
+        candidates.splice(index, 1);
+        candidates.sort(doubleSort);
+
+        if(type === memberType.validator && index < validatorSetSize){
+            let validators = candidates.slice(0, validatorSetSize);
+            return setValidators(JSON.stringify(validators));
+        }
+
+        let recordKey = applicationKey(type, evil);
+        let record = loadObj(recordKey);
+        distribute(dpos.validatorCandidates, record.pledge);
+    }
 }
 
 function withdraw(type){
@@ -413,7 +452,6 @@ function main(input_str){
 }
 
 function init(input_str){
-
     let committee = JSON.parse(input_str);
     for(member in committee){
         assert(addressCheck(member), 'Committee member(' + member + ') is not valid adress.');
