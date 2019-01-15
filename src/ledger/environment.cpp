@@ -89,6 +89,23 @@ namespace bumo{
 		return true;
 	}
 
+	bool Environment::UpdateElectionConfig(const Json::Value &electionCfg) {
+		std::shared_ptr<Json::Value> ecfg;
+		settings_.Get(electionCfgKey, ecfg);
+
+		if (!ecfg){
+			ecfg = std::make_shared<Json::Value>(electionCfg);
+			settings_.Set(electionCfgKey, ecfg);
+		}
+		else{
+			for (auto it = electionCfg.begin(); it != electionCfg.end(); it++) {
+				(*ecfg)[it.memberName()] = electionCfg[it.memberName()];
+			}
+		}
+
+		return true;
+	}
+
 	bool Environment::GetVotedFee(const protocol::FeeConfig &old_fee, protocol::FeeConfig& new_fee) {
 		bool change = false;
 		new_fee = old_fee;

@@ -327,6 +327,17 @@ class Account : public ::google::protobuf::Message /* @@protoc_insertion_point(c
   ::google::protobuf::int64 balance() const;
   void set_balance(::google::protobuf::int64 value);
 
+  // optional string creator = 8;
+  void clear_creator();
+  static const int kCreatorFieldNumber = 8;
+  const ::std::string& creator() const;
+  void set_creator(const ::std::string& value);
+  void set_creator(const char* value);
+  void set_creator(const char* value, size_t size);
+  ::std::string* mutable_creator();
+  ::std::string* release_creator();
+  void set_allocated_creator(::std::string* creator);
+
   // @@protoc_insertion_point(class_scope:protocol.Account)
  private:
 
@@ -339,6 +350,7 @@ class Account : public ::google::protobuf::Message /* @@protoc_insertion_point(c
   ::google::protobuf::internal::ArenaStringPtr assets_hash_;
   ::protocol::Contract* contract_;
   ::google::protobuf::int64 balance_;
+  ::google::protobuf::internal::ArenaStringPtr creator_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_chain_2eproto();
   friend void protobuf_AssignDesc_chain_2eproto();
@@ -3399,6 +3411,18 @@ class ConsensusValue : public ::google::protobuf::Message /* @@protoc_insertion_
   ::protocol::ConsensusValueValidation* release_validation();
   void set_allocated_validation(::protocol::ConsensusValueValidation* validation);
 
+  // repeated .protocol.KeyPair entry = 8;
+  int entry_size() const;
+  void clear_entry();
+  static const int kEntryFieldNumber = 8;
+  const ::protocol::KeyPair& entry(int index) const;
+  ::protocol::KeyPair* mutable_entry(int index);
+  ::protocol::KeyPair* add_entry();
+  ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >*
+      mutable_entry();
+  const ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >&
+      entry() const;
+
   // @@protoc_insertion_point(class_scope:protocol.ConsensusValue)
  private:
 
@@ -3411,6 +3435,7 @@ class ConsensusValue : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::internal::ArenaStringPtr previous_ledger_hash_;
   ::protocol::LedgerUpgrade* ledger_upgrade_;
   ::protocol::ConsensusValueValidation* validation_;
+  ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair > entry_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_chain_2eproto();
   friend void protobuf_AssignDesc_chain_2eproto();
@@ -4031,6 +4056,50 @@ inline void Account::set_balance(::google::protobuf::int64 value) {
   
   balance_ = value;
   // @@protoc_insertion_point(field_set:protocol.Account.balance)
+}
+
+// optional string creator = 8;
+inline void Account::clear_creator() {
+  creator_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& Account::creator() const {
+  // @@protoc_insertion_point(field_get:protocol.Account.creator)
+  return creator_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void Account::set_creator(const ::std::string& value) {
+  
+  creator_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.Account.creator)
+}
+inline void Account::set_creator(const char* value) {
+  
+  creator_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.Account.creator)
+}
+inline void Account::set_creator(const char* value, size_t size) {
+  
+  creator_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.Account.creator)
+}
+inline ::std::string* Account::mutable_creator() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.Account.creator)
+  return creator_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* Account::release_creator() {
+  // @@protoc_insertion_point(field_release:protocol.Account.creator)
+  
+  return creator_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void Account::set_allocated_creator(::std::string* creator) {
+  if (creator != NULL) {
+    
+  } else {
+    
+  }
+  creator_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), creator);
+  // @@protoc_insertion_point(field_set_allocated:protocol.Account.creator)
 }
 
 // -------------------------------------------------------------------
@@ -7177,6 +7246,36 @@ inline void ConsensusValue::set_allocated_validation(::protocol::ConsensusValueV
     
   }
   // @@protoc_insertion_point(field_set_allocated:protocol.ConsensusValue.validation)
+}
+
+// repeated .protocol.KeyPair entry = 8;
+inline int ConsensusValue::entry_size() const {
+  return entry_.size();
+}
+inline void ConsensusValue::clear_entry() {
+  entry_.Clear();
+}
+inline const ::protocol::KeyPair& ConsensusValue::entry(int index) const {
+  // @@protoc_insertion_point(field_get:protocol.ConsensusValue.entry)
+  return entry_.Get(index);
+}
+inline ::protocol::KeyPair* ConsensusValue::mutable_entry(int index) {
+  // @@protoc_insertion_point(field_mutable:protocol.ConsensusValue.entry)
+  return entry_.Mutable(index);
+}
+inline ::protocol::KeyPair* ConsensusValue::add_entry() {
+  // @@protoc_insertion_point(field_add:protocol.ConsensusValue.entry)
+  return entry_.Add();
+}
+inline ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >*
+ConsensusValue::mutable_entry() {
+  // @@protoc_insertion_point(field_mutable_list:protocol.ConsensusValue.entry)
+  return &entry_;
+}
+inline const ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >&
+ConsensusValue::entry() const {
+  // @@protoc_insertion_point(field_list:protocol.ConsensusValue.entry)
+  return entry_;
 }
 
 // -------------------------------------------------------------------
