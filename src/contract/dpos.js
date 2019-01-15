@@ -276,6 +276,12 @@ function rewardDistribution(){
     dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
 }
 
+function getProfit(){
+    let income = dpos.distribution[sender];
+    transferCoin(sender, income);
+    log(sender + ' extracted block reward ' + income);
+}
+
 function query(input_str){
     let input  = JSON.parse(input_str);
 
@@ -317,6 +323,9 @@ function main(input_str){
     }
     else if(input.method === 'withdraw'){
     	withdraw(params.type);
+    }
+    else if(input.method === 'getProfit'){
+    	getProfit();
     }
     else{
         throw '<undidentified operation type>';
