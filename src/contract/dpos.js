@@ -46,12 +46,6 @@ function loadObj(key)
     return false;
 }
 
-function delObj(key)
-{
-    storageDel(key);
-    log('Delete (' + key + ') from metadata succeed.');
-}
-
 function saveObj(key, value)
 {
     let str = JSON.stringify(value);
@@ -216,6 +210,22 @@ function updateCandidates(type, address, pledge){
     return true;
 }
 
+function deleteCandidate(type, address){
+    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let candidate = candidates.find(function(x){
+        return x[0] === address;
+    });
+
+    let index = committee.indexOf(candidate);
+    candidates.splice(index, 1);
+    candidates.sort(doubleSort);
+
+    if(type === memberType.validator && index < validatorSetSize){
+        let validators = candidates.slice(0, validatorSetSize);
+        setValidators(JSON.stringify(validators));
+    }
+}
+
 function apply(type){
     let key = proposalKey(motionType.apply, key, sender);
     let proposal = loadObj(key);
@@ -247,7 +257,7 @@ function approveIn(type, applicant){
         
     if(blockTimestamp >= proposal.expiration){
         transferCoin(applicant, proposal.pledge);
-        return delObj(key);
+        return storageDel(key);
     }
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
@@ -277,7 +287,7 @@ function vote(type, address){
         throw 'Unkown voting type.';
     }
 
-    let voteAmount = loadObj(key);
+    let voteAmount = storageLoad(key);
     if(voteAmount === false){
         voteAmount = thisPayCoinAmount;
     }
@@ -285,7 +295,7 @@ function vote(type, address){
         voteAmount = int64Add(voteAmount, thisPayCoinAmount);
     }
 
-    saveObj(key, thisPayCoinAmount);
+    storageStore(key, thisPayCoinAmount);
     updateCandidates(type, address);
 }
 
@@ -349,7 +359,7 @@ function approveOut(type, evil){
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
     if(blockTimestamp >= proposal.expiration){
-        return delObj(key);
+        return storageDel(key);
     }
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
@@ -363,20 +373,7 @@ function approveOut(type, evil){
         return saveObj(key, committee);
     }
     else{
-        let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
-        let candidate = candidates.find(function(x){
-            return x[0] === evil;
-        });
-
-        let index = committee.indexOf(candidate);
-        candidates.splice(index, 1);
-        candidates.sort(doubleSort);
-
-        if(type === memberType.validator && index < validatorSetSize){
-            let validators = candidates.slice(0, validatorSetSize);
-            setValidators(JSON.stringify(validators));
-        }
-
+        deleteCandidate(type, evil);
         let recordKey = proposalKey(motionType.apply, type, evil);
         let record = loadObj(recordKey);
         distribute(dpos.validatorCandidates, record.pledge);
@@ -384,7 +381,36 @@ function approveOut(type, evil){
 }
 
 function withdraw(type){
+    let withdrawKey = proposalKey(motionType.withdraw, type, sender);
+    let expiration = storageLoad(withdrawKey);
 
+    if(expiration === false){
+        return storageStore(withdrawKey, blockTimestamp + effectiveVoteInterval);
+    }
+
+    let expired = int64Compare(blockTimestamp, expiration);
+    assert(expired === 0 || expired === 1, 'Buffer period is not over.');
+
+    let applicantKey = proposalKey(motionType.apply, type, sender);
+    let applicant = loadObj(applicantKey);
+    assert(applicant !== false, 'failed to get metadata: ' + applicantKey + '.');
+
+    storageDel(applicantKey);
+    storageDel(withdrawKey);
+
+    if(type === memberType.committee){
+        committee.splice(committee.indexOf(sender), 1);
+        return saveObj(key, committee);
+    }
+
+    deleteCandidate(type, sender);
+
+    if(dpos.distribution[sender] === undefined){
+        dpos.distribution[sender] = applicant.pledge;
+    }
+    else{
+        dpos.distribution[sender] = int64Add(dpos.distribution[sender], applicant.pledge);
+    }
 }
 
 function query(input_str){
