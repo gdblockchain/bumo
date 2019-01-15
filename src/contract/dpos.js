@@ -63,6 +63,81 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
+function dposInit(){
+    dpos = loadObj(rewardKey);
+    assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
+
+    dpos.balance = getBalance();
+    assert(dpos.balance !== false, 'Faild to get account balance.');
+
+    dpos.validatorCandidates = loadObj(validatorCandidatesKey);
+    assert(dpos.validatorCandidates !== false, 'Faild to get validator candidates.');
+
+    dpos.kolCandidates = loadObj(kolCandidatesKey);
+    assert(dpos.kolCandidates !== false, 'Faild to get kol candidates.');
+
+    dpos.validators = dpos.validatorCandidates.slice(0, validatorSetSize);
+    dpos.kols       = dpos.kolCandidates.slice(0, kolSetSize);
+}
+
+function dposSave(){
+    saveObj(validatorCandidatesKey, dpos.validatorCandidates);
+    saveObj(kolCandidatesKey, kolCandidates);
+
+    let balance = getBalance();
+    assert(balance !== false, 'Failed to get balance.');
+
+    dpos.allStake = getBalance();
+    delete dpos.balance;
+    delete dpos.validators;
+    delete dpos.kols;
+
+    saveObj(rewardKey, dpos);
+}
+
+function distribute(twoDimenList, allReward){
+    let reward = int64Div(allReward, twoDimenList.length);
+
+    for(member in twoDimenList){
+        if(dpos.distribution[member[0]] === undefined){
+            dpos.distribution[member[0]] = reward;
+        }
+        else{
+            dpos.distribution[member[0]] = int64Add(dpos.distribution[member[0]], reward);
+        }
+    }
+
+    let left = int64Mod(allReward, twoDimenList.length);
+    dpos.distribution[twoDimenList[0][0]] = int64Add(dpos.distribution[member[0]], left);
+}
+
+function rewardDistribution(){
+    dposInit();
+
+    let rewards = int64Sub(dpos.balance, dpos.allStake);
+    if(rewards === '0'){
+        return;
+    }
+
+    let validatorReward = (rewards * 5) / 10;
+    distribute(dpos.validators, validatorReward);
+
+    let nodeReward = (rewards * 4) / 10;
+    distribute(dpos.validatorCandidates, nodeReward);
+
+    let kolReward = rewards / 10;
+    distribute(dpos.kols, kolReward);
+
+    let left = rewards % 10;
+    dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
+}
+
+function getProfit(){
+    let income = dpos.distribution[sender];
+    transferCoin(sender, income);
+    log(sender + ' extracted block reward ' + income);
+}
+
 function applicationKey(type, address){
     let key = '';
     if(type == memberType.committee){
@@ -322,81 +397,6 @@ function approveOut(type, evil){
 
 function withdraw(type){
 
-}
-
-function dposInit(){
-    dpos = loadObj(rewardKey);
-    assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
-
-    dpos.balance = getBalance();
-    assert(dpos.balance !== false, 'Faild to get account balance.');
-
-    dpos.validatorCandidates = loadObj(validatorCandidatesKey);
-    assert(dpos.validatorCandidates !== false, 'Faild to get validator candidates.');
-
-    dpos.kolCandidates = loadObj(kolCandidatesKey);
-    assert(dpos.kolCandidates !== false, 'Faild to get kol candidates.');
-
-    dpos.validators = dpos.validatorCandidates.slice(0, validatorSetSize);
-    dpos.kols       = dpos.kolCandidates.slice(0, kolSetSize);
-}
-
-function dposSave(){
-    saveObj(validatorCandidatesKey, dpos.validatorCandidates);
-    saveObj(kolCandidatesKey, kolCandidates);
-
-    let balance = getBalance();
-    assert(balance !== false, 'Failed to get balance.');
-
-    dpos.allStake = getBalance();
-    delete dpos.balance;
-    delete dpos.validators;
-    delete dpos.kols;
-
-    saveObj(rewardKey, dpos);
-}
-
-function distribute(twoDimenList, allReward){
-    let reward = int64Div(allReward, twoDimenList.length);
-
-    for(member in twoDimenList){
-        if(dpos.distribution[member[0]] === undefined){
-            dpos.distribution[member[0]] = reward;
-        }
-        else{
-            dpos.distribution[member[0]] = int64Add(dpos.distribution[member[0]], reward);
-        }
-    }
-
-    let left = int64Mod(allReward, twoDimenList.length);
-    dpos.distribution[twoDimenList[0][0]] = int64Add(dpos.distribution[member[0]], left);
-}
-
-function rewardDistribution(){
-    dposInit();
-
-    let rewards = int64Sub(dpos.balance, dpos.allStake);
-    if(rewards === '0'){
-        return;
-    }
-
-    let validatorReward = (rewards * 5) / 10;
-    distribute(dpos.validators, validatorReward);
-
-    let nodeReward = (rewards * 4) / 10;
-    distribute(dpos.validatorCandidates, nodeReward);
-
-    let kolReward = rewards / 10;
-    distribute(dpos.kols, kolReward);
-
-    let left = rewards % 10;
-    dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
-}
-
-function getProfit(){
-    let income = dpos.distribution[sender];
-    transferCoin(sender, income);
-    log(sender + ' extracted block reward ' + income);
 }
 
 function query(input_str){
