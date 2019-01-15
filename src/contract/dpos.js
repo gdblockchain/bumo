@@ -7,11 +7,13 @@ const outPassRate            = 0.7;
 const effectiveVoteInterval  = 15 * 24 * 60 * 60 * 1000 * 1000;
 const validatorMinPledge     = 5000000 * 100000000;
 const kolMinPledge           = 5 * 100000000;
-const validatorCandidatesKey = 'validator_candidates';
-const kolCandidatesKey       = 'kol_candidates';
-const kolSetKey              = 'kolset';
-const committeeKey           = 'committee';
 
+const rewardKey              = 'block_reward';
+const committeeKey           = 'committee';
+const kolCandidatesKey       = 'kol_candidates';
+const validatorCandidatesKey = 'validator_candidates';
+
+const dpos = {};
 const memberType = {
    'committee' : 1,
    'validator' : 2,
@@ -226,14 +228,57 @@ function withdraw(type){
 
 }
 
+function dposInit(){
+    dpos = loadObj(rewardKey);
+    assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
 
-function setValidatorsFromCandidate(candidates){
-    //candidates = candidates.sort(doubleSort);
-    let validators    = candidates.slice(0, validatorSetSize);
-    let validatorsStr = JSON.stringify(validators);
-    setValidators(validatorsStr);
-    log('Set new validator sets(' + validatorsStr + ') succeed.');
-    return true;
+    dpos.balance = getBalance();
+    assert(dpos.balance !== false, 'Faild to get account balance.');
+
+    dpos.validatorCandidates = loadObj(validatorCandidatesKey);
+    assert(dpos.validatorCandidates !== false, 'Faild to get validator candidates.');
+
+    dpos.kolCandidates = loadObj(kolCandidatesKey);
+    assert(dpos.kolCandidates !== false, 'Faild to get kol candidates.');
+}
+
+function distribute(twoDimenList, allReward){
+    let reward = int64Div(allReward, twoDimenList.length);
+
+    for(member in twoDimenList){
+        if(dpos.distribution[member[0]] === undefined){
+            dpos.distribution[member[0]] = reward;
+        }
+        else{
+            dpos.distribution[member[0]] = int64Add(dpos.distribution[member[0]], reward);
+        }
+    }
+
+    let left = int64Mod(allReward, twoDimenList.length);
+    dpos.distribution[twoDimenList[0][0]] = int64Add(dpos.distribution[member[0]], left);
+}
+
+function rewardDistribution(){
+    dposInit();
+
+    let rewards = int64Sub(dpos.balance, dpos.allStake);
+    if(rewards === '0'){
+        return;
+    }
+
+    let validators      = dpos.validatorCandidates.slice(0, validatorSetSize);
+    let validatorReward = (rewards * 5) / 10;
+    distribute(validators, validatorReward);
+
+    let nodeReward = (rewards * 4) / 10;
+    distribute(dpos.validatorCandidates, nodeReward);
+
+    let kols      = dpos.kolCandidates.slice(0, kolSetSize);
+    let kolReward = rewards / 10;
+    distribute(kols, kolReward);
+
+    let left = rewards % 10;
+    dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
 }
 
 function query(input_str){
@@ -244,7 +289,7 @@ function query(input_str){
         result.current_validators = getValidators();
     }
     else if(input.method === 'getCandidates'){
-        result.current_candidates = storageLoad(candidatesKey);
+        result.current_candidates = storageLoad(validatorCandidatesKey);
     }
     else{
        	throw '<unidentified operation type>';
@@ -255,6 +300,8 @@ function query(input_str){
 }
 
 function main(input_str){
+    rewardDistribution();
+
     let input = JSON.parse(input_str);
     let params = input.params;
 
@@ -282,18 +329,26 @@ function main(input_str){
 }
 
 function init(input_str){
-    let committee = JSON.parse(input_str);
 
+    let committee = JSON.parse(input_str);
     for(member in committee){
         assert(addressCheck(member) === true, 'Committee member(' + member + ') is not valid adress.');
     }
+    saveObj(committeeKey, committee);
 
     let validators = getValidators();
     assert(validators !== false, 'Get validators failed.');
 
     let candidates = validators.sort(doubleSort);
-    let str = JSON.stringify(candidates);
-    storageStore(candidatesKey, str);
+    saveObj(validatorCandidatesKey, candidates);
+
+    let balance = getBalance();
+    assert(balance !== false, 'Faild to get account balance.');
+
+    let reward= {};
+    reward.allStake     = balance;
+    reward.distribution = [];
+    saveObj(rewardKey, reward);
 
     return true;
 }
