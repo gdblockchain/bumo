@@ -63,22 +63,25 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function createApplyKey(type, address){
+function applicationKey(type, address){
     let key = '';
     if(type == memberType.committee){
         key = 'apply_committee_' + address; 
     }
-    else if(type === member.validators){
+    else if(type === memberType.validator){
         key = 'apply_validator_' + address; 
     }
-    else{
+    else if(type === memberType.kol){
         key = 'apply_KOL_' + address; 
+    }
+    else{
+        throw 'Unkown member type.';
     }
 
     return key;
 }
 
-function applyProposal(){
+function applicationProposal(){
     let proposal = {
         'pledge':thisPayCoinAmount,
         'expiration':blockTimestamp + effectiveVoteInterval,
@@ -88,21 +91,10 @@ function applyProposal(){
     return proposal;
 }
 
-function abolishProposal(proof){
-    let proposal = {
-        'Informer': sender,
-        'reason': proof,
-        'expiration': blockTimestamp + effectiveVoteInterval,
-        'ballot': [sender]
-    };
-
-    return proposal;
-}
-
 function checkPledge(type){
     let com = -1;
 
-    if(type === memberType.validators){
+    if(type === memberType.validator){
         com = int64Compare(thisPayCoinAmount, validatorMinPledge);
         assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of validator.');
     }
@@ -113,9 +105,14 @@ function checkPledge(type){
     else if(type === memberType.committee){
         assert(thisPayCoinAmount === '0', 'No deposit is required to apply to join the committee');
     }
+    else{
+        throw 'Unkown member type.';
+    }
 }
 
 function updateCandidates(type, address, pledge){
+    assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
+
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let candidate = candidates.find(function(x){
         return x[0] === address;
@@ -139,12 +136,12 @@ function updateCandidates(type, address, pledge){
 }
 
 function apply(type){
-    let key = createApplyKey(key, sender);
+    let key = applicationKey(key, sender);
     let proposal = loadObj(key);
 
     if(proposal === false){
         checkPledge(type);
-        proposal = applyProposal();
+        proposal = applicationProposal();
         return saveObj(key, proposal);
     }
 
@@ -163,7 +160,7 @@ function approveIn(type, applicant){
     let committee = loadObj(committeeKey);
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = createApplyKey(type, address);
+    let key = applicationKey(type, address);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -211,8 +208,73 @@ function vote(type, address){
     updateCandidates(type, address);
 }
 
-function abolish(type, address, proof){
+function abolitionKey(type, address){
+    let key = '';
+    if(type == memberType.committee){
+        key = 'abolish_committee_' + address; 
+    }
+    else if(type === memberType.validator){
+        key = 'abolish_validator_' + address; 
+    }
+    else if(type === memberType.kol){
+        key = 'abolish_KOL_' + address; 
+    }
+    else{
+        throw 'Unkown member type.';
+    }
 
+    return key;
+}
+
+function abolitionProposal(proof){
+    let proposal = {
+        'Informer': sender,
+        'reason': proof,
+        'expiration': blockTimestamp + effectiveVoteInterval,
+        'ballot': [sender]
+    };
+
+    return proposal;
+}
+
+function checkPermission(type, address){
+
+}
+
+function abolish(type, address, proof){
+    assert(addressCheck(address), address + ' is not valid adress.');
+
+    let committee = loadObj(committeeKey);
+    if(type === memberType.committee){
+        assert(committee.includes(sender), 'Only committee members have the right to report other committee member.');
+    }
+    else if(type === memberType.validator){
+        let node = dpos.validators.find(function(x){
+            return x[0] === sender;
+        });
+
+        assert(node !== undefined, 'Only validator have the right to report other validator.');
+    }
+    else if(type === memberType.kol){
+        let kol = dpos.kols.find(function(x){
+            return x[0] === sender;
+        });
+
+        assert(kol !== undefined, 'Only kol have the right to report other kol.');
+    }
+    else{
+        throw 'Unkown abolish type.';
+    }
+
+    let key = abolitionKey(type, address);
+    let proposal = loadObj(key);
+    if(proposal === false){
+        proposal = abolitionProposal(proof);
+        saveObj(key, proposal);
+    }
+
+    proposal.expiration = blockTimestamp + effectiveVoteInterval;
+    saveObj(key, proposal);
 }
 
 function approveOut(type){
@@ -235,6 +297,24 @@ function dposInit(){
 
     dpos.kolCandidates = loadObj(kolCandidatesKey);
     assert(dpos.kolCandidates !== false, 'Faild to get kol candidates.');
+
+    dpos.validators = dpos.validatorCandidates.slice(0, validatorSetSize);
+    dpos.kols       = dpos.kolCandidates.slice(0, kolSetSize);
+}
+
+function dposSave(){
+    saveObj(validatorCandidatesKey, dpos.validatorCandidates);
+    saveObj(kolCandidatesKey, kolCandidates);
+
+    let balance = getBalance();
+    assert(balance !== false, 'Failed to get balance.');
+
+    dpos.allStake = getBalance();
+    delete dpos.balance;
+    delete dpos.validators;
+    delete dpos.kols;
+
+    saveObj(rewardKey, dpos);
 }
 
 function distribute(twoDimenList, allReward){
@@ -261,16 +341,14 @@ function rewardDistribution(){
         return;
     }
 
-    let validators      = dpos.validatorCandidates.slice(0, validatorSetSize);
     let validatorReward = (rewards * 5) / 10;
-    distribute(validators, validatorReward);
+    distribute(dpos.validators, validatorReward);
 
     let nodeReward = (rewards * 4) / 10;
     distribute(dpos.validatorCandidates, nodeReward);
 
-    let kols      = dpos.kolCandidates.slice(0, kolSetSize);
     let kolReward = rewards / 10;
-    distribute(kols, kolReward);
+    distribute(dpos.kols, kolReward);
 
     let left = rewards % 10;
     dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
@@ -330,13 +408,15 @@ function main(input_str){
     else{
         throw '<undidentified operation type>';
     }
+
+    saveObj();
 }
 
 function init(input_str){
 
     let committee = JSON.parse(input_str);
     for(member in committee){
-        assert(addressCheck(member) === true, 'Committee member(' + member + ') is not valid adress.');
+        assert(addressCheck(member), 'Committee member(' + member + ') is not valid adress.');
     }
     saveObj(committeeKey, committee);
 
