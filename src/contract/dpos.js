@@ -2,7 +2,7 @@
 
 const kolSetSize                = 30;
 const kolMinPledge              = 5 * 100000000;
-const kolCandiatesSetSize       = 300;
+const kolCandidateSetSize       = 300;
 const validatorSetSize          = 30;
 const validatorMinPledge        = 5000000 * 100000000;
 const validatorCandidateSetSize = 300;
@@ -65,13 +65,14 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function dposInit(){
+function distributionInit(){
     dpos = loadObj(rewardKey);
     assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
 
-    dpos.balance = getBalance();
+    dpos.balance  = getBalance();
     assert(dpos.balance !== false, 'Faild to get account balance.');
 
+    dpos.allStake  = int64Add(dpos.allStake, thisPayCoinAmount);
     dpos.validatorCandidates = loadObj(validatorCandidatesKey);
     assert(dpos.validatorCandidates !== false, 'Faild to get validator candidates.');
 
@@ -80,21 +81,6 @@ function dposInit(){
 
     dpos.validators = dpos.validatorCandidates.slice(0, validatorSetSize);
     dpos.kols       = dpos.kolCandidates.slice(0, kolSetSize);
-}
-
-function dposSave(){
-    saveObj(validatorCandidatesKey, dpos.validatorCandidates);
-    saveObj(kolCandidatesKey, kolCandidates);
-
-    let balance = getBalance();
-    assert(balance !== false, 'Failed to get balance.');
-
-    dpos.allStake = getBalance();
-    delete dpos.balance;
-    delete dpos.validators;
-    delete dpos.kols;
-
-    saveObj(rewardKey, dpos);
 }
 
 function distribute(twoDimenList, allReward){
@@ -132,6 +118,11 @@ function rewardDistribution(){
 
     let left = rewards % 10;
     dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
+
+    let distributed = {};
+    distributed.allStake = getBalance();
+    distributed.distribution = dpos.distribution;
+    saveObj(rewardKey, distributed);
 }
 
 function getProfit(){
@@ -187,46 +178,77 @@ function checkPledge(type){
     }
 }
 
+function addCandidates(type, address, pledge, maxSize){
+    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let com = int64Compare(pledge, candidates[candidates.length - 1][1]);
+    
+    if(candidates.length >= maxSize && com <= 0){
+        return;
+    }
+
+    rewardDistribution();
+
+    let size = candidates.push([address, pledge]);
+    let node = candidates[size - 1];
+
+    candidates.sort(doubleSort);
+    if(candidates.length > maxSize){
+        candidates = candidates.slice(0, maxSize);
+    }
+
+    if(type === memberType.validator && candidates.indexOf(node) < validatorSetSize){
+        let validators = candidates.slice(0, validatorSetSize);
+        setValidators(JSON.stringify(validators));
+    }
+
+    let key = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    return saveObj(key, candidates);
+}
+
+function modifyCandidates(type, node, formalSize){
+    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let oldPos = candidates.indexOf(node);
+    
+    node[1] = int64Add(node[1], thisPayCoinAmount);
+    candidates.sort(doubleSort);
+    let newPos = candidates.indexOf(node);
+
+    if(oldPos > formalSize && newPos <= formalSize){
+        rewardDistribution();
+
+        if(type === memberType.validator){
+            let validators = candidates.slice(0, validatorSetSize);
+            setValidators(JSON.stringify(validators));
+        }
+    }
+
+    let key = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    return saveObj(key, candidates);
+}
+
 function updateCandidates(type, address, pledge){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    dposInit();
+    distributionInit();
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let node = candidates.find(function(x){
         return x[0] === address;
     });
 
     if(node === undefined){
-        let size = candidates.push([address, pledge]);
-        node = candidates[size - 1];
+        let maxSize = type === memberType.validator ? validatorCandidateSetSize : kolCandidateSetSize;
+        addCandidates(type, address, pledge, maxSize);
     }
     else{
-        node[1] = int64Add(node[1], thisPayCoinAmount);
+        let formalSize = type === memberType.validator ? validatorSetSize : kolSetSize;
+        modifyCandidates(type, node, formalSize);
     }
-
-    candidates.sort(doubleSort);
-    if(candidates.length > validatorCandidateSetSize){
-        candidates = candidates.slice(0, validatorCandidateSetSize);
-    }
-
-    if(type === memberType.validator && candidates.indexOf(node) < validatorSetSize){
-        rewardDistribution();
-        let validators = candidates.slice(0, validatorSetSize);
-        setValidators(JSON.stringify(validators));
-    }
-    else if((type === memberType.validator && candidates.includes(node)) || 
-            (type === memberType.kol && candidates.indexOf(node) < kolSetSize)){
-        rewardDistribution();
-    }
-
-    dposSave();
-    return true;
 }
 
 function deleteCandidate(type, address){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    dposInit();
+    distributionInit();
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let candidate = candidates.find(function(x){
         return x[0] === address;
@@ -246,7 +268,8 @@ function deleteCandidate(type, address){
         setValidators(JSON.stringify(validators));
     }
 
-    dposSave();
+    let key = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    saveObj(key, candidates);
 }
 
 function apply(type){
@@ -254,17 +277,20 @@ function apply(type){
     let proposal = loadObj(key);
 
     if(proposal === false){
+        /* first apply */
         checkPledge(type);
         proposal = applicationProposal();
         return saveObj(key, proposal);
     }
 
     proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
-    if(proposal.passTime === undefined){
+    if(proposal.passTime === undefined){ 
+        /* Additional deposit, not yet approved */
         proposal.expiration = blockTimestamp + effectiveVoteInterval,
         return saveObj(key, proposal);
     }
 
+    /* Approved, additional deposit */
     saveObj(key, proposal);
     updateCandidates(type, sender);
 }
