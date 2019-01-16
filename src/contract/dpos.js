@@ -347,6 +347,7 @@ function approveOut(type, evil){
         return saveObj(key, proposal);
     }
 
+    storageDel(key);
     if(type === memberType.committee){
         committee.splice(committee.indexOf(evil), 1);
         return saveObj(key, committee);
