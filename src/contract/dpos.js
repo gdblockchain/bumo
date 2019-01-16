@@ -425,9 +425,10 @@ function approveOut(type, evil){
     }
     else{
         deleteCandidate(type, evil);
-        let recordKey = proposalKey(motionType.apply, type, evil);
-        let record = loadObj(recordKey);
-        distribute(dpos.validatorCandidates, record.pledge);
+        let recordKey  = proposalKey(motionType.apply, type, evil);
+        let record     = loadObj(recordKey);
+        let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+        distribute(candidates, record.pledge);
     }
 }
 
