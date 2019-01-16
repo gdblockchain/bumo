@@ -465,7 +465,7 @@ namespace bumo {
 
 			Json::Value jsonValidators;
 			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
-			jsonValidators = ledger_context->GetTopTx()->environment_->GetEle();
+			jsonValidators = ledger_context->GetTopTx()->environment_->GetElectionConfig();
 
 			std::string strvalue = jsonValidators.toFastString();
 			v8::Local<v8::String> returnvalue = v8::String::NewFromUtf8(args.GetIsolate(), strvalue.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
