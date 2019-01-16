@@ -302,7 +302,7 @@ function approveIn(type, applicant){
     let committee = loadObj(committeeKey);
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = proposalKey(motionType,apply, type, address);
+    let key = proposalKey(motionType.apply, type, address);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
