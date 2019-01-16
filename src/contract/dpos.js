@@ -219,7 +219,6 @@ function updateCandidates(type, address, pledge){
         rewardDistribution();
     }
 
-
     dposSave();
     return true;
 }
@@ -263,11 +262,9 @@ function apply(type){
     proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
     if(proposal.passTime === undefined){
         proposal.expiration = blockTimestamp + effectiveVoteInterval,
-        saveObj(key, proposal);
-        return true;
+        return saveObj(key, proposal);
     }
 
-    proposal.passTime === blockTimestamp;
     saveObj(key, proposal);
     updateCandidates(type, sender);
 }
@@ -290,6 +287,9 @@ function approveIn(type, applicant){
     if(proposal.ballot.length <= parseInt(committee.length * inPassRate + 0.5)){
         return saveObj(key, proposal);
     }
+
+    proposal.passTime === blockTimestamp;
+    saveObj(key, proposal);
 
     if(type === memberType.committee){
         committee.push(applicant);
