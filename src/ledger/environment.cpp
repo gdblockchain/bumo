@@ -128,7 +128,7 @@ namespace bumo{
 				}
 			}
 			else if (key == "candidate_pledge_amount" || key == "kol_pledge_amount" || 
-					 key == "validators_refresh_interval" || key == "min_vote_BU") {
+					 key == "validators_refresh_interval" || key == "min_vote_bu") {
 				int64_t value = (*ecfg)[key].asInt64();
 				if (key == "candidate_pledge_amount" && old_cfg.candidate_pledge_amount() != value) {
 					change = true;

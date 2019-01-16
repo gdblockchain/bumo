@@ -463,11 +463,11 @@ namespace bumo {
 			v8::HandleScope handle_scope(args.GetIsolate());
 			V8Contract *v8_contract = GetContractFrom(args.GetIsolate());
 
-			Json::Value jsonValidators;
+			Json::Value system_cfg;
 			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
-			jsonValidators = ledger_context->GetTopTx()->environment_->GetElectionConfig();
+			system_cfg = ledger_context->GetTopTx()->environment_->GetElectionConfig();
 
-			std::string strvalue = jsonValidators.toFastString();
+			std::string strvalue = system_cfg.toFastString();
 			v8::Local<v8::String> returnvalue = v8::String::NewFromUtf8(args.GetIsolate(), strvalue.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
 			args.GetReturnValue().Set(v8::JSON::Parse(returnvalue));
 
