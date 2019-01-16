@@ -125,7 +125,7 @@ function rewardDistribution(){
     saveObj(rewardKey, distributed);
 }
 
-function getProfit(){
+function extract(){
     rewardInit();
     rewardDistribution();
 
@@ -329,6 +329,37 @@ function approveIn(type, applicant){
     }
 }
 
+function approveOut(type, evil){
+    let committee = loadObj(committeeKey);
+    assert(committee.includes(sender), 'Only committee members have the right to approve.');
+
+    let key = proposalKey(motionType.abolish, type, address);
+    let proposal = loadObj(key);
+    assert(proposal !== false, 'failed to get metadata: ' + key + '.');
+        
+    if(blockTimestamp >= proposal.expiration){
+        return storageDel(key);
+    }
+
+    assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
+    proposal.ballot.push(sender);
+    if(proposal.ballot.length <= parseInt(committee.length * outPassRate + 0.5)){
+        return saveObj(key, proposal);
+    }
+
+    if(type === memberType.committee){
+        committee.splice(committee.indexOf(evil), 1);
+        return saveObj(key, committee);
+    }
+    else{
+        deleteCandidate(type, evil);
+        let recordKey  = proposalKey(motionType.apply, type, evil);
+        let record     = loadObj(recordKey);
+        let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+        distribute(candidates, record.pledge);
+    }
+}
+
 function vote(type, address){
     let key = '';
     if(type === memberType.validators){
@@ -404,37 +435,6 @@ function abolish(type, address, proof){
     saveObj(key, proposal);
 }
 
-function approveOut(type, evil){
-    let committee = loadObj(committeeKey);
-    assert(committee.includes(sender), 'Only committee members have the right to approve.');
-
-    let key = proposalKey(motionType.abolish, type, address);
-    let proposal = loadObj(key);
-    assert(proposal !== false, 'failed to get metadata: ' + key + '.');
-        
-    if(blockTimestamp >= proposal.expiration){
-        return storageDel(key);
-    }
-
-    assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
-    proposal.ballot.push(sender);
-    if(proposal.ballot.length <= parseInt(committee.length * outPassRate + 0.5)){
-        return saveObj(key, proposal);
-    }
-
-    if(type === memberType.committee){
-        committee.splice(committee.indexOf(evil), 1);
-        return saveObj(key, committee);
-    }
-    else{
-        deleteCandidate(type, evil);
-        let recordKey  = proposalKey(motionType.apply, type, evil);
-        let record     = loadObj(recordKey);
-        let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
-        distribute(candidates, record.pledge);
-    }
-}
-
 function withdraw(type){
     let withdrawKey = proposalKey(motionType.withdraw, type, sender);
     let expiration = storageLoad(withdrawKey);
@@ -496,20 +496,20 @@ function main(input_str){
     else if(input.method === 'approveIn'){
 	    approveIn(params.type, params.address);
     }
+    else if(input.method === 'approveOut'){
+    	approveOut(params.type, params.address);
+    }
     else if(input.method === 'vote'){
 	    vote(params.type, params.address);
     }
     else if(input.method === 'abolish'){
     	abolish(params.type, params.address, params.proof);
     }
-    else if(input.method === 'approveOut'){
-    	approveOut(params.type, params.address);
-    }
     else if(input.method === 'withdraw'){
     	withdraw(params.type);
     }
-    else if(input.method === 'getProfit'){
-    	getProfit();
+    else if(input.method === 'extract'){
+    	extract();
     }
     else{
         throw '<undidentified operation type>';
