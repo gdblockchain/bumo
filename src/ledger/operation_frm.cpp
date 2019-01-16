@@ -877,7 +877,7 @@ namespace bumo {
 			int64_t src_balance=0;
 			if (!utils::SafeIntSub(proto_source_account.balance(), ope.amount(), src_balance)) {
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				result_.set_desc(utils::String::Format("PayCoin overflow: source ccount(%s), balance(" FMT_I64 "), payment amount:(" FMT_I64 ") ",
+				result_.set_desc(utils::String::Format("PayCoin overflow: source account(%s), balance(" FMT_I64 "), payment amount:(" FMT_I64 ") ",
 					proto_source_account.address().c_str(), proto_source_account.balance(), ope.amount()));
 				break;
 			}

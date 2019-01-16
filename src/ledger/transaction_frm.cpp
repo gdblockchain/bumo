@@ -298,8 +298,8 @@ namespace bumo {
 		} while (false);
 
 		return false;
-	}
-	
+	}	
+
 	//Use this function to calculate the total fee.
 	bool TransactionFrm::ReturnFee(int64_t& total_fee) {
 		int64_t actual_fee=0;
@@ -324,8 +324,14 @@ namespace bumo {
 
 		do {
 			if (!environment_->GetEntry(str_address, source_account)) {
-				LOG_ERROR("Source account(%s) does not exist", str_address.c_str());
+				result_.set_desc(utils::String::Format("Source account(%s) does not exist", str_address.c_str()));
 				result_.set_code(protocol::ERRCODE_ACCOUNT_NOT_EXIST);
+				break;
+			}
+
+			if (!DauReward(actual_fee, source_account, total_fee)) {
+				result_.set_desc("Failed to do dau reward");
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
 				break;
 			}
 
@@ -339,10 +345,9 @@ namespace bumo {
 			protocol::Account& proto_source_account = source_account->GetProtoAccount();
 			int64_t new_balance =0;
 			if (!utils::SafeIntAdd(proto_source_account.balance(), fee, new_balance)){
-				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s blance:(" FMT_I64 ") + extra fee(" FMT_I64 ") of return.",
+				result_.set_desc(utils::String::Format("Calculation overflowed when Source account(%s)'s balance:(" FMT_I64 ") + extra fee(" FMT_I64 ") of return.",
 					str_address.c_str(), proto_source_account.balance(), fee));
 				result_.set_code(protocol::ERRCODE_MATH_OVERFLOW);
-				LOG_ERROR(result_.desc().c_str());
 				break;
 			}
 
@@ -353,7 +358,69 @@ namespace bumo {
 			return true;
 		} while (false);
 
+		if (result_.code() != ERROR_SUCCESS) LOG_ERROR(result_.desc().c_str());
 		return false;
+	}
+
+	bool TransactionFrm::DauReward(int64_t actual_fee, AccountFrm::pointer& source_account, int64_t& total_fee) {
+		// return fee to creator if creator exist
+		uint32_t creator_share = LedgerManager::Instance().GetFeeSharerRate(LedgerManager::SHARER_CREATOR);
+		std::string creator = source_account->GetAccountCreator();
+		if (!creator.empty()) {
+			if (!AllocateFeesByShare(creator, actual_fee, creator_share, total_fee)) {
+				result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", creator.c_str()));
+				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+				return false;
+			}
+			LOG_TRACE("Return fee to creator done, create share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)creator_share, actual_fee);
+		}
+
+		std::string dapp_addr = transaction_env_.transaction().dapp_address();
+		if (!dapp_addr.empty()) {
+			if (PublicKey::IsAddressValid(dapp_addr)) {
+				uint32_t dapp_share = LedgerManager::Instance().GetFeeSharerRate(LedgerManager::SHARER_DAPP);
+				if (!AllocateFeesByShare(dapp_addr, actual_fee, dapp_share, total_fee)) {
+					result_.set_desc(utils::String::Format("Failed to return the share of fee to creator %s", dapp_addr.c_str()));
+					result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+					return false;
+				}
+				LOG_TRACE("Return fee to dapp done, dapp share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)dapp_share, actual_fee);
+			}
+			else {
+				LOG_ERROR("Invalid dapp address, %s", dapp_addr.c_str());
+			}
+		}
+		
+		return true;
+	}
+
+	bool TransactionFrm::AllocateFeesByShare(const std::string& address, int64_t actual_fee, uint32_t share, int64_t& total_fee) {
+		AccountFrm::pointer account;
+		if (!environment_->GetEntry(address, account)) {
+			LOG_ERROR("Account(%s) does not exist", address.c_str());
+			return false;
+		}
+
+		if (share == 0) return true;
+
+		int64_t amount = 0;
+		if (!utils::SafeIntMul(actual_fee, (int64_t)share, amount)) {
+			LOG_ERROR("Calculation overflowed when total:(" FMT_I64 ") * share(" FMT_I64 ") of return.", actual_fee, share);
+			return false;
+		}
+		// the share rate already multiply by 100, to avoid float
+		amount /= 100;
+		if (!account->AddBalance(amount)) {
+			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
+			return false;
+		}
+
+		if (!utils::SafeIntSub(total_fee, amount, total_fee)){
+			LOG_ERROR("Failed to return the share of fee to %s", address.c_str());
+			return false;
+		}
+
+		return true;
 	}
 
 	int64_t TransactionFrm::GetNonce() const {
