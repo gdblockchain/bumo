@@ -2473,6 +2473,17 @@ class Transaction : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::int64 chain_id() const;
   void set_chain_id(::google::protobuf::int64 value);
 
+  // optional string dapp_address = 9;
+  void clear_dapp_address();
+  static const int kDappAddressFieldNumber = 9;
+  const ::std::string& dapp_address() const;
+  void set_dapp_address(const ::std::string& value);
+  void set_dapp_address(const char* value);
+  void set_dapp_address(const char* value, size_t size);
+  ::std::string* mutable_dapp_address();
+  ::std::string* release_dapp_address();
+  void set_allocated_dapp_address(::std::string* dapp_address);
+
   // @@protoc_insertion_point(class_scope:protocol.Transaction)
  private:
 
@@ -2486,6 +2497,7 @@ class Transaction : public ::google::protobuf::Message /* @@protoc_insertion_poi
   ::google::protobuf::internal::ArenaStringPtr metadata_;
   ::google::protobuf::RepeatedPtrField< ::protocol::Operation > operations_;
   ::google::protobuf::int64 chain_id_;
+  ::google::protobuf::internal::ArenaStringPtr dapp_address_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_chain_2eproto();
   friend void protobuf_AssignDesc_chain_2eproto();
@@ -6369,6 +6381,50 @@ inline void Transaction::set_chain_id(::google::protobuf::int64 value) {
   
   chain_id_ = value;
   // @@protoc_insertion_point(field_set:protocol.Transaction.chain_id)
+}
+
+// optional string dapp_address = 9;
+inline void Transaction::clear_dapp_address() {
+  dapp_address_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline const ::std::string& Transaction::dapp_address() const {
+  // @@protoc_insertion_point(field_get:protocol.Transaction.dapp_address)
+  return dapp_address_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void Transaction::set_dapp_address(const ::std::string& value) {
+  
+  dapp_address_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
+  // @@protoc_insertion_point(field_set:protocol.Transaction.dapp_address)
+}
+inline void Transaction::set_dapp_address(const char* value) {
+  
+  dapp_address_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
+  // @@protoc_insertion_point(field_set_char:protocol.Transaction.dapp_address)
+}
+inline void Transaction::set_dapp_address(const char* value, size_t size) {
+  
+  dapp_address_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
+      ::std::string(reinterpret_cast<const char*>(value), size));
+  // @@protoc_insertion_point(field_set_pointer:protocol.Transaction.dapp_address)
+}
+inline ::std::string* Transaction::mutable_dapp_address() {
+  
+  // @@protoc_insertion_point(field_mutable:protocol.Transaction.dapp_address)
+  return dapp_address_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline ::std::string* Transaction::release_dapp_address() {
+  // @@protoc_insertion_point(field_release:protocol.Transaction.dapp_address)
+  
+  return dapp_address_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+}
+inline void Transaction::set_allocated_dapp_address(::std::string* dapp_address) {
+  if (dapp_address != NULL) {
+    
+  } else {
+    
+  }
+  dapp_address_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), dapp_address);
+  // @@protoc_insertion_point(field_set_allocated:protocol.Transaction.dapp_address)
 }
 
 // -------------------------------------------------------------------
