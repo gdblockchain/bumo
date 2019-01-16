@@ -1595,9 +1595,9 @@ class ElectionConfig : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::int64 validators_refresh_interval() const;
   void set_validators_refresh_interval(::google::protobuf::int64 value);
 
-  // optional int64 min_vote_BU = 4;
+  // optional int64 min_vote_bu = 4;
   void clear_min_vote_bu();
-  static const int kMinVoteBUFieldNumber = 4;
+  static const int kMinVoteBuFieldNumber = 4;
   ::google::protobuf::int64 min_vote_bu() const;
   void set_min_vote_bu(::google::protobuf::int64 value);
 
@@ -2878,18 +2878,18 @@ inline void ElectionConfig::set_validators_refresh_interval(::google::protobuf::
   // @@protoc_insertion_point(field_set:protocol.ElectionConfig.validators_refresh_interval)
 }
 
-// optional int64 min_vote_BU = 4;
+// optional int64 min_vote_bu = 4;
 inline void ElectionConfig::clear_min_vote_bu() {
   min_vote_bu_ = GOOGLE_LONGLONG(0);
 }
 inline ::google::protobuf::int64 ElectionConfig::min_vote_bu() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.min_vote_BU)
+  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.min_vote_bu)
   return min_vote_bu_;
 }
 inline void ElectionConfig::set_min_vote_bu(::google::protobuf::int64 value) {
   
   min_vote_bu_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.min_vote_BU)
+  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.min_vote_bu)
 }
 
 // optional string block_reward_share = 5;

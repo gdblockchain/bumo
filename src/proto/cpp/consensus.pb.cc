@@ -452,7 +452,7 @@ void protobuf_AddDesc_consensus_2eproto() {
     "\016ElectionConfig\022\037\n\027candidate_pledge_amou"
     "nt\030\001 \001(\003\022\031\n\021kol_pledge_amount\030\002 \001(\003\022#\n\033v"
     "alidators_refresh_interval\030\003 \001(\003\022\023\n\013min_"
-    "vote_BU\030\004 \001(\003\022\032\n\022block_reward_share\030\005 \001("
+    "vote_bu\030\004 \001(\003\022\032\n\022block_reward_share\030\005 \001("
     "\t\022\034\n\024fee_allocation_share\030\006 \001(\t*\260\001\n\017Pbft"
     "MessageType\022\030\n\024PBFT_TYPE_PREPREPARE\020\000\022\025\n"
     "\021PBFT_TYPE_PREPARE\020\001\022\024\n\020PBFT_TYPE_COMMIT"
@@ -5985,7 +5985,7 @@ void FeeConfig::clear_base_reserve() {
 const int ElectionConfig::kCandidatePledgeAmountFieldNumber;
 const int ElectionConfig::kKolPledgeAmountFieldNumber;
 const int ElectionConfig::kValidatorsRefreshIntervalFieldNumber;
-const int ElectionConfig::kMinVoteBUFieldNumber;
+const int ElectionConfig::kMinVoteBuFieldNumber;
 const int ElectionConfig::kBlockRewardShareFieldNumber;
 const int ElectionConfig::kFeeAllocationShareFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
@@ -6134,14 +6134,14 @@ bool ElectionConfig::MergePartialFromCodedStream(
         } else {
           goto handle_unusual;
         }
-        if (input->ExpectTag(32)) goto parse_min_vote_BU;
+        if (input->ExpectTag(32)) goto parse_min_vote_bu;
         break;
       }
 
-      // optional int64 min_vote_BU = 4;
+      // optional int64 min_vote_bu = 4;
       case 4: {
         if (tag == 32) {
-         parse_min_vote_BU:
+         parse_min_vote_bu:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
                  input, &min_vote_bu_)));
@@ -6226,7 +6226,7 @@ void ElectionConfig::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->validators_refresh_interval(), output);
   }
 
-  // optional int64 min_vote_BU = 4;
+  // optional int64 min_vote_bu = 4;
   if (this->min_vote_bu() != 0) {
     ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->min_vote_bu(), output);
   }
@@ -6272,7 +6272,7 @@ void ElectionConfig::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->validators_refresh_interval(), target);
   }
 
-  // optional int64 min_vote_BU = 4;
+  // optional int64 min_vote_bu = 4;
   if (this->min_vote_bu() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->min_vote_bu(), target);
   }
@@ -6328,7 +6328,7 @@ int ElectionConfig::ByteSize() const {
         this->validators_refresh_interval());
   }
 
-  // optional int64 min_vote_BU = 4;
+  // optional int64 min_vote_bu = 4;
   if (this->min_vote_bu() != 0) {
     total_size += 1 +
       ::google::protobuf::internal::WireFormatLite::Int64Size(
@@ -6486,18 +6486,18 @@ void ElectionConfig::clear_validators_refresh_interval() {
   // @@protoc_insertion_point(field_set:protocol.ElectionConfig.validators_refresh_interval)
 }
 
-// optional int64 min_vote_BU = 4;
+// optional int64 min_vote_bu = 4;
 void ElectionConfig::clear_min_vote_bu() {
   min_vote_bu_ = GOOGLE_LONGLONG(0);
 }
  ::google::protobuf::int64 ElectionConfig::min_vote_bu() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.min_vote_BU)
+  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.min_vote_bu)
   return min_vote_bu_;
 }
  void ElectionConfig::set_min_vote_bu(::google::protobuf::int64 value) {
   
   min_vote_bu_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.min_vote_BU)
+  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.min_vote_bu)
 }
 
 // optional string block_reward_share = 5;
