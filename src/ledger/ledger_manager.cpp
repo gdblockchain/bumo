@@ -710,6 +710,12 @@ namespace bumo {
 			abnormal_json.append(item);
 		}
 		data["abnormal_records"] = abnormal_json;
+		data["election_config"] = Proto2Json(election_config_);
+		Json::Value share_json;
+		for (int i = 0; i < fee_sharer_rate_.size(); i++) {
+			share_json.append(fee_sharer_rate_[i]);
+		}
+		data["fee_share_rate"] = share_json;
 	}
 
 	bool LedgerManager::CloseLedger(const protocol::ConsensusValue& consensus_value, const std::string& proof) {

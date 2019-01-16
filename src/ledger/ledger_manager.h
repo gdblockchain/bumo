@@ -73,7 +73,7 @@ namespace bumo {
 		bool ConsensusValueFromDB(int64_t seq, protocol::ConsensusValue& request);
 		protocol::FeeConfig GetCurFeeConfig();
         
-        // dpos
+        // DPOS
 		const protocol::ElectionConfig& GetProtoElectionConfig()
 		{
 			return election_config_;
@@ -85,7 +85,7 @@ namespace bumo {
 		void UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch, bool validators_changed);
         void AddAbnormalRecord(const std::string& abnormal_node);
 
-		Result DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context); // -1: false, 0 : successs, > 0 exception
+		Result DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context); // -1: false, 0 : success, > 0 exception
 		void NotifyLedgerClose(LedgerFrm::pointer closing_ledger, bool has_upgrade);
 
 		virtual void OnTimer(int64_t current_time) override;
