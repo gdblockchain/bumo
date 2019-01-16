@@ -106,6 +106,55 @@ namespace bumo{
 		return true;
 	}
 
+	bool Environment::GetVotedElectionConfig(const protocol::ElectionConfig& old_cfg, protocol::ElectionConfig& new_cfg) {
+		bool change = false;
+		new_cfg = old_cfg;
+
+		std::shared_ptr<Json::Value> ecfg;
+		settings_.Get(electionCfgKey, ecfg);
+		if (!ecfg) return false;
+
+		for (auto it = ecfg->begin(); it != ecfg->end(); it++) {
+			std::string key = it.memberName();
+			if (key == "fee_allocation_share" || key == "block_reward_share") {
+				std::string value = (*ecfg)[key].asString();
+				if (key == "fee_allocation_share" && old_cfg.fee_allocation_share() != value) {
+					change = true;
+					new_cfg.set_fee_allocation_share(value);
+				}
+				else if (key == "block_reward_share" && old_cfg.block_reward_share() != value) {
+					change = true;
+					new_cfg.set_block_reward_share(value);
+				}
+			}
+			else if (key == "candidate_pledge_amount" || key == "kol_pledge_amount" || 
+					 key == "validators_refresh_interval" || key == "min_vote_BU") {
+				int64_t value = (*ecfg)[key].asInt64();
+				if (key == "candidate_pledge_amount" && old_cfg.candidate_pledge_amount() != value) {
+					change = true;
+					new_cfg.set_candidate_pledge_amount(value);
+				}
+				else if (key == "validators_refresh_interval" && old_cfg.validators_refresh_interval() != value) {
+					change = true;
+					new_cfg.set_validators_refresh_interval(value);
+				}
+				else if (key == "kol_pledge_amount" && old_cfg.kol_pledge_amount() != value) {
+					change = true;
+					new_cfg.set_kol_pledge_amount(value);
+				}
+				else if (key == "min_vote_bu" && old_cfg.min_vote_bu() != value) {
+					change = true;
+					new_cfg.set_min_vote_bu(value);
+				}
+			}
+			else {
+				LOG_TRACE("No such configuration parameter key:%s, value:%s", key.c_str(), (*ecfg)[key].asString().c_str());
+			}
+		}
+
+		return change;
+	}
+
 	bool Environment::GetVotedFee(const protocol::FeeConfig &old_fee, protocol::FeeConfig& new_fee) {
 		bool change = false;
 		new_fee = old_fee;
@@ -163,6 +212,19 @@ namespace bumo{
 		}
 
 		return *validators;
+	}
+
+	Json::Value& Environment::GetElectionConfig(){
+		std::shared_ptr<Json::Value> ecfg;
+		settings_.Get(electionCfgKey, ecfg);
+
+		if (!ecfg){
+			ecfg = std::make_shared<Json::Value>();
+			*ecfg = Proto2Json(LedgerManager::Instance().GetProtoElectionConfig());
+			settings_.Set(validatorsKey, ecfg);
+		}
+
+		return *ecfg;
 	}
 
 	bool Environment::UpdateNewValidators(const Json::Value& validators) {
