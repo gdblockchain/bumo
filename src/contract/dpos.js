@@ -65,14 +65,14 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function distributionInit(){
+function rewardInit(){
     dpos = loadObj(rewardKey);
     assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
 
+    dpos.allStake = int64Add(dpos.allStake, thisPayCoinAmount);
     dpos.balance  = getBalance();
     assert(dpos.balance !== false, 'Faild to get account balance.');
 
-    dpos.allStake  = int64Add(dpos.allStake, thisPayCoinAmount);
     dpos.validatorCandidates = loadObj(validatorCandidatesKey);
     assert(dpos.validatorCandidates !== false, 'Faild to get validator candidates.');
 
@@ -117,7 +117,7 @@ function rewardDistribution(){
     distribute(dpos.kols, kolReward);
 
     let left = rewards % 10;
-    dpos.distribution[validators[0][0]] = int64Add(dpos.distribution[validators[0][0]], left);
+    dpos.distribution[dpos.validators[0][0]] = int64Add(dpos.distribution[dpos.validators[0][0]], left);
 
     let distributed = {};
     distributed.allStake = getBalance();
@@ -126,6 +126,9 @@ function rewardDistribution(){
 }
 
 function getProfit(){
+    rewardInit();
+    rewardDistribution();
+
     let income = dpos.distribution[sender];
     transferCoin(sender, income);
     log(sender + ' extracted block reward ' + income);
@@ -229,7 +232,7 @@ function modifyCandidates(type, node, formalSize){
 function updateCandidates(type, address, pledge){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    distributionInit();
+    rewardInit();
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let node = candidates.find(function(x){
         return x[0] === address;
@@ -248,7 +251,7 @@ function updateCandidates(type, address, pledge){
 function deleteCandidate(type, address){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    distributionInit();
+    rewardInit();
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let candidate = candidates.find(function(x){
         return x[0] === address;
