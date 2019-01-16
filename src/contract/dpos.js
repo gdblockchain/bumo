@@ -1,17 +1,19 @@
 'use strict';
 
-const validatorSetSize       = 30;
-const kolSetSize             = 100;
-const inPassRate             = 0.5;
-const outPassRate            = 0.7;
-const effectiveVoteInterval  = 15 * 24 * 60 * 60 * 1000 * 1000;
-const validatorMinPledge     = 5000000 * 100000000;
-const kolMinPledge           = 5 * 100000000;
+const kolSetSize                = 30;
+const kolMinPledge              = 5 * 100000000;
+const kolCandiatesSetSize       = 300;
+const validatorSetSize          = 30;
+const validatorMinPledge        = 5000000 * 100000000;
+const validatorCandidateSetSize = 300;
+const inPassRate                = 0.5;
+const outPassRate               = 0.7;
+const effectiveVoteInterval     = 15 * 24 * 60 * 60 * 1000 * 1000;
 
-const rewardKey              = 'block_reward';
-const committeeKey           = 'committee';
-const kolCandidatesKey       = 'kol_candidates';
-const validatorCandidatesKey = 'validator_candidates';
+const rewardKey                 = 'block_reward';
+const committeeKey              = 'committee';
+const kolCandidatesKey          = 'kol_candidates';
+const validatorCandidatesKey    = 'validator_candidates';
 
 const dpos = {};
 const memberType = {
