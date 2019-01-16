@@ -160,6 +160,17 @@ namespace bumo {
 			return false;
 		}
 
+		// election configuration
+		if (!loadElectionConfig()) {
+			LOG_ERROR("Failed to load election configuration!");
+			return false;
+		}
+
+		if (!loadAbnormalRecords()) {
+			LOG_ERROR("Failed to load abnormal records");
+			return false;
+		}
+
 		bumo::General::SetSelfChainId(lclheader.chain_id());
 
 		LOG_INFO("Gas price :" FMT_I64 " Base reserve:" FMT_I64 " .", fees_.gas_price(), fees_.base_reserve());
@@ -306,31 +317,94 @@ namespace bumo {
 		return fee.ParseFromString(str);
 	}
 
-	bool LedgerManager::ReadSharerRate(){
-		std::vector<std::string> vec = utils::String::split(election_config_.fee_allocation_share(), ":");
+	bool LedgerManager::loadElectionConfig() {
+		auto db = Storage::Instance().account_db();
+		std::string str;
+		int32_t ret = db->Get(General::ELECTION_CONFIG, str);
+		if (ret == 0) {
+			election_config_.set_candidate_pledge_amount(500000000000000);
+			election_config_.set_kol_pledge_amount(10000000000000);
+			election_config_.set_min_vote_bu(100000000);
+			election_config_.set_validators_refresh_interval(86400); // unused for now
+			election_config_.set_block_reward_share("50:40:10");
+			election_config_.set_fee_allocation_share("70:20:10");
+			return ReadSharerRate(election_config_.fee_allocation_share());
+		} 
+		else if (ret == 1) {
+			if (election_config_.ParseFromString(str)) {
+				return ReadSharerRate(election_config_.fee_allocation_share());
+			}
+			else {
+				return false;
+			}
+		}
+		else {
+			return false;
+		}
+	}
+
+	bool LedgerManager::loadAbnormalRecords() {
+		auto db = Storage::Instance().account_db();
+		std::string json_str;
+		int ret = db->Get(General::ABNORMAL_RECORDS, json_str);
+		if (ret < 0) {
+			return false;
+		}
+		else if (ret == 0) {// 0 means abnormal records not exist
+			return true;
+		}
+
+		Json::Value abnormal_json;
+		if (!abnormal_json.fromString(json_str)) {
+			LOG_ERROR("Failed to parse json string %s", json_str.c_str());
+			return false;
+		}
+		else {
+			for (size_t i = 0; i < abnormal_json.size(); i++) {
+				Json::Value& item = abnormal_json[i];
+				abnormal_records_.insert(std::make_pair(item["address"].asString(), item["count"].asInt64()));
+			}
+		}
+		return true;
+	}
+
+	void LedgerManager::ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg) {
+		std::string hash = HashWrapper::Crypto(ecfg.SerializeAsString());
+		batch->Put(General::ELECTION_CONFIG, ecfg.SerializeAsString());
+	}
+
+	bool LedgerManager::ReadSharerRate(const std::string& sharer_rate){
+		std::vector<std::string> vec = utils::String::split(sharer_rate, ":");
 		if (vec.size() != SHARER_MAX) {
 			return false;
 		}
 
+		std::vector<uint32_t> new_sharer_vec;
 		for (int i = 0; i < SHARER_MAX; i++) {
 			uint32_t value = 0;
 			if (!utils::String::SafeStoui(vec[i], value)) {
 				LOG_ERROR("Failed to convert string(%s) to int", vec[i].c_str());
 				return false;
 			}
-			fee_sharer_rate_.push_back(value);
+			new_sharer_vec.push_back(value);
 		}
+		fee_sharer_rate_ = new_sharer_vec;
 
 		return true;
-	}
+	} 
 
-	uint32_t LedgerManager::GetFeesSharerRate(FeeSharerType owner) {
+	uint32_t LedgerManager::GetFeeSharerRate(FeeSharerType owner) {
 		return fee_sharer_rate_[owner];
 	}
 
 	bool LedgerManager::SetProtoElectionConfig(const protocol::ElectionConfig& ecfg) {
+		if (election_config_.fee_allocation_share() != ecfg.fee_allocation_share())
+		{
+			if (!ReadSharerRate(ecfg.fee_allocation_share())) return false;
+		}
 		election_config_ = ecfg;
-		return ReadSharerRate();
+		
+		return true;
 	}
 
 	void LedgerManager::AddAbnormalRecord(const std::string& abnormal_node) {
@@ -343,8 +417,14 @@ namespace bumo {
 		}
 	}
 
-	void LedgerManager::UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch) {
+	void LedgerManager::UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch, bool validators_changed) {
 		Json::Value abnormal_json;
+		if (validators_changed) {
+			abnormal_records_.clear();
+			for (int i = 0; i < validators_.validators_size(); i++) {
+				abnormal_records_.insert(std::make_pair(validators_.validators(i).address(), 0));
+			}
+		}
 		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
 			it != abnormal_records_.end();
 			it++) {
@@ -651,6 +731,19 @@ namespace bumo {
 		if (closing_ledger == NULL){
 			return false;
 		}
+		
+		// for abnormal record
+		std::string abnormal_node;
+		for (int i = 0; i < consensus_value.entry_size(); i++) {
+			const protocol::KeyPair& kv = consensus_value.entry(i);
+			if (kv.key() == "abnormal_node") {
+				abnormal_node = kv.value();
+			}
+		}
+		if (!abnormal_node.empty()) {
+			AddAbnormalRecord(abnormal_node);
+			LOG_INFO("Add abnormal record: %s", abnormal_node.c_str());
+		}
 
 		protocol::Ledger& ledger = closing_ledger->ProtoLedger();
 		auto header = ledger.mutable_header();
@@ -700,9 +793,11 @@ namespace bumo {
 		account_db_batch->Put(bumo::General::KEY_LEDGER_SEQ, utils::String::Format(FMT_I64, ledger_seq));
 
 		//for validator upgrade
+		bool validators_changed = false;
 		if (new_set.validators_size() > 0 || closing_ledger->environment_->GetVotedValidators(validators_, new_set)) {
 			ValidatorsSet(account_db_batch, new_set);
 			validators_ = new_set;
+			validators_changed = true;
 		}
 		header->set_validators_hash(HashWrapper::Crypto(new_set.SerializeAsString()));//TODO
 
@@ -714,6 +809,21 @@ namespace bumo {
 			fees_ = new_fees;
 		}
 		header->set_fees_hash(HashWrapper::Crypto(fees_.SerializeAsString()));
+
+		//for election configuration
+		protocol::ElectionConfig new_ecfg;
+		if (closing_ledger->environment_->GetVotedElectionConfig(election_config_, new_ecfg)) {
+			if (!SetProtoElectionConfig(new_ecfg)) {
+				LOG_ERROR("Failed to update election configuration, %s", new_ecfg.DebugString().c_str());
+			}
+			else {
+				ElectionConfigSet(account_db_batch, new_ecfg);
+			}
+		}
+		// for abnormal node
+		if (!abnormal_node.empty()) {
+			UpdateAbnormalRecords(account_db_batch, validators_changed);
+		}
 
 		//This header must be for the latest block.
 		header->set_hash(HashWrapper::Crypto(closing_ledger->ProtoLedger().SerializeAsString()));
