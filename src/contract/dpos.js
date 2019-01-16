@@ -100,22 +100,22 @@ function dposSave(){
 function distribute(twoDimenList, allReward){
     let reward = int64Div(allReward, twoDimenList.length);
 
-    for(member in twoDimenList){
-        if(dpos.distribution[member[0]] === undefined){
-            dpos.distribution[member[0]] = reward;
+    for(index in twoDimenList){
+        let name = twoDimenList[index][0];
+        if(dpos.distribution[name] === undefined){
+            dpos.distribution[name] = reward;
         }
         else{
-            dpos.distribution[member[0]] = int64Add(dpos.distribution[member[0]], reward);
+            dpos.distribution[name] = int64Add(dpos.distribution[name], reward);
         }
     }
 
     let left = int64Mod(allReward, twoDimenList.length);
-    dpos.distribution[twoDimenList[0][0]] = int64Add(dpos.distribution[member[0]], left);
+    let element1st = dpos.distribution[twoDimenList[0][0]];
+    element1st = int64Add(element1st, left);
 }
 
 function rewardDistribution(){
-    dposInit();
-
     let rewards = int64Sub(dpos.balance, dpos.allStake);
     if(rewards === '0'){
         return;
@@ -190,35 +190,55 @@ function checkPledge(type){
 function updateCandidates(type, address, pledge){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
+    dposInit();
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
-    let candidate = candidates.find(function(x){
+    let node = candidates.find(function(x){
         return x[0] === address;
     });
 
-    if(candidate === undefined){
-        candidates.push([address, pledge]);
+    if(node === undefined){
+        let size = candidates.push([address, pledge]);
+        node = candidates[size - 1];
     }
     else{
-        candidate[1] = int64Add(candidate[1], thisPayCoinAmount);
+        node[1] = int64Add(node[1], thisPayCoinAmount);
     }
 
     candidates.sort(doubleSort);
-
-    if(type === memberType.validator && candidates.indexOf(candidate) < validatorSetSize){
-        let validators = candidates.slice(0, validatorSetSize);
-        return setValidators(JSON.stringify(validators));
+    if(candidates.length > validatorCandidateSetSize){
+        candidates = candidates.slice(0, validatorCandidateSetSize);
     }
 
+    if(type === memberType.validator && candidates.indexOf(node) < validatorSetSize){
+        rewardDistribution();
+        let validators = candidates.slice(0, validatorSetSize);
+        setValidators(JSON.stringify(validators));
+    }
+    else if((type === memberType.validator && candidates.includes(node)) || 
+            (type === memberType.kol && candidates.indexOf(node) < kolSetSize)){
+        rewardDistribution();
+    }
+
+
+    dposSave();
     return true;
 }
 
 function deleteCandidate(type, address){
+    assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
+
+    dposInit();
     let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
     let candidate = candidates.find(function(x){
         return x[0] === address;
     });
 
     let index = committee.indexOf(candidate);
+    if(index === -1){
+        return; 
+    }
+
+    rewardDistribution();
     candidates.splice(index, 1);
     candidates.sort(doubleSort);
 
@@ -226,6 +246,8 @@ function deleteCandidate(type, address){
         let validators = candidates.slice(0, validatorSetSize);
         setValidators(JSON.stringify(validators));
     }
+
+    dposSave();
 }
 
 function apply(type){
@@ -245,6 +267,7 @@ function apply(type){
         return true;
     }
 
+    proposal.passTime === blockTimestamp;
     saveObj(key, proposal);
     updateCandidates(type, sender);
 }
@@ -434,8 +457,6 @@ function query(input_str){
 }
 
 function main(input_str){
-    rewardDistribution();
-
     let input = JSON.parse(input_str);
     let params = input.params;
 
@@ -463,14 +484,12 @@ function main(input_str){
     else{
         throw '<undidentified operation type>';
     }
-
-    dposSave();
 }
 
 function init(input_str){
     let committee = JSON.parse(input_str);
-    for(member in committee){
-        assert(addressCheck(member), 'Committee member(' + member + ') is not valid adress.');
+    for(index in committee){
+        assert(addressCheck(committee[index]), 'Committee member(' +committee[index] + ') is not valid adress.');
     }
     saveObj(committeeKey, committee);
 
