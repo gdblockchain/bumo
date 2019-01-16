@@ -505,7 +505,18 @@ namespace bumo {
 			return true;
 		}
 
-		protocol::ValidatorSet set;
+		std::shared_ptr<AccountFrm> account;
+		if (environment_->GetEntry(General::CONTRACT_VALIDATOR_ADDRESS, account)) {
+			int64_t new_balance = 0;
+			if (!utils::SafeIntAdd(account->GetAccountBalance(), total_reward, new_balance)){
+				LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), total reward:(" FMT_I64 ")", account->GetAccountBalance(), total_reward);
+				return false;
+			}
+			account->GetProtoAccount().set_balance(new_balance);
+			LOG_TRACE("Failed to allocate block reward(" FMT_I64 ") to dpos contract account in ledger(" FMT_I64 ")", total_reward, ledger_.header().seq());
+		}
+
+		/*protocol::ValidatorSet set;
 		if (!LedgerManager::Instance().GetValidators(ledger_.header().seq() - 1, set)) {
 			LOG_ERROR("Failed to get validator of ledger(" FMT_I64 ")", ledger_.header().seq() - 1);
 			return false;
@@ -550,7 +561,7 @@ namespace bumo {
 			}
 			proto_account.set_balance(new_balance);
 			LOG_TRACE("Account(%s) aquired last reward(" FMT_I64 ") of allocation in ledger(" FMT_I64 ")", proto_account.address().c_str(), left_reward, ledger_.header().seq());
-		}
+		}*/
 
 		environment_->Commit();
 		return true;

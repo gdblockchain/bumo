@@ -453,6 +453,29 @@ namespace bumo {
 		args.GetReturnValue().Set(false);
 	}
 
+	void V8Contract::CallBackGetSystemCfg(const v8::FunctionCallbackInfo<v8::Value>& args) {
+		do {
+			if (args.Length() != 0) {
+				LOG_TRACE("parameter error");
+				args.GetReturnValue().Set(false);
+				break;
+			}
+			v8::HandleScope handle_scope(args.GetIsolate());
+			V8Contract *v8_contract = GetContractFrom(args.GetIsolate());
+
+			Json::Value jsonValidators;
+			LedgerContext *ledger_context = v8_contract->GetParameter().ledger_context_;
+			jsonValidators = ledger_context->GetTopTx()->environment_->GetElectionConfig();
+
+			std::string strvalue = jsonValidators.toFastString();
+			v8::Local<v8::String> returnvalue = v8::String::NewFromUtf8(args.GetIsolate(), strvalue.c_str(), v8::NewStringType::kNormal).ToLocalChecked();
+			args.GetReturnValue().Set(v8::JSON::Parse(returnvalue));
+
+			return;
+		} while (false);
+		args.GetReturnValue().Set(false);
+	}
+
 	void V8Contract::CallBackAddressValidCheck(const v8::FunctionCallbackInfo<v8::Value>& args) {
 		std::string error_desc;
 		do {

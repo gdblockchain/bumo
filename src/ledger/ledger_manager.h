@@ -74,11 +74,15 @@ namespace bumo {
 		protocol::FeeConfig GetCurFeeConfig();
         
         // dpos
-        const protocol::ElectionConfig& GetProtoElectionConfig();
+		const protocol::ElectionConfig& GetProtoElectionConfig()
+		{
+			return election_config_;
+		}
+
         bool SetProtoElectionConfig(const protocol::ElectionConfig& ecfg);
-		bool ReadSharerRate();
-		uint32_t LedgerManager::GetFeesSharerRate(FeeSharerType owner);
-		void UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch);
+		bool ReadSharerRate(const std::string& share_rate);
+		uint32_t GetFeeSharerRate(FeeSharerType owner);
+		void UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch, bool validators_changed);
         void AddAbnormalRecord(const std::string& abnormal_node);
 
 		Result DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context); // -1: false, 0 : successs, > 0 exception
@@ -118,6 +122,11 @@ namespace bumo {
 		static bool ValidatorsGet(const std::string& hash, protocol::ValidatorSet& vlidators_set);
 
 		static void FeesConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::FeeConfig &fee);
+
+		static void ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg);
+
+		bool loadElectionConfig();
+		bool loadAbnormalRecords();
 		
 		LedgerFrm::pointer last_closed_ledger_;
 		protocol::ValidatorSet validators_;

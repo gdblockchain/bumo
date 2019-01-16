@@ -159,6 +159,7 @@ message Transaction {
 	bytes metadata = 6;
 	repeated Operation operations = 7;
 	int64 chain_id = 8;
+	string dapp_address = 9;
 }
 
 message Signer {
