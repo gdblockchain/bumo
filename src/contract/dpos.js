@@ -1,19 +1,9 @@
 'use strict';
 
-const kolSetSize                = 30;
-const kolMinPledge              = 5 * 100000000;
-const kolCandidateSetSize       = 300;
-const validatorSetSize          = 30;
-const validatorMinPledge        = 5000000 * 100000000;
-const validatorCandidateSetSize = 300;
-const inPassRate                = 0.5;
-const outPassRate               = 0.7;
-const effectiveVoteInterval     = 15 * 24 * 60 * 60 * 1000 * 1000;
-
-const rewardKey                 = 'block_reward';
-const committeeKey              = 'committee';
-const kolCandidatesKey          = 'kol_candidates';
-const validatorCandidatesKey    = 'validator_candidates';
+const rewardKey         = 'block_reward';
+const committeeKey      = 'committee';
+const kolCandsKey       = 'kol_candidates';
+const validatorCandsKey = 'validator_candidates';
 
 const dpos = {};
 const memberType = {
@@ -26,6 +16,18 @@ const motionType = {
     'apply':'application',
     'abolish':'abolition',
     'withdraw':'withdraw'
+};
+
+let cfg = {
+    'kolsSize'           : 30,
+    'kolCandsSize'       : 300,
+    'kolMinPledge'       : 5000000000000,   /* 5 0000 0000 0000 */
+    'validatorsSize'     : 30,
+    'validatorCandsSize' : 300,
+    'validatorMinPledge' : 500000000000000, /* 500 0000 0000 0000 */
+    'inPassRate'         : 0.5,
+    'outPassRate'        : 0.7,
+    'validPeriod'        : 1296000000000    /* 15 * 24 * 60 * 60 * 1000 * 1000 */
 };
 
 function doubleSort(a, b){
@@ -75,14 +77,14 @@ function rewardInit(){
     dpos.balance  = getBalance();
     assert(dpos.balance !== false, 'Faild to get account balance.');
 
-    dpos.validatorCandidates = loadObj(validatorCandidatesKey);
-    assert(dpos.validatorCandidates !== false, 'Faild to get validator candidates.');
+    dpos.validatorCands = loadObj(validatorCandsKey);
+    assert(dpos.validatorCands !== false, 'Faild to get validator candidates.');
 
-    dpos.kolCandidates = loadObj(kolCandidatesKey);
-    assert(dpos.kolCandidates !== false, 'Faild to get kol candidates.');
+    dpos.kolCands = loadObj(kolCandsKey);
+    assert(dpos.kolCands !== false, 'Faild to get kol candidates.');
 
-    dpos.validators = dpos.validatorCandidates.slice(0, validatorSetSize);
-    dpos.kols       = dpos.kolCandidates.slice(0, kolSetSize);
+    dpos.validators = dpos.validatorCands.slice(0, cfg.validatorsSize);
+    dpos.kols       = dpos.kolCands.slice(0, cfg.kolsSize);
 }
 
 function distribute(twoDimenList, allReward){
@@ -114,7 +116,7 @@ function rewardDistribution(){
     distribute(dpos.validators, validatorReward);
 
     let nodeReward = (rewards * 4) / 10;
-    distribute(dpos.validatorCandidates, nodeReward);
+    distribute(dpos.validatorCands, nodeReward);
 
     let kolReward = rewards / 10;
     distribute(dpos.kols, kolReward);
@@ -158,7 +160,7 @@ function proposalKey(proposalType, memType, address){
 function applicationProposal(){
     let proposal = {
         'pledge':thisPayCoinAmount,
-        'expiration':blockTimestamp + effectiveVoteInterval,
+        'expiration':blockTimestamp + cfg.validPeriod,
         'ballot':[]
     };
 
@@ -169,11 +171,11 @@ function checkPledge(type){
     let com = -1;
 
     if(type === memberType.validator){
-        com = int64Compare(thisPayCoinAmount, validatorMinPledge);
+        com = int64Compare(thisPayCoinAmount, cfg.validatorMinPledge);
         assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of validator.');
     }
     else if(type === memberType.kol){
-        com = int64Compare(thisPayCoinAmount, kolMinPledge);
+        com = int64Compare(thisPayCoinAmount, cfg.kolMinPledge);
         assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of KOL.');
     }
     else if(type === memberType.committee){
@@ -185,7 +187,7 @@ function checkPledge(type){
 }
 
 function addCandidates(type, address, pledge, maxSize){
-    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
     let com = int64Compare(pledge, candidates[candidates.length - 1][1]);
     
     if(candidates.length >= maxSize && com <= 0){
@@ -202,17 +204,17 @@ function addCandidates(type, address, pledge, maxSize){
         candidates = candidates.slice(0, maxSize);
     }
 
-    if(type === memberType.validator && candidates.indexOf(node) < validatorSetSize){
-        let validators = candidates.slice(0, validatorSetSize);
+    if(type === memberType.validator && candidates.indexOf(node) < cfg.validatorsSize){
+        let validators = candidates.slice(0, cfg.validatorsSize);
         setValidators(JSON.stringify(validators));
     }
 
-    let key = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
     return saveObj(key, candidates);
 }
 
 function modifyCandidates(type, node, formalSize){
-    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
     let oldPos = candidates.indexOf(node);
     
     node[1] = int64Add(node[1], thisPayCoinAmount);
@@ -223,12 +225,12 @@ function modifyCandidates(type, node, formalSize){
         rewardDistribution();
 
         if(type === memberType.validator){
-            let validators = candidates.slice(0, validatorSetSize);
+            let validators = candidates.slice(0, cfg.validatorsSize);
             setValidators(JSON.stringify(validators));
         }
     }
 
-    let key = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
     return saveObj(key, candidates);
 }
 
@@ -236,17 +238,17 @@ function updateCandidates(type, address, pledge){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
     rewardInit();
-    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
     let node = candidates.find(function(x){
         return x[0] === address;
     });
 
     if(node === undefined){
-        let maxSize = type === memberType.validator ? validatorCandidateSetSize : kolCandidateSetSize;
+        let maxSize = type === memberType.validator ? cfg.validatorCandsSize : cfg.kolCandsSize;
         addCandidates(type, address, pledge, maxSize);
     }
     else{
-        let formalSize = type === memberType.validator ? validatorSetSize : kolSetSize;
+        let formalSize = type === memberType.validator ? cfg.validatorsSize : cfg.kolsSize;
         modifyCandidates(type, node, formalSize);
     }
 }
@@ -255,7 +257,7 @@ function deleteCandidate(type, address){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
     rewardInit();
-    let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
     let candidate = candidates.find(function(x){
         return x[0] === address;
     });
@@ -269,12 +271,12 @@ function deleteCandidate(type, address){
     candidates.splice(index, 1);
     candidates.sort(doubleSort);
 
-    if(type === memberType.validator && index < validatorSetSize){
-        let validators = candidates.slice(0, validatorSetSize);
+    if(type === memberType.validator && index < cfg.validatorsSize){
+        let validators = candidates.slice(0, cfg.validatorsSize);
         setValidators(JSON.stringify(validators));
     }
 
-    let key = type === memberType.validator ? validatorCandidatesKey : kolCandidatesKey;
+    let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
     saveObj(key, candidates);
 }
 
@@ -292,7 +294,7 @@ function apply(type){
     proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
     if(proposal.passTime === undefined){ 
         /* Additional deposit, not yet approved */
-        proposal.expiration = blockTimestamp + effectiveVoteInterval;
+        proposal.expiration = blockTimestamp + cfg.validPeriod;
         return saveObj(key, proposal);
     }
 
@@ -316,7 +318,7 @@ function approveIn(type, applicant){
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
     proposal.ballot.push(sender);
-    if(proposal.ballot.length <= parseInt(committee.length * inPassRate + 0.5)){
+    if(proposal.ballot.length <= parseInt(committee.length * cfg.inPassRate + 0.5)){
         return saveObj(key, proposal);
     }
 
@@ -346,7 +348,7 @@ function approveOut(type, evil){
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
     proposal.ballot.push(sender);
-    if(proposal.ballot.length <= parseInt(committee.length * outPassRate + 0.5)){
+    if(proposal.ballot.length <= parseInt(committee.length * cfg.outPassRate + 0.5)){
         return saveObj(key, proposal);
     }
 
@@ -359,7 +361,7 @@ function approveOut(type, evil){
         deleteCandidate(type, evil);
         let recordKey  = proposalKey(motionType.apply, type, evil);
         let record     = loadObj(recordKey);
-        let candidates = type === memberType.validator ? dpos.validatorCandidates : dpos.kolCandidates;
+        let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
         distribute(candidates, record.pledge);
     }
 }
@@ -392,7 +394,7 @@ function abolitionProposal(proof){
     let proposal = {
         'Informer': sender,
         'reason': proof,
-        'expiration': blockTimestamp + effectiveVoteInterval,
+        'expiration': blockTimestamp + cfg.validPeriod,
         'ballot': [sender]
     };
 
@@ -431,7 +433,7 @@ function abolish(type, address, proof){
         saveObj(key, proposal);
     }
 
-    proposal.expiration = blockTimestamp + effectiveVoteInterval;
+    proposal.expiration = blockTimestamp + cfg.validPeriod;
     saveObj(key, proposal);
 }
 
@@ -440,7 +442,7 @@ function withdraw(type){
     let expiration = storageLoad(withdrawKey);
 
     if(expiration === false){
-        return storageStore(withdrawKey, blockTimestamp + effectiveVoteInterval);
+        return storageStore(withdrawKey, blockTimestamp + cfg.validPeriod);
     }
 
     let expired = int64Compare(blockTimestamp, expiration);
@@ -477,7 +479,7 @@ function query(input_str){
         result.current_validators = getValidators();
     }
     else if(input.method === 'getCandidates'){
-        result.current_candidates = storageLoad(validatorCandidatesKey);
+        result.current_candidates = storageLoad(validatorCandsKey);
     }
     else{
        	throw '<unidentified operation type>';
@@ -529,7 +531,7 @@ function init(input_str){
     assert(validators !== false, 'Get validators failed.');
 
     let candidates = validators.sort(doubleSort);
-    saveObj(validatorCandidatesKey, candidates);
+    saveObj(validatorCandsKey, candidates);
 
     let balance = getBalance();
     assert(balance !== false, 'Faild to get account balance.');
