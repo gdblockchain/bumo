@@ -1,34 +1,25 @@
 'use strict';
 
+const configKey         = 'dos_config';
 const rewardKey         = 'block_reward';
 const committeeKey      = 'committee';
 const kolCandsKey       = 'kol_candidates';
 const validatorCandsKey = 'validator_candidates';
 
-const dpos = {};
 const memberType = {
    'committee' : 1,
    'validator' : 2,
-   'kol' : 3
+   'kol'       : 3
 };
 
 const motionType = {
-    'apply':'application',
-    'abolish':'abolition',
+    'apply'   :'application',
+    'abolish' :'abolition',
     'withdraw':'withdraw'
 };
 
-let cfg = {
-    'kolsSize'           : 30,
-    'kolCandsSize'       : 300,
-    'kolMinPledge'       : 5000000000000,   /* 5 0000 0000 0000 */
-    'validatorsSize'     : 30,
-    'validatorCandsSize' : 300,
-    'validatorMinPledge' : 500000000000000, /* 500 0000 0000 0000 */
-    'inPassRate'         : 0.5,
-    'outPassRate'        : 0.7,
-    'validPeriod'        : 1296000000000    /* 15 * 24 * 60 * 60 * 1000 * 1000 */
-};
+let dpos = {};
+let cfg  = {};
 
 function doubleSort(a, b){
     let com = int64Compare(b[1], a[1]) ;
@@ -493,6 +484,9 @@ function main(input_str){
     let input = JSON.parse(input_str);
     let params = input.params;
 
+    cfg = loadObj(configKey);
+    assert(cfg !== false, 'Failed to load configuration.');
+
     if(input.method === 'apply'){
         apply(params.type);
     }
@@ -520,7 +514,23 @@ function main(input_str){
 }
 
 function init(input_str){
+    let config = {
+        'committeeSize'      : 100,
+        'kolsSize'           : 30,
+        'kolCandsSize'       : 300,
+        'kolMinPledge'       : 5000000000000,   /* 5 0000 0000 0000 */
+        'validatorsSize'     : 30,
+        'validatorCandsSize' : 300,
+        'validatorMinPledge' : 500000000000000, /* 500 0000 0000 0000 */
+        'inPassRate'         : 0.5,
+        'outPassRate'        : 0.7,
+        'validPeriod'        : 1296000000000    /* 15 * 24 * 60 * 60 * 1000 * 1000 */
+    };
+    saveObj(configKey, config);
+
     let committee = JSON.parse(input_str);
+    assert(int64Compare(committee.length, config.committeeSize) <= 0, 'Committee size exceeded.');
+
     let i = 0;
     for(i = 0; i < committee.length; i += 1){
         assert(addressCheck(committee[i]), 'Committee member(' +committee[i] + ') is not valid adress.');
