@@ -25,7 +25,7 @@ const memberType = {
 const motionType = {
     'apply':'application',
     'abolish':'abolition',
-    'withdraw':'withdraw',
+    'withdraw':'withdraw'
 };
 
 function doubleSort(a, b){
@@ -66,10 +66,12 @@ function transferCoin(dest, amount)
 }
 
 function rewardInit(){
-    dpos = loadObj(rewardKey);
+    let rewards = loadObj(rewardKey);
     assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
 
-    dpos.allStake = int64Add(dpos.allStake, thisPayCoinAmount);
+    dpos.allStake = int64Add(rewards.allStake, thisPayCoinAmount);
+    dpos.distribution = rewards.distribution;
+
     dpos.balance  = getBalance();
     assert(dpos.balance !== false, 'Faild to get account balance.');
 
@@ -86,8 +88,9 @@ function rewardInit(){
 function distribute(twoDimenList, allReward){
     let reward = int64Div(allReward, twoDimenList.length);
 
-    for(index in twoDimenList){
-        let name = twoDimenList[index][0];
+    let i = 0;
+    for(i = 0; i < twoDimenList.length; i += 1){
+        let name = twoDimenList[i][0];
         if(dpos.distribution[name] === undefined){
             dpos.distribution[name] = reward;
         }
@@ -136,7 +139,7 @@ function extract(){
 
 function proposalKey(proposalType, memType, address){
     let key = '';
-    if(memType == memberType.committee){
+    if(memType === memberType.committee){
         key = proposalType + '_committee_' + address; 
     }
     else if(memType === memberType.validator){
@@ -257,7 +260,7 @@ function deleteCandidate(type, address){
         return x[0] === address;
     });
 
-    let index = committee.indexOf(candidate);
+    let index = candidates.indexOf(candidate);
     if(index === -1){
         return; 
     }
@@ -276,7 +279,7 @@ function deleteCandidate(type, address){
 }
 
 function apply(type){
-    let key = proposalKey(motionType.apply, key, sender);
+    let key = proposalKey(motionType.apply, type, sender);
     let proposal = loadObj(key);
 
     if(proposal === false){
@@ -289,7 +292,7 @@ function apply(type){
     proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
     if(proposal.passTime === undefined){ 
         /* Additional deposit, not yet approved */
-        proposal.expiration = blockTimestamp + effectiveVoteInterval,
+        proposal.expiration = blockTimestamp + effectiveVoteInterval;
         return saveObj(key, proposal);
     }
 
@@ -302,7 +305,7 @@ function approveIn(type, applicant){
     let committee = loadObj(committeeKey);
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = proposalKey(motionType.apply, type, address);
+    let key = proposalKey(motionType.apply, type, applicant);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -317,7 +320,7 @@ function approveIn(type, applicant){
         return saveObj(key, proposal);
     }
 
-    proposal.passTime === blockTimestamp;
+    proposal.passTime = blockTimestamp;
     saveObj(key, proposal);
 
     if(type === memberType.committee){
@@ -333,7 +336,7 @@ function approveOut(type, evil){
     let committee = loadObj(committeeKey);
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = proposalKey(motionType.abolish, type, address);
+    let key = proposalKey(motionType.abolish, type, evil);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -350,7 +353,7 @@ function approveOut(type, evil){
     storageDel(key);
     if(type === memberType.committee){
         committee.splice(committee.indexOf(evil), 1);
-        return saveObj(key, committee);
+        saveObj(key, committee);
     }
     else{
         deleteCandidate(type, evil);
@@ -394,10 +397,6 @@ function abolitionProposal(proof){
     };
 
     return proposal;
-}
-
-function checkPermission(type, address){
-
 }
 
 function abolish(type, address, proof){
@@ -455,8 +454,9 @@ function withdraw(type){
     storageDel(withdrawKey);
 
     if(type === memberType.committee){
+        let committee = loadObj(committeeKey);
         committee.splice(committee.indexOf(sender), 1);
-        return saveObj(key, committee);
+        return saveObj(committeeKey, committee);
     }
 
     deleteCandidate(type, sender);
@@ -519,8 +519,9 @@ function main(input_str){
 
 function init(input_str){
     let committee = JSON.parse(input_str);
-    for(index in committee){
-        assert(addressCheck(committee[index]), 'Committee member(' +committee[index] + ') is not valid adress.');
+    let i = 0;
+    for(i = 0; i < committee.length; i += 1){
+        assert(addressCheck(committee[i]), 'Committee member(' +committee[i] + ') is not valid adress.');
     }
     saveObj(committeeKey, committee);
 
