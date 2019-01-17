@@ -514,7 +514,7 @@ function main(input_str){
 }
 
 function init(input_str){
-    let config = {
+    cfg = {
         'committeeSize'      : 100,
         'kolsSize'           : 30,
         'kolCandsSize'       : 300,
@@ -526,10 +526,10 @@ function init(input_str){
         'outPassRate'        : 0.7,
         'validPeriod'        : 1296000000000    /* 15 * 24 * 60 * 60 * 1000 * 1000 */
     };
-    saveObj(configKey, config);
+    saveObj(configKey, cfg);
 
     let committee = JSON.parse(input_str);
-    assert(int64Compare(committee.length, config.committeeSize) <= 0, 'Committee size exceeded.');
+    assert(int64Compare(committee.length, cfg.committeeSize) <= 0, 'Committee size exceeded.');
 
     let i = 0;
     for(i = 0; i < committee.length; i += 1){
@@ -546,7 +546,7 @@ function init(input_str){
     let balance = getBalance();
     assert(balance !== false, 'Faild to get account balance.');
 
-    let reward= {};
+    let reward = {};
     reward.allStake     = balance;
     reward.distribution = {};
     saveObj(rewardKey, reward);
