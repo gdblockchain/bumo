@@ -328,11 +328,13 @@ namespace bumo {
 				result_.set_code(protocol::ERRCODE_ACCOUNT_NOT_EXIST);
 				break;
 			}
-
-			if (!DauReward(actual_fee, source_account, total_fee)) {
-				result_.set_desc("Failed to do dau reward");
-				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-				break;
+			
+			if (CHECK_VERSION_GT_1002){
+				if (!DauReward(actual_fee, source_account, total_fee)) {
+					result_.set_desc("Failed to do dau reward");
+					result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
+					break;
+				}
 			}
 
 			if (!utils::SafeIntSub(total_fee, fee, total_fee)){

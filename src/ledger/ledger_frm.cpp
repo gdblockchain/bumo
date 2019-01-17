@@ -505,63 +505,69 @@ namespace bumo {
 			return true;
 		}
 
-		std::shared_ptr<AccountFrm> account;
-		if (environment_->GetEntry(General::CONTRACT_VALIDATOR_ADDRESS, account)) {
-			int64_t new_balance = 0;
-			if (!utils::SafeIntAdd(account->GetAccountBalance(), total_reward, new_balance)){
-				LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), total reward:(" FMT_I64 ")", account->GetAccountBalance(), total_reward);
-				return false;
-			}
-			account->GetProtoAccount().set_balance(new_balance);
-			LOG_TRACE("Failed to allocate block reward(" FMT_I64 ") to dpos contract account in ledger(" FMT_I64 ")", total_reward, ledger_.header().seq());
-		}
-
-		/*protocol::ValidatorSet set;
-		if (!LedgerManager::Instance().GetValidators(ledger_.header().seq() - 1, set)) {
-			LOG_ERROR("Failed to get validator of ledger(" FMT_I64 ")", ledger_.header().seq() - 1);
-			return false;
-		}
-		if (set.validators_size() == 0) {
-			LOG_ERROR("Validator set should not be empty.");
-			return false;
-		}
-
-		int64_t left_reward = total_reward;
-		std::shared_ptr<AccountFrm> random_account;
-		int64_t random_index = ledger_.header().seq() % set.validators_size();
-		int64_t average_fee = total_reward / set.validators_size();
-		LOG_INFO("total reward(" FMT_I64 ") = total fee(" FMT_I64 ") + block reward(" FMT_I64 ") in ledger(" FMT_I64 ")", total_reward, total_fee_, block_reward, ledger_.header().seq());
-		for (int32_t i = 0; i < set.validators_size(); i++) {
+		if (CHECK_VERSION_GT_1002)
+		{
 			std::shared_ptr<AccountFrm> account;
-			if (!environment_->GetEntry(set.validators(i).address(), account)) {
-				account = AccountFrm::CreatAccountFrm(set.validators(i).address(), 0);
-				environment_->AddEntry(account->GetAccountAddress(), account);
+			if (environment_->GetEntry(GET_CONTRACT_VALIDATOR_ADDRESS, account)) {
+				int64_t new_balance = 0;
+				if (!utils::SafeIntAdd(account->GetAccountBalance(), total_reward, new_balance)){
+					LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), total reward:(" FMT_I64 ")", account->GetAccountBalance(), total_reward);
+					return false;
+				}
+				account->GetProtoAccount().set_balance(new_balance);
 			}
-			if (random_index == i) {
-				random_account = account;
+			else {
+				LOG_TRACE("Failed to get dpos contract address(%s), no block reward will be allocation", GET_CONTRACT_VALIDATOR_ADDRESS);
 			}
-
-			left_reward -= average_fee;
-
-			LOG_TRACE("Account(%s) allocated reward(" FMT_I64 "), left reward(" FMT_I64 ") in ledger(" FMT_I64 ")", account->GetAccountAddress().c_str(), average_fee, left_reward, ledger_.header().seq());
-			protocol::Account &proto_account = account->GetProtoAccount();
-			int64_t new_balance = 0;;
-			if (!utils::SafeIntAdd(proto_account.balance(), average_fee, new_balance)){
-				LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), average_fee:(" FMT_I64 ")", proto_account.balance(), average_fee);
-				return false;
-			}
-			proto_account.set_balance(new_balance);
 		}
-		if (left_reward > 0) {
-			protocol::Account &proto_account = random_account->GetProtoAccount();
-			int64_t new_balance = 0;
-			if (!utils::SafeIntAdd(proto_account.balance(), left_reward, new_balance)){
-				LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), reward:(" FMT_I64 ")", proto_account.balance(), left_reward);
+		else {
+			protocol::ValidatorSet set;
+			if (!LedgerManager::Instance().GetValidators(ledger_.header().seq() - 1, set)) {
+				LOG_ERROR("Failed to get validator of ledger(" FMT_I64 ")", ledger_.header().seq() - 1);
 				return false;
 			}
-			proto_account.set_balance(new_balance);
-			LOG_TRACE("Account(%s) aquired last reward(" FMT_I64 ") of allocation in ledger(" FMT_I64 ")", proto_account.address().c_str(), left_reward, ledger_.header().seq());
-		}*/
+			if (set.validators_size() == 0) {
+				LOG_ERROR("Validator set should not be empty.");
+				return false;
+			}
+
+			int64_t left_reward = total_reward;
+			std::shared_ptr<AccountFrm> random_account;
+			int64_t random_index = ledger_.header().seq() % set.validators_size();
+			int64_t average_fee = total_reward / set.validators_size();
+			LOG_INFO("total reward(" FMT_I64 ") = total fee(" FMT_I64 ") + block reward(" FMT_I64 ") in ledger(" FMT_I64 ")", total_reward, total_fee_, block_reward, ledger_.header().seq());
+			for (int32_t i = 0; i < set.validators_size(); i++) {
+				std::shared_ptr<AccountFrm> account;
+				if (!environment_->GetEntry(set.validators(i).address(), account)) {
+					account = AccountFrm::CreatAccountFrm(set.validators(i).address(), 0);
+					environment_->AddEntry(account->GetAccountAddress(), account);
+				}
+				if (random_index == i) {
+					random_account = account;
+				}
+
+				left_reward -= average_fee;
+
+				LOG_TRACE("Account(%s) allocated reward(" FMT_I64 "), left reward(" FMT_I64 ") in ledger(" FMT_I64 ")", account->GetAccountAddress().c_str(), average_fee, left_reward, ledger_.header().seq());
+				protocol::Account &proto_account = account->GetProtoAccount();
+				int64_t new_balance = 0;;
+				if (!utils::SafeIntAdd(proto_account.balance(), average_fee, new_balance)){
+					LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), average_fee:(" FMT_I64 ")", proto_account.balance(), average_fee);
+					return false;
+				}
+				proto_account.set_balance(new_balance);
+			}
+			if (left_reward > 0) {
+				protocol::Account &proto_account = random_account->GetProtoAccount();
+				int64_t new_balance = 0;
+				if (!utils::SafeIntAdd(proto_account.balance(), left_reward, new_balance)){
+					LOG_ERROR("Overflowed when rewarding account. Account balance:(" FMT_I64 "), reward:(" FMT_I64 ")", proto_account.balance(), left_reward);
+					return false;
+				}
+				proto_account.set_balance(new_balance);
+				LOG_TRACE("Account(%s) aquired last reward(" FMT_I64 ") of allocation in ledger(" FMT_I64 ")", proto_account.address().c_str(), left_reward, ledger_.header().seq());
+			}
+		}
 
 		environment_->Commit();
 		return true;
