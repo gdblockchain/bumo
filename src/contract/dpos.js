@@ -103,14 +103,10 @@ function rewardDistribution(){
         return;
     }
 
-    let validatorReward = (rewards * 5) / 10;
-    distribute(dpos.validators, validatorReward);
-
-    let nodeReward = (rewards * 4) / 10;
-    distribute(dpos.validatorCands, nodeReward);
-
-    let kolReward = rewards / 10;
-    distribute(dpos.kols, kolReward);
+    let oneTenth = rewards / 10;
+    distribute(dpos.kols, oneTenth);
+    distribute(dpos.validators, oneTenth * 5);
+    distribute(dpos.validatorCands, oneTenth * 4);
 
     let left = rewards % 10;
     dpos.distribution[dpos.validators[0][0]] = int64Add(dpos.distribution[dpos.validators[0][0]], left);
