@@ -523,6 +523,10 @@ function withdraw(type){
     }
 }
 
+function config(item, value){
+
+}
+
 function query(input_str){
     let input  = JSON.parse(input_str);
 
@@ -571,6 +575,9 @@ function main(input_str){
     }
     else if(input.method === 'extract'){
     	extract();
+    }
+    else if(input.method === 'config'){
+    	config(params.item, params.value);
     }
     else{
         throw '<undidentified operation type>';
