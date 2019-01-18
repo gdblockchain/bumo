@@ -379,7 +379,7 @@ function vote(type, address){
         voteAmount = int64Add(voteAmount, thisPayCoinAmount);
     }
 
-    storageStore(key, thisPayCoinAmount);
+    storageStore(key, voteAmount);
     updateCandidates(type, address);
 }
 
