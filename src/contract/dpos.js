@@ -234,7 +234,7 @@ function updateCandidates(type, address, pledge){
         return x[0] === address;
     });
 
-    if(node === undefined){
+    if(node === undefined && pledge !== undefined){
         let maxSize = type === memberType.validator ? cfg.validatorCandsSize : cfg.kolCandsSize;
         addCandidates(type, address, pledge, maxSize);
     }
