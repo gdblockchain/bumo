@@ -3423,18 +3423,6 @@ class ConsensusValue : public ::google::protobuf::Message /* @@protoc_insertion_
   ::protocol::ConsensusValueValidation* release_validation();
   void set_allocated_validation(::protocol::ConsensusValueValidation* validation);
 
-  // repeated .protocol.KeyPair entry = 8;
-  int entry_size() const;
-  void clear_entry();
-  static const int kEntryFieldNumber = 8;
-  const ::protocol::KeyPair& entry(int index) const;
-  ::protocol::KeyPair* mutable_entry(int index);
-  ::protocol::KeyPair* add_entry();
-  ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >*
-      mutable_entry();
-  const ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >&
-      entry() const;
-
   // @@protoc_insertion_point(class_scope:protocol.ConsensusValue)
  private:
 
@@ -3447,7 +3435,6 @@ class ConsensusValue : public ::google::protobuf::Message /* @@protoc_insertion_
   ::google::protobuf::internal::ArenaStringPtr previous_ledger_hash_;
   ::protocol::LedgerUpgrade* ledger_upgrade_;
   ::protocol::ConsensusValueValidation* validation_;
-  ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair > entry_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_chain_2eproto();
   friend void protobuf_AssignDesc_chain_2eproto();
@@ -7302,36 +7289,6 @@ inline void ConsensusValue::set_allocated_validation(::protocol::ConsensusValueV
     
   }
   // @@protoc_insertion_point(field_set_allocated:protocol.ConsensusValue.validation)
-}
-
-// repeated .protocol.KeyPair entry = 8;
-inline int ConsensusValue::entry_size() const {
-  return entry_.size();
-}
-inline void ConsensusValue::clear_entry() {
-  entry_.Clear();
-}
-inline const ::protocol::KeyPair& ConsensusValue::entry(int index) const {
-  // @@protoc_insertion_point(field_get:protocol.ConsensusValue.entry)
-  return entry_.Get(index);
-}
-inline ::protocol::KeyPair* ConsensusValue::mutable_entry(int index) {
-  // @@protoc_insertion_point(field_mutable:protocol.ConsensusValue.entry)
-  return entry_.Mutable(index);
-}
-inline ::protocol::KeyPair* ConsensusValue::add_entry() {
-  // @@protoc_insertion_point(field_add:protocol.ConsensusValue.entry)
-  return entry_.Add();
-}
-inline ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >*
-ConsensusValue::mutable_entry() {
-  // @@protoc_insertion_point(field_mutable_list:protocol.ConsensusValue.entry)
-  return &entry_;
-}
-inline const ::google::protobuf::RepeatedPtrField< ::protocol::KeyPair >&
-ConsensusValue::entry() const {
-  // @@protoc_insertion_point(field_list:protocol.ConsensusValue.entry)
-  return entry_;
 }
 
 // -------------------------------------------------------------------

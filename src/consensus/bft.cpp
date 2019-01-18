@@ -1088,6 +1088,26 @@ namespace bumo {
 
 	bool Pbft::ProcessQuorumViewChange(PbftVcInstance &vc_instance) {
 		LOG_INFO("Process quorum view-change, new view (number:" FMT_I64 ")", vc_instance.view_number_);
+		
+		std::string abnormal_node;
+		int32_t vsize = validators_.size();
+		for (std::map<std::string, int64_t>::iterator iter = validators_.begin();
+			iter != validators_.end();
+			iter++) {
+			if (iter->second == view_number_ % vsize) {
+				abnormal_node = iter->first;
+				std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.find(abnormal_node);
+				if (it != abnormal_records_.end())
+				{
+					it->second++;
+				}
+				else {
+					abnormal_records_.insert(std::make_pair(abnormal_node, 1));
+				}
+				break;
+			}
+		}
+
 		if (vc_instance.view_number_ % validators_.size() != replica_id_) { // we must be the leader
 
 			protocol::PbftPreparedSet temp_set = vc_instance.pre_prepared_env_set;
@@ -1143,24 +1163,6 @@ namespace bumo {
 
 		ValueSaver saver;
 		//Enter the new view
-		std::string abnormal_node;
-		int32_t vsize = validators_.size();
-		for (std::map<std::string, int64_t>::iterator iter = validators_.begin();
-			iter != validators_.end();
-			iter++) {
-			if (iter->second == view_number_ % vsize) {
-				abnormal_node = iter->first;
-				std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.find(abnormal_node);
-				if (it != abnormal_records_.end())
-				{
-					it->second++;
-				}
-				else {
-					abnormal_records_.insert(std::make_pair(abnormal_node, 1));
-				}
-				break;
-			}
-		}
 
 		view_number_ = vc_instance.view_number_;
 		view_active_ = true;
