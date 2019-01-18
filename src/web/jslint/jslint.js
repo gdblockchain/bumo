@@ -5043,6 +5043,8 @@ function callJslint(js_value, global_string) {
 	option_array["single"] = true;
 	option_array["white"] = true;
 	option_array["for"] = true;
+	option_array["this"] = true;
+
 	var rx_separator = /[\s,;'"]+/;
 	var pre_defined = (global_string === "") ? undefined : global_string.split(rx_separator);
 	var data = jslint(js_value, option_array, pre_defined); 
@@ -5054,3 +5056,4 @@ function callJslint(js_value, global_string) {
 	}
 	return JSON.stringify(data.warnings);
 }
+
