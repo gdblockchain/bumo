@@ -291,7 +291,7 @@ function apply(type){
 
     /* Approved, additional deposit */
     saveObj(key, proposal);
-    updateCandidates(type, sender);
+    updateCandidates(type, sender, proposal.pledge);
 }
 
 function approveIn(type, applicant){
