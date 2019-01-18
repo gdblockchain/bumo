@@ -347,11 +347,11 @@ function approveOut(type, evil){
     }
     else{
         deleteCandidate(type, evil);
-        let recordKey  = proposalKey(motionType.apply, type, evil);
-        let record     = loadObj(recordKey);
+        let applicantKey  = proposalKey(motionType.apply, type, evil);
+        let applicant     = loadObj(applicantKey);
         let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
-        distribute(candidates, record.pledge);
-        storageDel(recordKey);
+        distribute(candidates, applicant.pledge);
+        storageDel(applicantKey);
     }
 }
 
