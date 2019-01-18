@@ -328,11 +328,11 @@ namespace bumo {
 				result_.set_code(protocol::ERRCODE_ACCOUNT_NOT_EXIST);
 				break;
 			}
-
-			if (!DauReward(actual_fee, source_account, total_fee)) {
-				result_.set_desc("Failed to do dau reward");
-				result_.set_code(protocol::ERRCODE_INTERNAL_ERROR);
-				break;
+			
+			if (CHECK_VERSION_GT_1002){
+				if (!DauReward(actual_fee, source_account, total_fee)) {
+					break;
+				}
 			}
 
 			if (!utils::SafeIntSub(total_fee, fee, total_fee)){
@@ -387,7 +387,7 @@ namespace bumo {
 				LOG_TRACE("Return fee to dapp done, dapp share: " FMT_I64 ", actual fee: " FMT_I64 "", (int64_t)dapp_share, actual_fee);
 			}
 			else {
-				LOG_ERROR("Invalid dapp address, %s", dapp_addr.c_str());
+				LOG_WARN("Invalid dapp address, %s", dapp_addr.c_str());
 			}
 		}
 		

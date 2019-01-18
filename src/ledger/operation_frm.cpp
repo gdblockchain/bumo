@@ -530,7 +530,10 @@ namespace bumo {
 			account.set_balance(create_account.init_balance());
 			account.mutable_priv()->CopyFrom(create_account.priv());
 			account.set_address(dest_address);
-			account.set_creator(transaction_->GetSourceAddress());
+			if (CHECK_VERSION_GT_1002){
+				account.set_creator(transaction_->GetSourceAddress());
+			}
+			
 			account.mutable_contract()->CopyFrom(create_account.contract());
 			dest_account = std::make_shared<AccountFrm>(account);
 
@@ -868,7 +871,9 @@ namespace bumo {
 				account.mutable_priv()->set_master_weight(1);
 				account.mutable_priv()->mutable_thresholds()->set_tx_threshold(1);
 				account.set_address(ope.dest_address());
-				account.set_creator(source_account_->GetAccountAddress());
+				if (CHECK_VERSION_GT_1002) {
+					account.set_creator(source_account_->GetAccountAddress());
+				}
 				dest_account_ptr = std::make_shared<AccountFrm>(account);
 				environment->AddEntry(ope.dest_address(), dest_account_ptr);
 
@@ -972,7 +977,7 @@ namespace bumo {
 			const std::string dest_address = create_account.dest_address();
 			//If the ledger version is greater than 1000, you must leave the dest address of the smart contract empty. An address will be created automatically.
 			bool has_dest_address = !dest_address.empty();
-			bool unimportant_address = (dest_address != General::CONTRACT_VALIDATOR_ADDRESS) && (dest_address != General::CONTRACT_FEE_ADDRESS);
+			bool unimportant_address = (dest_address != GET_CONTRACT_VALIDATOR_ADDRESS) && (dest_address != General::CONTRACT_FEE_ADDRESS);
 			if (is_create_contract && has_dest_address && unimportant_address) {
 				result.set_code(protocol::ERRCODE_INVALID_ADDRESS);
 				result.set_desc(utils::String::Format("The dest address(%s) must be empty when create contract account", dest_address.c_str()));

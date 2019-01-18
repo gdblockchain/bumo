@@ -1061,7 +1061,7 @@ namespace bumo {
 		}
 
 		ClearViewChanges();
-		OnViewChanged("", "");
+		OnViewChanged("");
 		return true;
 	}
 
@@ -1150,6 +1150,14 @@ namespace bumo {
 			iter++) {
 			if (iter->second == view_number_ % vsize) {
 				abnormal_node = iter->first;
+				std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.find(abnormal_node);
+				if (it != abnormal_records_.end())
+				{
+					it->second++;
+				}
+				else {
+					abnormal_records_.insert(std::make_pair(abnormal_node, 1));
+				}
 				break;
 			}
 		}
@@ -1165,7 +1173,7 @@ namespace bumo {
 		ClearViewChanges();
 
 		notify_->OnResetCloseTimer();
-		OnViewChanged(last_cons_value, abnormal_node);
+		OnViewChanged(last_cons_value);
 
 		return true;
 	}
@@ -1604,6 +1612,15 @@ namespace bumo {
 			validators[validators.size()] = set.validators(i).address();
 		}
 		data["quorum_size"] = (Json::UInt64)quorum_size;
+
+		Json::Value records_json;
+		std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
+		for (; it != abnormal_records_.end(); it++)
+		{
+			records_json["address"] = it->first;
+			records_json["count"] = it->second;
+		}
+		data["abnormal_records"] = records_json;
 	}
 
 	int32_t Pbft::IsLeader() {
@@ -1692,6 +1709,9 @@ namespace bumo {
 			
 			ClearNotCommitedInstance();
 			notify_->OnResetCloseTimer();
+
+			//Clear abnormal records
+			abnormal_records_.clear();
 		} 
 		
 		if (new_seq > 0) {

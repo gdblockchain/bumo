@@ -78,12 +78,9 @@ namespace bumo {
 		{
 			return election_config_;
 		}
-
         bool SetProtoElectionConfig(const protocol::ElectionConfig& ecfg);
 		bool ReadSharerRate(const std::string& share_rate);
 		uint32_t GetFeeSharerRate(FeeSharerType owner);
-		void UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch, bool validators_changed);
-        void AddAbnormalRecord(const std::string& abnormal_node);
 
 		Result DoTransaction(protocol::TransactionEnv& env, LedgerContext *ledger_context); // -1: false, 0 : success, > 0 exception
 		void NotifyLedgerClose(LedgerFrm::pointer closing_ledger, bool has_upgrade);
@@ -101,7 +98,6 @@ namespace bumo {
 		Json::Value statistics_;
 		utils::ReadWriteLock tree_mutex_;
 		KVTrie* tree_;
-		std::unordered_map<std::string, int64_t> abnormal_records_;
 		protocol::ElectionConfig election_config_;
         std::vector<uint32_t> fee_sharer_rate_;
 
@@ -126,7 +122,6 @@ namespace bumo {
 		static void ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg);
 
 		bool loadElectionConfig();
-		bool loadAbnormalRecords();
 		
 		LedgerFrm::pointer last_closed_ledger_;
 		protocol::ValidatorSet validators_;

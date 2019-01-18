@@ -161,14 +161,12 @@ namespace bumo {
 		}
 
 		// election configuration
-		if (!loadElectionConfig()) {
-			LOG_ERROR("Failed to load election configuration!");
-			return false;
-		}
-
-		if (!loadAbnormalRecords()) {
-			LOG_ERROR("Failed to load abnormal records");
-			return false;
+		if (CHECK_VERSION_GT_1001)
+		{
+			if (!loadElectionConfig()) {
+				LOG_ERROR("Failed to load election configuration!");
+				return false;
+			}
 		}
 
 		bumo::General::SetSelfChainId(lclheader.chain_id());
@@ -335,37 +333,14 @@ namespace bumo {
 				return ReadSharerRate(election_config_.fee_allocation_share());
 			}
 			else {
+				LOG_TRACE("Failed to parse election configuration from string");
 				return false;
 			}
 		}
 		else {
+			LOG_TRACE("Failed to get election configuration from account db");
 			return false;
 		}
-	}
-
-	bool LedgerManager::loadAbnormalRecords() {
-		auto db = Storage::Instance().account_db();
-		std::string json_str;
-		int ret = db->Get(General::ABNORMAL_RECORDS, json_str);
-		if (ret < 0) {
-			return false;
-		}
-		else if (ret == 0) {// 0 means abnormal records not exist
-			return true;
-		}
-
-		Json::Value abnormal_json;
-		if (!abnormal_json.fromString(json_str)) {
-			LOG_ERROR("Failed to parse json string %s", json_str.c_str());
-			return false;
-		}
-		else {
-			for (size_t i = 0; i < abnormal_json.size(); i++) {
-				Json::Value& item = abnormal_json[i];
-				abnormal_records_.insert(std::make_pair(item["address"].asString(), item["count"].asInt64()));
-			}
-		}
-		return true;
 	}
 
 	void LedgerManager::ElectionConfigSet(std::shared_ptr<WRITE_BATCH> batch, const protocol::ElectionConfig &ecfg) {
@@ -405,35 +380,6 @@ namespace bumo {
 		election_config_ = ecfg;
 		
 		return true;
-	}
-
-	void LedgerManager::AddAbnormalRecord(const std::string& abnormal_node) {
-		std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.find(abnormal_node);
-		if (it != abnormal_records_.end()) {
-			it->second++;
-		}
-		else {
-			abnormal_records_.insert(std::make_pair(abnormal_node, 1));
-		}
-	}
-
-	void LedgerManager::UpdateAbnormalRecords(std::shared_ptr<WRITE_BATCH> batch, bool validators_changed) {
-		Json::Value abnormal_json;
-		if (validators_changed) {
-			abnormal_records_.clear();
-			for (int i = 0; i < validators_.validators_size(); i++) {
-				abnormal_records_.insert(std::make_pair(validators_.validators(i).address(), 0));
-			}
-		}
-		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
-			it != abnormal_records_.end();
-			it++) {
-			Json::Value item;
-			item["address"] = it->first;
-			item["count"] = it->second;
-			abnormal_json.append(item);
-		}
-		batch->Put(General::ABNORMAL_RECORDS, abnormal_json.toFastString());
 	}
 
 	bool LedgerManager::CreateGenesisAccount() {
@@ -700,16 +646,6 @@ namespace bumo {
 
 		data["chain_max_ledger_seq"] = chain_max_ledger_probaly_ > data["ledger_sequence"].asInt64() ?
 		chain_max_ledger_probaly_ : data["ledger_sequence"].asInt64();
-		Json::Value abnormal_json;
-		for (std::unordered_map<std::string, int64_t>::iterator it = abnormal_records_.begin();
-			it != abnormal_records_.end();
-			it++) {
-			Json::Value item;
-			item["address"] = it->first;
-			item["count"] = it->second;
-			abnormal_json.append(item);
-		}
-		data["abnormal_records"] = abnormal_json;
 		data["election_config"] = Proto2Json(election_config_);
 		Json::Value share_json;
 		for (int i = 0; i < fee_sharer_rate_.size(); i++) {
@@ -736,19 +672,6 @@ namespace bumo {
 		LedgerFrm::pointer closing_ledger = context_manager_.SyncProcess(consensus_value);
 		if (closing_ledger == NULL){
 			return false;
-		}
-		
-		// for abnormal record
-		std::string abnormal_node;
-		for (int i = 0; i < consensus_value.entry_size(); i++) {
-			const protocol::KeyPair& kv = consensus_value.entry(i);
-			if (kv.key() == "abnormal_node") {
-				abnormal_node = kv.value();
-			}
-		}
-		if (!abnormal_node.empty()) {
-			AddAbnormalRecord(abnormal_node);
-			LOG_INFO("Add abnormal record: %s", abnormal_node.c_str());
 		}
 
 		protocol::Ledger& ledger = closing_ledger->ProtoLedger();
@@ -799,11 +722,9 @@ namespace bumo {
 		account_db_batch->Put(bumo::General::KEY_LEDGER_SEQ, utils::String::Format(FMT_I64, ledger_seq));
 
 		//for validator upgrade
-		bool validators_changed = false;
 		if (new_set.validators_size() > 0 || closing_ledger->environment_->GetVotedValidators(validators_, new_set)) {
 			ValidatorsSet(account_db_batch, new_set);
 			validators_ = new_set;
-			validators_changed = true;
 		}
 		header->set_validators_hash(HashWrapper::Crypto(new_set.SerializeAsString()));//TODO
 
@@ -817,18 +738,16 @@ namespace bumo {
 		header->set_fees_hash(HashWrapper::Crypto(fees_.SerializeAsString()));
 
 		//for election configuration
-		protocol::ElectionConfig new_ecfg;
-		if (closing_ledger->environment_->GetVotedElectionConfig(election_config_, new_ecfg)) {
-			if (!SetProtoElectionConfig(new_ecfg)) {
-				LOG_ERROR("Failed to update election configuration, %s", new_ecfg.DebugString().c_str());
+		if (CHECK_VERSION_GT_1002) {
+			protocol::ElectionConfig new_ecfg;
+			if (closing_ledger->environment_->GetVotedElectionConfig(election_config_, new_ecfg)) {
+				if (!SetProtoElectionConfig(new_ecfg)) {
+					LOG_ERROR("Failed to update election configuration, %s", new_ecfg.DebugString().c_str());
+				}
+				else {
+					ElectionConfigSet(account_db_batch, new_ecfg);
+				}
 			}
-			else {
-				ElectionConfigSet(account_db_batch, new_ecfg);
-			}
-		}
-		// for abnormal node
-		if (!abnormal_node.empty()) {
-			UpdateAbnormalRecords(account_db_batch, validators_changed);
 		}
 
 		//This header must be for the latest block.

@@ -266,7 +266,7 @@ namespace bumo {
 				break;
 			}
 
-			if (v8_contract->parameter_.this_address_ != General::CONTRACT_VALIDATOR_ADDRESS) {
+			if (v8_contract->parameter_.this_address_ != GET_CONTRACT_VALIDATOR_ADDRESS) {
 				error_desc = utils::String::Format("contract(%s) has no permission to call callBackSetValidators interface.", v8_contract->parameter_.this_address_.c_str());
 				break;
 			}
@@ -309,7 +309,7 @@ namespace bumo {
 				break;
 			}
 
-			if (v8_contract->parameter_.this_address_ != General::CONTRACT_VALIDATOR_ADDRESS) {
+			if (v8_contract->parameter_.this_address_ != GET_CONTRACT_VALIDATOR_ADDRESS) {
 				error_desc = utils::String::Format("contract(%s) has no permission to call callBackSetSystemCfg interface.", v8_contract->parameter_.this_address_.c_str());
 				break;
 			}
