@@ -253,12 +253,13 @@ function deleteCandidate(type, address){
         return x[0] === address;
     });
 
-    let index = candidates.indexOf(candidate);
-    if(index === -1){
+    if(candidate === undefined){
         return; 
     }
 
     rewardDistribution();
+
+    let index = candidates.indexOf(candidate);
     candidates.splice(index, 1);
     candidates.sort(doubleSort);
 
@@ -354,6 +355,7 @@ function approveOut(type, evil){
         let record     = loadObj(recordKey);
         let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
         distribute(candidates, record.pledge);
+        storageDel(recordKey);
     }
 }
 
