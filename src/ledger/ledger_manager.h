@@ -78,7 +78,6 @@ namespace bumo {
 		{
 			return election_config_;
 		}
-
         bool SetProtoElectionConfig(const protocol::ElectionConfig& ecfg);
 		bool ReadSharerRate(const std::string& share_rate);
 		uint32_t GetFeeSharerRate(FeeSharerType owner);

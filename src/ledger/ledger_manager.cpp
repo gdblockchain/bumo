@@ -161,9 +161,12 @@ namespace bumo {
 		}
 
 		// election configuration
-		if (!loadElectionConfig()) {
-			LOG_ERROR("Failed to load election configuration!");
-			return false;
+		if (CHECK_VERSION_GT_1001)
+		{
+			if (!loadElectionConfig()) {
+				LOG_ERROR("Failed to load election configuration!");
+				return false;
+			}
 		}
 
 		bumo::General::SetSelfChainId(lclheader.chain_id());
@@ -330,10 +333,12 @@ namespace bumo {
 				return ReadSharerRate(election_config_.fee_allocation_share());
 			}
 			else {
+				LOG_TRACE("Failed to parse election configuration from string");
 				return false;
 			}
 		}
 		else {
+			LOG_TRACE("Failed to get election configuration from account db");
 			return false;
 		}
 	}
