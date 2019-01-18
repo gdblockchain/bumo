@@ -392,6 +392,14 @@ function abolitionProposal(proof){
     return proposal;
 }
 
+function isExist(twoDimenList, address){
+    let element = twoDimenList.find(function(x){
+        return x[0] === address;
+    });
+
+    return element !== undefined;
+}
+
 function abolish(type, address, proof){
     assert(addressCheck(address), address + ' is not valid adress.');
 
@@ -400,18 +408,10 @@ function abolish(type, address, proof){
         assert(committee.includes(sender), 'Only committee members have the right to report other committee member.');
     }
     else if(type === memberType.validator){
-        let node = dpos.validators.find(function(x){
-            return x[0] === sender;
-        });
-
-        assert(node !== undefined, 'Only validator have the right to report other validator.');
+        assert(isExist(dpos.validators, sender), 'Only validator have the right to report other validator.');
     }
     else if(type === memberType.kol){
-        let kol = dpos.kols.find(function(x){
-            return x[0] === sender;
-        });
-
-        assert(kol !== undefined, 'Only kol have the right to report other kol.');
+        assert(isExist(dpos.kols, sender), 'Only kol have the right to report other kol.');
     }
     else{
         throw 'Unkown abolish type.';
