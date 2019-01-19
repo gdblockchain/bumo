@@ -642,6 +642,9 @@ function main(input_str){
     else if(input.method === 'configure'){
     	configure(params.item, params.value);
     }
+    else if(input.method === 'approveCfg'){
+    	approveCfg(params.proposer, params.item);
+    }
     else{
         throw '<undidentified operation type>';
     }
