@@ -60,7 +60,7 @@ function transferCoin(dest, amount)
 
 function rewardInit(){
     let rewards = loadObj(rewardKey);
-    assert(dpos !== false, 'Faild to get all stake and reward distribution table.');
+    assert(rewards !== false, 'Faild to get all stake and reward distribution table.');
 
     dpos.allStake = int64Add(rewards.allStake, thisPayCoinAmount);
     dpos.distribution = rewards.distribution;
@@ -324,6 +324,7 @@ function apply(type){
 
 function approveIn(type, applicant){
     let committee = loadObj(committeeKey);
+    assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
     let key = proposalKey(motionType.apply, type, applicant);
@@ -355,6 +356,7 @@ function approveIn(type, applicant){
 
 function approveOut(type, evil){
     let committee = loadObj(committeeKey);
+    assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
     let key = proposalKey(motionType.abolish, type, evil);
@@ -380,6 +382,8 @@ function approveOut(type, evil){
         deleteCandidate(type, evil);
         let applicantKey  = proposalKey(motionType.apply, type, evil);
         let applicant     = loadObj(applicantKey);
+        assert(applicant !== false, 'Faild to get ' + applicantKey + ' from metadata.');
+
         let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
         distribute(candidates, applicant.pledge);
         storageDel(applicantKey);
@@ -465,6 +469,8 @@ function abolish(type, address, proof){
     assert(addressCheck(address), address + ' is not valid adress.');
 
     let committee = loadObj(committeeKey);
+    assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
+
     if(type === memberType.committee){
         assert(committee.includes(sender), 'Only committee members have the right to report other committee member.');
     }
@@ -509,6 +515,8 @@ function withdraw(type){
 
     if(type === memberType.committee){
         let committee = loadObj(committeeKey);
+        assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
+
         committee.splice(committee.indexOf(sender), 1);
         return saveObj(committeeKey, committee);
     }
@@ -523,8 +531,32 @@ function withdraw(type){
     }
 }
 
-function config(item, value){
+function configProposal(item, value){
+    let proposal = {
+        'item': item,
+        'value': value,
+        'expiration':blockTimestamp + cfg.validPeriod,
+        'ballot':[sender]
+    };
 
+    return proposal;
+}
+
+function configure(item, value){
+    assert(cfg[item] !== undefined, 'Configuration ' + item + ' cannot be changed.');
+
+    let committee = loadObj(committeeKey);
+    assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
+    assert(committee.includes(sender), 'Only the committee has the power to proposal to modify the configuration.');
+
+    let key = sender + '_configure_' + item;
+    let proposal = loadObj(key);
+    if(proposal !== false && proposal.value === value){
+        return;
+    }
+
+    proposal = configProposal(item, value);
+    return saveObj(key, proposal);
 }
 
 function query(input_str){
@@ -576,8 +608,8 @@ function main(input_str){
     else if(input.method === 'extract'){
     	extract();
     }
-    else if(input.method === 'config'){
-    	config(params.item, params.value);
+    else if(input.method === 'configure'){
+    	configure(params.item, params.value);
     }
     else{
         throw '<undidentified operation type>';
