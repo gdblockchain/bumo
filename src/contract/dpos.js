@@ -18,8 +18,9 @@ const motionType = {
     'withdraw':'withdraw'
 };
 
+let sysCfg = [];
 let dpos = {};
-let cfg  = {};
+let cfg = {};
 
 function doubleSort(a, b){
     let com = int64Compare(b[1], a[1]) ;
@@ -581,6 +582,12 @@ function approveCfg(proposer, item){
     storageDel(key);
     cfg[item] = proposal.value;
     saveObj(configKey, cfg);
+
+    if(sysCfg.includes(item)){
+        let sys = {};
+        sys[item] = proposal.value;
+        setSystemCfg(JSON.stringify(sys));
+    }
 }
 
 function query(input_str){
