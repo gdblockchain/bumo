@@ -559,6 +559,30 @@ function configure(item, value){
     return saveObj(key, proposal);
 }
 
+function approveCfg(proposer, item){
+    let committee = loadObj(committeeKey);
+    assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
+    assert(committee.includes(sender), 'Only committee members have the right to approve.');
+
+    let key = proposer + '_configure_' + item;
+    let proposal = loadObj(key);
+    assert(proposal !== false, 'failed to get metadata: ' + key + '.');
+        
+    if(blockTimestamp >= proposal.expiration){
+        return storageDel(key);
+    }
+
+    assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
+    proposal.ballot.push(sender);
+    if(proposal.ballot.length <= parseInt(committee.length * cfg.outPassRate + 0.5)){
+        return saveObj(key, proposal);
+    }
+
+    storageDel(key);
+    cfg[item] = proposal.value;
+    saveObj(configKey, cfg);
+}
+
 function query(input_str){
     let input  = JSON.parse(input_str);
 
