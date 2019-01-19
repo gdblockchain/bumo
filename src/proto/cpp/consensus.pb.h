@@ -1577,41 +1577,6 @@ class ElectionConfig : public ::google::protobuf::Message /* @@protoc_insertion_
 
   // accessors -------------------------------------------------------
 
-  // optional int64 candidate_pledge_amount = 1;
-  void clear_candidate_pledge_amount();
-  static const int kCandidatePledgeAmountFieldNumber = 1;
-  ::google::protobuf::int64 candidate_pledge_amount() const;
-  void set_candidate_pledge_amount(::google::protobuf::int64 value);
-
-  // optional int64 kol_pledge_amount = 2;
-  void clear_kol_pledge_amount();
-  static const int kKolPledgeAmountFieldNumber = 2;
-  ::google::protobuf::int64 kol_pledge_amount() const;
-  void set_kol_pledge_amount(::google::protobuf::int64 value);
-
-  // optional int64 validators_refresh_interval = 3;
-  void clear_validators_refresh_interval();
-  static const int kValidatorsRefreshIntervalFieldNumber = 3;
-  ::google::protobuf::int64 validators_refresh_interval() const;
-  void set_validators_refresh_interval(::google::protobuf::int64 value);
-
-  // optional int64 min_vote_bu = 4;
-  void clear_min_vote_bu();
-  static const int kMinVoteBuFieldNumber = 4;
-  ::google::protobuf::int64 min_vote_bu() const;
-  void set_min_vote_bu(::google::protobuf::int64 value);
-
-  // optional string block_reward_share = 5;
-  void clear_block_reward_share();
-  static const int kBlockRewardShareFieldNumber = 5;
-  const ::std::string& block_reward_share() const;
-  void set_block_reward_share(const ::std::string& value);
-  void set_block_reward_share(const char* value);
-  void set_block_reward_share(const char* value, size_t size);
-  ::std::string* mutable_block_reward_share();
-  ::std::string* release_block_reward_share();
-  void set_allocated_block_reward_share(::std::string* block_reward_share);
-
   // optional string fee_allocation_share = 6;
   void clear_fee_allocation_share();
   static const int kFeeAllocationShareFieldNumber = 6;
@@ -1628,11 +1593,6 @@ class ElectionConfig : public ::google::protobuf::Message /* @@protoc_insertion_
 
   ::google::protobuf::internal::InternalMetadataWithArena _internal_metadata_;
   bool _is_default_instance_;
-  ::google::protobuf::int64 candidate_pledge_amount_;
-  ::google::protobuf::int64 kol_pledge_amount_;
-  ::google::protobuf::int64 validators_refresh_interval_;
-  ::google::protobuf::int64 min_vote_bu_;
-  ::google::protobuf::internal::ArenaStringPtr block_reward_share_;
   ::google::protobuf::internal::ArenaStringPtr fee_allocation_share_;
   mutable int _cached_size_;
   friend void  protobuf_AddDesc_consensus_2eproto();
@@ -2835,106 +2795,6 @@ inline void FeeConfig::set_base_reserve(::google::protobuf::int64 value) {
 // -------------------------------------------------------------------
 
 // ElectionConfig
-
-// optional int64 candidate_pledge_amount = 1;
-inline void ElectionConfig::clear_candidate_pledge_amount() {
-  candidate_pledge_amount_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 ElectionConfig::candidate_pledge_amount() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.candidate_pledge_amount)
-  return candidate_pledge_amount_;
-}
-inline void ElectionConfig::set_candidate_pledge_amount(::google::protobuf::int64 value) {
-  
-  candidate_pledge_amount_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.candidate_pledge_amount)
-}
-
-// optional int64 kol_pledge_amount = 2;
-inline void ElectionConfig::clear_kol_pledge_amount() {
-  kol_pledge_amount_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 ElectionConfig::kol_pledge_amount() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.kol_pledge_amount)
-  return kol_pledge_amount_;
-}
-inline void ElectionConfig::set_kol_pledge_amount(::google::protobuf::int64 value) {
-  
-  kol_pledge_amount_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.kol_pledge_amount)
-}
-
-// optional int64 validators_refresh_interval = 3;
-inline void ElectionConfig::clear_validators_refresh_interval() {
-  validators_refresh_interval_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 ElectionConfig::validators_refresh_interval() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.validators_refresh_interval)
-  return validators_refresh_interval_;
-}
-inline void ElectionConfig::set_validators_refresh_interval(::google::protobuf::int64 value) {
-  
-  validators_refresh_interval_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.validators_refresh_interval)
-}
-
-// optional int64 min_vote_bu = 4;
-inline void ElectionConfig::clear_min_vote_bu() {
-  min_vote_bu_ = GOOGLE_LONGLONG(0);
-}
-inline ::google::protobuf::int64 ElectionConfig::min_vote_bu() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.min_vote_bu)
-  return min_vote_bu_;
-}
-inline void ElectionConfig::set_min_vote_bu(::google::protobuf::int64 value) {
-  
-  min_vote_bu_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.min_vote_bu)
-}
-
-// optional string block_reward_share = 5;
-inline void ElectionConfig::clear_block_reward_share() {
-  block_reward_share_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline const ::std::string& ElectionConfig::block_reward_share() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.block_reward_share)
-  return block_reward_share_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void ElectionConfig::set_block_reward_share(const ::std::string& value) {
-  
-  block_reward_share_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.block_reward_share)
-}
-inline void ElectionConfig::set_block_reward_share(const char* value) {
-  
-  block_reward_share_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:protocol.ElectionConfig.block_reward_share)
-}
-inline void ElectionConfig::set_block_reward_share(const char* value, size_t size) {
-  
-  block_reward_share_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:protocol.ElectionConfig.block_reward_share)
-}
-inline ::std::string* ElectionConfig::mutable_block_reward_share() {
-  
-  // @@protoc_insertion_point(field_mutable:protocol.ElectionConfig.block_reward_share)
-  return block_reward_share_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline ::std::string* ElectionConfig::release_block_reward_share() {
-  // @@protoc_insertion_point(field_release:protocol.ElectionConfig.block_reward_share)
-  
-  return block_reward_share_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
-inline void ElectionConfig::set_allocated_block_reward_share(::std::string* block_reward_share) {
-  if (block_reward_share != NULL) {
-    
-  } else {
-    
-  }
-  block_reward_share_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), block_reward_share);
-  // @@protoc_insertion_point(field_set_allocated:protocol.ElectionConfig.block_reward_share)
-}
 
 // optional string fee_allocation_share = 6;
 inline void ElectionConfig::clear_fee_allocation_share() {

@@ -304,12 +304,7 @@ void protobuf_AssignDesc_consensus_2eproto() {
       GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FeeConfig, _is_default_instance_));
   FeeConfig_Type_descriptor_ = FeeConfig_descriptor_->enum_type(0);
   ElectionConfig_descriptor_ = file->message_type(13);
-  static const int ElectionConfig_offsets_[6] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ElectionConfig, candidate_pledge_amount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ElectionConfig, kol_pledge_amount_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ElectionConfig, validators_refresh_interval_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ElectionConfig, min_vote_bu_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ElectionConfig, block_reward_share_),
+  static const int ElectionConfig_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ElectionConfig, fee_allocation_share_),
   };
   ElectionConfig_reflection_ =
@@ -448,19 +443,16 @@ void protobuf_AddDesc_consensus_2eproto() {
     "/\n\tPbftProof\022\"\n\007commits\030\001 \003(\0132\021.protocol"
     ".PbftEnv\"j\n\tFeeConfig\022\021\n\tgas_price\030\001 \001(\003"
     "\022\024\n\014base_reserve\030\002 \001(\003\"4\n\004Type\022\013\n\007UNKNOW"
-    "N\020\000\022\r\n\tGAS_PRICE\020\001\022\020\n\014BASE_RESERVE\020\002\"\300\001\n"
-    "\016ElectionConfig\022\037\n\027candidate_pledge_amou"
-    "nt\030\001 \001(\003\022\031\n\021kol_pledge_amount\030\002 \001(\003\022#\n\033v"
-    "alidators_refresh_interval\030\003 \001(\003\022\023\n\013min_"
-    "vote_bu\030\004 \001(\003\022\032\n\022block_reward_share\030\005 \001("
-    "\t\022\034\n\024fee_allocation_share\030\006 \001(\t*\260\001\n\017Pbft"
-    "MessageType\022\030\n\024PBFT_TYPE_PREPREPARE\020\000\022\025\n"
-    "\021PBFT_TYPE_PREPARE\020\001\022\024\n\020PBFT_TYPE_COMMIT"
-    "\020\002\022\030\n\024PBFT_TYPE_VIEWCHANGE\020\003\022\025\n\021PBFT_TYP"
-    "E_NEWVIEW\020\004\022%\n!PBFT_TYPE_VIEWCHANG_WITH_"
-    "RAWVALUE\020\005*8\n\rPbftValueType\022\021\n\rPBFT_VALU"
-    "E_TX\020\000\022\024\n\020PBFT_VALUE_TXSET\020\001B\"\n io.bumo."
-    "sdk.core.extend.protobufb\006proto3", 2032);
+    "N\020\000\022\r\n\tGAS_PRICE\020\001\022\020\n\014BASE_RESERVE\020\002\".\n\016"
+    "ElectionConfig\022\034\n\024fee_allocation_share\030\006"
+    " \001(\t*\260\001\n\017PbftMessageType\022\030\n\024PBFT_TYPE_PR"
+    "EPREPARE\020\000\022\025\n\021PBFT_TYPE_PREPARE\020\001\022\024\n\020PBF"
+    "T_TYPE_COMMIT\020\002\022\030\n\024PBFT_TYPE_VIEWCHANGE\020"
+    "\003\022\025\n\021PBFT_TYPE_NEWVIEW\020\004\022%\n!PBFT_TYPE_VI"
+    "EWCHANG_WITH_RAWVALUE\020\005*8\n\rPbftValueType"
+    "\022\021\n\rPBFT_VALUE_TX\020\000\022\024\n\020PBFT_VALUE_TXSET\020"
+    "\001B\"\n io.bumo.sdk.core.extend.protobufb\006p"
+    "roto3", 1885);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "consensus.proto", &protobuf_RegisterTypes);
   PbftPrePrepare::default_instance_ = new PbftPrePrepare();
@@ -5982,11 +5974,6 @@ void FeeConfig::clear_base_reserve() {
 // ===================================================================
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1900
-const int ElectionConfig::kCandidatePledgeAmountFieldNumber;
-const int ElectionConfig::kKolPledgeAmountFieldNumber;
-const int ElectionConfig::kValidatorsRefreshIntervalFieldNumber;
-const int ElectionConfig::kMinVoteBuFieldNumber;
-const int ElectionConfig::kBlockRewardShareFieldNumber;
 const int ElectionConfig::kFeeAllocationShareFieldNumber;
 #endif  // !defined(_MSC_VER) || _MSC_VER >= 1900
 
@@ -6012,11 +5999,6 @@ void ElectionConfig::SharedCtor() {
     _is_default_instance_ = false;
   ::google::protobuf::internal::GetEmptyString();
   _cached_size_ = 0;
-  candidate_pledge_amount_ = GOOGLE_LONGLONG(0);
-  kol_pledge_amount_ = GOOGLE_LONGLONG(0);
-  validators_refresh_interval_ = GOOGLE_LONGLONG(0);
-  min_vote_bu_ = GOOGLE_LONGLONG(0);
-  block_reward_share_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   fee_allocation_share_.UnsafeSetDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -6026,7 +6008,6 @@ ElectionConfig::~ElectionConfig() {
 }
 
 void ElectionConfig::SharedDtor() {
-  block_reward_share_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   fee_allocation_share_.DestroyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   if (this != default_instance_) {
   }
@@ -6059,29 +6040,7 @@ ElectionConfig* ElectionConfig::New(::google::protobuf::Arena* arena) const {
 
 void ElectionConfig::Clear() {
 // @@protoc_insertion_point(message_clear_start:protocol.ElectionConfig)
-#if defined(__clang__)
-#define ZR_HELPER_(f) \
-  _Pragma("clang diagnostic push") \
-  _Pragma("clang diagnostic ignored \"-Winvalid-offsetof\"") \
-  __builtin_offsetof(ElectionConfig, f) \
-  _Pragma("clang diagnostic pop")
-#else
-#define ZR_HELPER_(f) reinterpret_cast<char*>(\
-  &reinterpret_cast<ElectionConfig*>(16)->f)
-#endif
-
-#define ZR_(first, last) do {\
-  ::memset(&first, 0,\
-           ZR_HELPER_(last) - ZR_HELPER_(first) + sizeof(last));\
-} while (0)
-
-  ZR_(candidate_pledge_amount_, min_vote_bu_);
-  block_reward_share_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   fee_allocation_share_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-
-#undef ZR_HELPER_
-#undef ZR_
-
 }
 
 bool ElectionConfig::MergePartialFromCodedStream(
@@ -6094,86 +6053,9 @@ bool ElectionConfig::MergePartialFromCodedStream(
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional int64 candidate_pledge_amount = 1;
-      case 1: {
-        if (tag == 8) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &candidate_pledge_amount_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(16)) goto parse_kol_pledge_amount;
-        break;
-      }
-
-      // optional int64 kol_pledge_amount = 2;
-      case 2: {
-        if (tag == 16) {
-         parse_kol_pledge_amount:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &kol_pledge_amount_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(24)) goto parse_validators_refresh_interval;
-        break;
-      }
-
-      // optional int64 validators_refresh_interval = 3;
-      case 3: {
-        if (tag == 24) {
-         parse_validators_refresh_interval:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &validators_refresh_interval_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(32)) goto parse_min_vote_bu;
-        break;
-      }
-
-      // optional int64 min_vote_bu = 4;
-      case 4: {
-        if (tag == 32) {
-         parse_min_vote_bu:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
-                 input, &min_vote_bu_)));
-
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(42)) goto parse_block_reward_share;
-        break;
-      }
-
-      // optional string block_reward_share = 5;
-      case 5: {
-        if (tag == 42) {
-         parse_block_reward_share:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_block_reward_share()));
-          DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-            this->block_reward_share().data(), this->block_reward_share().length(),
-            ::google::protobuf::internal::WireFormatLite::PARSE,
-            "protocol.ElectionConfig.block_reward_share"));
-        } else {
-          goto handle_unusual;
-        }
-        if (input->ExpectTag(50)) goto parse_fee_allocation_share;
-        break;
-      }
-
       // optional string fee_allocation_share = 6;
       case 6: {
         if (tag == 50) {
-         parse_fee_allocation_share:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
                 input, this->mutable_fee_allocation_share()));
           DO_(::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -6211,36 +6093,6 @@ failure:
 void ElectionConfig::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:protocol.ElectionConfig)
-  // optional int64 candidate_pledge_amount = 1;
-  if (this->candidate_pledge_amount() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->candidate_pledge_amount(), output);
-  }
-
-  // optional int64 kol_pledge_amount = 2;
-  if (this->kol_pledge_amount() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->kol_pledge_amount(), output);
-  }
-
-  // optional int64 validators_refresh_interval = 3;
-  if (this->validators_refresh_interval() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->validators_refresh_interval(), output);
-  }
-
-  // optional int64 min_vote_bu = 4;
-  if (this->min_vote_bu() != 0) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(4, this->min_vote_bu(), output);
-  }
-
-  // optional string block_reward_share = 5;
-  if (this->block_reward_share().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->block_reward_share().data(), this->block_reward_share().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "protocol.ElectionConfig.block_reward_share");
-    ::google::protobuf::internal::WireFormatLite::WriteStringMaybeAliased(
-      5, this->block_reward_share(), output);
-  }
-
   // optional string fee_allocation_share = 6;
   if (this->fee_allocation_share().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -6257,37 +6109,6 @@ void ElectionConfig::SerializeWithCachedSizes(
 ::google::protobuf::uint8* ElectionConfig::InternalSerializeWithCachedSizesToArray(
     bool deterministic, ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:protocol.ElectionConfig)
-  // optional int64 candidate_pledge_amount = 1;
-  if (this->candidate_pledge_amount() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->candidate_pledge_amount(), target);
-  }
-
-  // optional int64 kol_pledge_amount = 2;
-  if (this->kol_pledge_amount() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->kol_pledge_amount(), target);
-  }
-
-  // optional int64 validators_refresh_interval = 3;
-  if (this->validators_refresh_interval() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->validators_refresh_interval(), target);
-  }
-
-  // optional int64 min_vote_bu = 4;
-  if (this->min_vote_bu() != 0) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(4, this->min_vote_bu(), target);
-  }
-
-  // optional string block_reward_share = 5;
-  if (this->block_reward_share().size() > 0) {
-    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
-      this->block_reward_share().data(), this->block_reward_share().length(),
-      ::google::protobuf::internal::WireFormatLite::SERIALIZE,
-      "protocol.ElectionConfig.block_reward_share");
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        5, this->block_reward_share(), target);
-  }
-
   // optional string fee_allocation_share = 6;
   if (this->fee_allocation_share().size() > 0) {
     ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
@@ -6306,41 +6127,6 @@ void ElectionConfig::SerializeWithCachedSizes(
 int ElectionConfig::ByteSize() const {
 // @@protoc_insertion_point(message_byte_size_start:protocol.ElectionConfig)
   int total_size = 0;
-
-  // optional int64 candidate_pledge_amount = 1;
-  if (this->candidate_pledge_amount() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int64Size(
-        this->candidate_pledge_amount());
-  }
-
-  // optional int64 kol_pledge_amount = 2;
-  if (this->kol_pledge_amount() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int64Size(
-        this->kol_pledge_amount());
-  }
-
-  // optional int64 validators_refresh_interval = 3;
-  if (this->validators_refresh_interval() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int64Size(
-        this->validators_refresh_interval());
-  }
-
-  // optional int64 min_vote_bu = 4;
-  if (this->min_vote_bu() != 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::Int64Size(
-        this->min_vote_bu());
-  }
-
-  // optional string block_reward_share = 5;
-  if (this->block_reward_share().size() > 0) {
-    total_size += 1 +
-      ::google::protobuf::internal::WireFormatLite::StringSize(
-        this->block_reward_share());
-  }
 
   // optional string fee_allocation_share = 6;
   if (this->fee_allocation_share().size() > 0) {
@@ -6377,22 +6163,6 @@ void ElectionConfig::MergeFrom(const ElectionConfig& from) {
   if (GOOGLE_PREDICT_FALSE(&from == this)) {
     ::google::protobuf::internal::MergeFromFail(__FILE__, __LINE__);
   }
-  if (from.candidate_pledge_amount() != 0) {
-    set_candidate_pledge_amount(from.candidate_pledge_amount());
-  }
-  if (from.kol_pledge_amount() != 0) {
-    set_kol_pledge_amount(from.kol_pledge_amount());
-  }
-  if (from.validators_refresh_interval() != 0) {
-    set_validators_refresh_interval(from.validators_refresh_interval());
-  }
-  if (from.min_vote_bu() != 0) {
-    set_min_vote_bu(from.min_vote_bu());
-  }
-  if (from.block_reward_share().size() > 0) {
-
-    block_reward_share_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.block_reward_share_);
-  }
   if (from.fee_allocation_share().size() > 0) {
 
     fee_allocation_share_.AssignWithDefault(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), from.fee_allocation_share_);
@@ -6423,11 +6193,6 @@ void ElectionConfig::Swap(ElectionConfig* other) {
   InternalSwap(other);
 }
 void ElectionConfig::InternalSwap(ElectionConfig* other) {
-  std::swap(candidate_pledge_amount_, other->candidate_pledge_amount_);
-  std::swap(kol_pledge_amount_, other->kol_pledge_amount_);
-  std::swap(validators_refresh_interval_, other->validators_refresh_interval_);
-  std::swap(min_vote_bu_, other->min_vote_bu_);
-  block_reward_share_.Swap(&other->block_reward_share_);
   fee_allocation_share_.Swap(&other->fee_allocation_share_);
   _internal_metadata_.Swap(&other->_internal_metadata_);
   std::swap(_cached_size_, other->_cached_size_);
@@ -6443,106 +6208,6 @@ void ElectionConfig::InternalSwap(ElectionConfig* other) {
 
 #if PROTOBUF_INLINE_NOT_IN_HEADERS
 // ElectionConfig
-
-// optional int64 candidate_pledge_amount = 1;
-void ElectionConfig::clear_candidate_pledge_amount() {
-  candidate_pledge_amount_ = GOOGLE_LONGLONG(0);
-}
- ::google::protobuf::int64 ElectionConfig::candidate_pledge_amount() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.candidate_pledge_amount)
-  return candidate_pledge_amount_;
-}
- void ElectionConfig::set_candidate_pledge_amount(::google::protobuf::int64 value) {
-  
-  candidate_pledge_amount_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.candidate_pledge_amount)
-}
-
-// optional int64 kol_pledge_amount = 2;
-void ElectionConfig::clear_kol_pledge_amount() {
-  kol_pledge_amount_ = GOOGLE_LONGLONG(0);
-}
- ::google::protobuf::int64 ElectionConfig::kol_pledge_amount() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.kol_pledge_amount)
-  return kol_pledge_amount_;
-}
- void ElectionConfig::set_kol_pledge_amount(::google::protobuf::int64 value) {
-  
-  kol_pledge_amount_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.kol_pledge_amount)
-}
-
-// optional int64 validators_refresh_interval = 3;
-void ElectionConfig::clear_validators_refresh_interval() {
-  validators_refresh_interval_ = GOOGLE_LONGLONG(0);
-}
- ::google::protobuf::int64 ElectionConfig::validators_refresh_interval() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.validators_refresh_interval)
-  return validators_refresh_interval_;
-}
- void ElectionConfig::set_validators_refresh_interval(::google::protobuf::int64 value) {
-  
-  validators_refresh_interval_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.validators_refresh_interval)
-}
-
-// optional int64 min_vote_bu = 4;
-void ElectionConfig::clear_min_vote_bu() {
-  min_vote_bu_ = GOOGLE_LONGLONG(0);
-}
- ::google::protobuf::int64 ElectionConfig::min_vote_bu() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.min_vote_bu)
-  return min_vote_bu_;
-}
- void ElectionConfig::set_min_vote_bu(::google::protobuf::int64 value) {
-  
-  min_vote_bu_ = value;
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.min_vote_bu)
-}
-
-// optional string block_reward_share = 5;
-void ElectionConfig::clear_block_reward_share() {
-  block_reward_share_.ClearToEmptyNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- const ::std::string& ElectionConfig::block_reward_share() const {
-  // @@protoc_insertion_point(field_get:protocol.ElectionConfig.block_reward_share)
-  return block_reward_share_.GetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void ElectionConfig::set_block_reward_share(const ::std::string& value) {
-  
-  block_reward_share_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), value);
-  // @@protoc_insertion_point(field_set:protocol.ElectionConfig.block_reward_share)
-}
- void ElectionConfig::set_block_reward_share(const char* value) {
-  
-  block_reward_share_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), ::std::string(value));
-  // @@protoc_insertion_point(field_set_char:protocol.ElectionConfig.block_reward_share)
-}
- void ElectionConfig::set_block_reward_share(const char* value, size_t size) {
-  
-  block_reward_share_.SetNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(),
-      ::std::string(reinterpret_cast<const char*>(value), size));
-  // @@protoc_insertion_point(field_set_pointer:protocol.ElectionConfig.block_reward_share)
-}
- ::std::string* ElectionConfig::mutable_block_reward_share() {
-  
-  // @@protoc_insertion_point(field_mutable:protocol.ElectionConfig.block_reward_share)
-  return block_reward_share_.MutableNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- ::std::string* ElectionConfig::release_block_reward_share() {
-  // @@protoc_insertion_point(field_release:protocol.ElectionConfig.block_reward_share)
-  
-  return block_reward_share_.ReleaseNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-}
- void ElectionConfig::set_allocated_block_reward_share(::std::string* block_reward_share) {
-  if (block_reward_share != NULL) {
-    
-  } else {
-    
-  }
-  block_reward_share_.SetAllocatedNoArena(&::google::protobuf::internal::GetEmptyStringAlreadyInited(), block_reward_share);
-  // @@protoc_insertion_point(field_set_allocated:protocol.ElectionConfig.block_reward_share)
-}
 
 // optional string fee_allocation_share = 6;
 void ElectionConfig::clear_fee_allocation_share() {
