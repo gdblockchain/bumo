@@ -176,7 +176,7 @@ function checkPledge(type){
 
 function addCandidates(type, address, pledge, maxSize){
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-    let com = int64Compare(pledge, candidates[candidates.length - 1][1]);
+    let com        = int64Compare(pledge, candidates[candidates.length - 1][1]);
     
     if(candidates.length >= maxSize && com <= 0){
         return;
@@ -202,14 +202,8 @@ function addCandidates(type, address, pledge, maxSize){
 }
 
 function deleteCandidate(type, address){
-    assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
-
-    electInit();
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-    let node = candidates.find(function(x){
-        return x[0] === address;
-    });
-
+    let node       = candidates.find(function(x){ return x[0] === address; });
     if(node === undefined){
         return; 
     }
@@ -346,7 +340,9 @@ function approveOut(type, evil){
         saveObj(key, committee);
     }
     else{
+        electInit();
         deleteCandidate(type, evil);
+
         let applicantKey  = proposalKey(motionType.apply, type, evil);
         let applicant     = loadObj(applicantKey);
         assert(applicant !== false, 'Faild to get ' + applicantKey + ' from metadata.');
@@ -497,6 +493,7 @@ function withdraw(type){
         return saveObj(committeeKey, committee);
     }
 
+    electInit();
     deleteCandidate(type, sender);
 
     if(elect.distribution[sender] === undefined){
