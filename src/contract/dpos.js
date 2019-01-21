@@ -18,7 +18,7 @@ const motionType = {
     'withdraw':'withdraw'
 };
 
-let sysCfg = [];
+let sysCfg = ['fee_allocation_share'];
 let elect = {};
 let cfg = {};
 
@@ -75,8 +75,8 @@ function electInit(){
     elect.kolCands = loadObj(kolCandsKey);
     assert(elect.kolCands !== false, 'Faild to get kol candidates.');
 
-    elect.validators = elect.validatorCands.slice(0, cfg.validatorsSize);
-    elect.kols       = elect.kolCands.slice(0, cfg.kolsSize);
+    elect.validators = elect.validatorCands.slice(0, cfg.validator_size);
+    elect.kols       = elect.kolCands.slice(0, cfg.kol_size);
 }
 
 function distribute(twoDimenList, allReward){
@@ -148,7 +148,7 @@ function proposalKey(proposalType, memType, address){
 function applicationProposal(){
     let proposal = {
         'pledge':thisPayCoinAmount,
-        'expiration':blockTimestamp + cfg.validPeriod,
+        'expiration':blockTimestamp + cfg.valid_period,
         'ballot':[]
     };
 
@@ -159,11 +159,11 @@ function checkPledge(type){
     let com = -1;
 
     if(type === memberType.validator){
-        com = int64Compare(thisPayCoinAmount, cfg.validatorMinPledge);
+        com = int64Compare(thisPayCoinAmount, cfg.validator_min_pledge);
         assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of validator.');
     }
     else if(type === memberType.kol){
-        com = int64Compare(thisPayCoinAmount, cfg.kolMinPledge);
+        com = int64Compare(thisPayCoinAmount, cfg.kol_min_pledge);
         assert(com === 0 || com === 1, 'Quality deposit is less than the minimum pledge of KOL.');
     }
     else if(type === memberType.committee){
@@ -192,8 +192,8 @@ function addCandidates(type, address, pledge, maxSize){
         candidates = candidates.slice(0, maxSize);
     }
 
-    if(type === memberType.validator && candidates.indexOf(node) < cfg.validatorsSize){
-        let validators = candidates.slice(0, cfg.validatorsSize);
+    if(type === memberType.validator && candidates.indexOf(node) < cfg.validator_size){
+        let validators = candidates.slice(0, cfg.validator_size);
         setValidators(JSON.stringify(validators));
     }
 
@@ -213,7 +213,7 @@ function increaseStake(type, node, formalSize){
         rewardDistribution();
 
         if(type === memberType.validator){
-            let validators = candidates.slice(0, cfg.validatorsSize);
+            let validators = candidates.slice(0, cfg.validator_size);
             setValidators(JSON.stringify(validators));
         }
     }
@@ -244,7 +244,7 @@ function decreaseStake(type, address, formalSize, amount){
         rewardDistribution();
 
         if(type === memberType.validator){
-            let validators = candidates.slice(0, cfg.validatorsSize);
+            let validators = candidates.slice(0, cfg.validator_size);
             setValidators(JSON.stringify(validators));
         }
     }
@@ -263,11 +263,11 @@ function updateCandidates(type, address, pledge){
     });
 
     if(node === undefined && pledge !== undefined){
-        let maxSize = type === memberType.validator ? cfg.validatorCandsSize : cfg.kolCandsSize;
+        let maxSize = type === memberType.validator ? cfg.validator_candidate_size : cfg.kol_candidate_size;
         addCandidates(type, address, pledge, maxSize);
     }
     else{
-        let formalSize = type === memberType.validator ? cfg.validatorsSize : cfg.kolsSize;
+        let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
         increaseStake(type, node, formalSize);
     }
 }
@@ -291,8 +291,8 @@ function deleteCandidate(type, address){
     candidates.splice(index, 1);
     candidates.sort(doubleSort);
 
-    if(type === memberType.validator && index < cfg.validatorsSize){
-        let validators = candidates.slice(0, cfg.validatorsSize);
+    if(type === memberType.validator && index < cfg.validator_size){
+        let validators = candidates.slice(0, cfg.validator_size);
         setValidators(JSON.stringify(validators));
     }
 
@@ -314,7 +314,7 @@ function apply(type){
     proposal.pledge = int64Add(proposal.pledge, thisPayCoinAmount);
     if(proposal.passTime === undefined){ 
         /* Additional deposit, not yet approved */
-        proposal.expiration = blockTimestamp + cfg.validPeriod;
+        proposal.expiration = blockTimestamp + cfg.valid_period;
         return saveObj(key, proposal);
     }
 
@@ -339,7 +339,7 @@ function approveIn(type, applicant){
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
     proposal.ballot.push(sender);
-    if(proposal.ballot.length <= parseInt(committee.length * cfg.inPassRate + 0.5)){
+    if(proposal.ballot.length <= parseInt(committee.length * cfg.in_pass_rate + 0.5)){
         return saveObj(key, proposal);
     }
 
@@ -370,7 +370,7 @@ function approveOut(type, evil){
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
     proposal.ballot.push(sender);
-    if(proposal.ballot.length <= parseInt(committee.length * cfg.outPassRate + 0.5)){
+    if(proposal.ballot.length <= parseInt(committee.length * cfg.out_pass_rate + 0.5)){
         return saveObj(key, proposal);
     }
 
@@ -443,7 +443,7 @@ function unVote(type, address, amount){
     }
     transferCoin(sender, amount);
 
-    let formalSize = type === memberType.validator ? cfg.validatorsSize : cfg.kolsSize;
+    let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
     decreaseStake(type, address, formalSize, amount);
 }
 
@@ -451,7 +451,7 @@ function abolitionProposal(proof){
     let proposal = {
         'Informer': sender,
         'reason': proof,
-        'expiration': blockTimestamp + cfg.validPeriod,
+        'expiration': blockTimestamp + cfg.valid_period,
         'ballot': [sender]
     };
 
@@ -492,7 +492,7 @@ function abolish(type, address, proof){
         saveObj(key, proposal);
     }
 
-    proposal.expiration = blockTimestamp + cfg.validPeriod;
+    proposal.expiration = blockTimestamp + cfg.valid_period;
     saveObj(key, proposal);
 }
 
@@ -501,7 +501,7 @@ function withdraw(type){
     let expiration = storageLoad(withdrawKey);
 
     if(expiration === false){
-        return storageStore(withdrawKey, blockTimestamp + cfg.validPeriod);
+        return storageStore(withdrawKey, blockTimestamp + cfg.valid_period);
     }
 
     let expired = int64Compare(blockTimestamp, expiration);
@@ -536,7 +536,7 @@ function configProposal(item, value){
     let proposal = {
         'item': item,
         'value': value,
-        'expiration':blockTimestamp + cfg.validPeriod,
+        'expiration':blockTimestamp + cfg.valid_period,
         'ballot':[sender]
     };
 
@@ -575,7 +575,7 @@ function approveCfg(proposer, item){
 
     assert(proposal.ballot.includes(sender) !== true, sender + ' has voted.');
     proposal.ballot.push(sender);
-    if(proposal.ballot.length <= parseInt(committee.length * cfg.outPassRate + 0.5)){
+    if(proposal.ballot.length <= parseInt(committee.length * cfg.out_pass_rate + 0.5)){
         return saveObj(key, proposal);
     }
 
@@ -652,21 +652,23 @@ function main(input_str){
 
 function init(input_str){
     cfg = {
-        'committeeSize'      : 100,
-        'kolsSize'           : 30,
-        'kolCandsSize'       : 300,
-        'kolMinPledge'       : 5000000000000,   /* 5 0000 0000 0000 */
-        'validatorsSize'     : 30,
-        'validatorCandsSize' : 300,
-        'validatorMinPledge' : 500000000000000, /* 500 0000 0000 0000 */
-        'inPassRate'         : 0.5,
-        'outPassRate'        : 0.7,
-        'validPeriod'        : 1296000000000    /* 15 * 24 * 60 * 60 * 1000 * 1000 */
+        'committee_size'           : 100,
+        'kol_size'                 : 30,
+        'kol_candidate_size'       : 300,
+        'kol_min_pledge'           : 5000000000000,  /* 5 0000 0000 0000 */
+        'validator_size'           : 30,
+        'validator_candidate_size' : 300,
+        'validator_min_pledge'     : 500000000000000,/* 500 0000 0000 0000 */
+        'in_pass_rate'             : 0.5,
+        'out_pass_rate'            : 0.7,
+        'valid_period'             : 1296000000000,  /* 15 * 24 * 60 * 60 * 1000 * 1000 */
+        'fee_allocation_share'     : '70:20:10',     /* DAPP_70% : blockReward_20% : creator_10% */
+        'reward_allocation_share'  : '50:40:10'      /* validator_50% : validatorCandidate_40% : kol_10% */
     };
     saveObj(configKey, cfg);
 
     let committee = JSON.parse(input_str);
-    assert(int64Compare(committee.length, cfg.committeeSize) <= 0, 'Committee size exceeded.');
+    assert(int64Compare(committee.length, cfg.committee_size) <= 0, 'Committee size exceeded.');
 
     let i = 0;
     for(i = 0; i < committee.length; i += 1){
