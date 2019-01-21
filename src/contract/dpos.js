@@ -482,39 +482,39 @@ function abolish(type, address, proof){
 
 function withdraw(type){
     let withdrawKey = proposalKey(motionType.withdraw, type, sender);
-    let expiration = storageLoad(withdrawKey);
+    let expiration  = storageLoad(withdrawKey);
 
     if(expiration === false){
         return storageStore(withdrawKey, blockTimestamp + cfg.valid_period);
     }
 
-    let expired = int64Compare(blockTimestamp, expiration);
-    assert(expired === 0 || expired === 1, 'Buffer period is not over.');
+    assert(int64Compare(blockTimestamp, expiration) >= 0, 'Buffer period is not over.');
 
     let applicantKey = proposalKey(motionType.apply, type, sender);
-    let applicant = loadObj(applicantKey);
+    let applicant    = loadObj(applicantKey);
     assert(applicant !== false, 'failed to get metadata: ' + applicantKey + '.');
-
-    storageDel(applicantKey);
-    storageDel(withdrawKey);
 
     if(type === memberType.committee){
         let committee = loadObj(committeeKey);
         assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
 
         committee.splice(committee.indexOf(sender), 1);
-        return saveObj(committeeKey, committee);
-    }
-
-    electInit();
-    deleteCandidate(type, sender);
-
-    if(elect.distribution[sender] === undefined){
-        elect.distribution[sender] = applicant.pledge;
+        saveObj(committeeKey, committee);
     }
     else{
-        elect.distribution[sender] = int64Add(elect.distribution[sender], applicant.pledge);
+        electInit();
+        deleteCandidate(type, sender);
+
+        if(elect.distribution[sender] === undefined){
+            elect.distribution[sender] = applicant.pledge;
+        }
+        else{
+            elect.distribution[sender] = int64Add(elect.distribution[sender], applicant.pledge);
+        }
     }
+
+    storageDel(applicantKey);
+    storageDel(withdrawKey);
 }
 
 function configProposal(item, value){
