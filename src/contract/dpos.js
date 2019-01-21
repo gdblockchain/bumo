@@ -201,7 +201,7 @@ function addCandidates(type, address, pledge, maxSize){
     return saveObj(key, candidates);
 }
 
-function updateElection(type, node, formalSize, amount){
+function updateStake(type, node, formalSize, amount){
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
 
     let oldPos = candidates.indexOf(node);
@@ -221,25 +221,6 @@ function updateElection(type, node, formalSize, amount){
 
     let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
     return saveObj(key, candidates);
-}
-
-function updateCandidates(type, address, pledge){
-    assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
-
-    electInit();
-    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-    let node = candidates.find(function(x){
-        return x[0] === address;
-    });
-
-    if(node === undefined && pledge !== undefined){
-        let maxSize = type === memberType.validator ? cfg.validator_candidate_size : cfg.kol_candidate_size;
-        addCandidates(type, address, pledge, maxSize);
-    }
-    else{
-        let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
-        updateElection(type, node, formalSize, thisPayCoinAmount);
-    }
 }
 
 function deleteCandidate(type, address){
@@ -290,7 +271,20 @@ function apply(type){
 
     /* Approved, additional deposit */
     saveObj(key, proposal);
-    updateCandidates(type, sender, proposal.pledge);
+    assert(type === memberType.validator || type === memberType.kol, 'Only the validator and KOL may add a deposit.');
+
+    electInit();
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
+    let node = candidates.find(function(x){ return x[0] === sender; });
+
+    if(node === undefined){
+        let maxSize = type === memberType.validator ? cfg.validator_candidate_size : cfg.kol_candidate_size;
+        addCandidates(type, sender, proposal.pledge, maxSize);
+    }
+    else{
+        let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
+        updateStake(type, node, formalSize, thisPayCoinAmount);
+    }
 }
 
 function approveIn(type, applicant){
@@ -298,7 +292,7 @@ function approveIn(type, applicant){
     assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = proposalKey(motionType.apply, type, applicant);
+    let key      = proposalKey(motionType.apply, type, applicant);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -318,10 +312,12 @@ function approveIn(type, applicant){
 
     if(type === memberType.committee){
         committee.push(applicant);
-        return saveObj(key, committee);
+        saveObj(key, committee);
     }
     else{
-        return updateCandidates(type, applicant, proposal.pledge);
+        electInit();
+        let maxSize = type === memberType.validator ? cfg.validator_candidate_size : cfg.kol_candidate_size;
+        addCandidates(type, applicant, proposal.pledge, maxSize);
     }
 }
 
@@ -378,11 +374,11 @@ function voterKey(type, address){
 }
 
 function vote(type, address){
+    assert(type === memberType.validator || type === memberType.kol, 'Can only vote for validator or KOL.');
     assert(addressCheck(address), address + ' is not valid adress.');
 
-    let key = voterKey(type, address);
+    let key        = voterKey(type, address);
     let voteAmount = storageLoad(key);
-    assert(voteAmount !== false, 'The account did not vote for: ' + address);
 
     if(voteAmount === false){
         voteAmount = thisPayCoinAmount;
@@ -392,10 +388,18 @@ function vote(type, address){
     }
 
     storageStore(key, voteAmount);
-    updateCandidates(type, address);
+
+    electInit();
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
+    let node = candidates.find(function(x){ return x[0] === address; });
+
+    assert(node !== undefined, address + ' is not validator candidate or KOL candidate.');
+    let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
+    updateStake(type, node, formalSize, thisPayCoinAmount);
 }
 
 function unVote(type, address, amount){
+    assert(type === memberType.validator || type === memberType.kol, 'Can only vote for validator or KOL.');
     assert(addressCheck(address), address + ' is not valid adress.');
     assert(int64Compare(amount, 0) > 0, 'Unvote amount <= 0.');
 
@@ -415,7 +419,7 @@ function unVote(type, address, amount){
     }
 
     let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
-    updateElection(type, address, formalSize, -amount);
+    updateStake(type, address, formalSize, -amount);
 }
 
 function abolitionProposal(proof){
