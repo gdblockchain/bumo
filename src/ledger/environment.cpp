@@ -116,35 +116,11 @@ namespace bumo{
 
 		for (auto it = ecfg->begin(); it != ecfg->end(); it++) {
 			std::string key = it.memberName();
-			if (key == "fee_allocation_share" || key == "block_reward_share") {
+			if (key == "fee_allocation_share") {
 				std::string value = (*ecfg)[key].asString();
-				if (key == "fee_allocation_share" && old_cfg.fee_allocation_share() != value) {
+				if (old_cfg.fee_allocation_share() != value) {
 					change = true;
 					new_cfg.set_fee_allocation_share(value);
-				}
-				else if (key == "block_reward_share" && old_cfg.block_reward_share() != value) {
-					change = true;
-					new_cfg.set_block_reward_share(value);
-				}
-			}
-			else if (key == "candidate_pledge_amount" || key == "kol_pledge_amount" || 
-					 key == "validators_refresh_interval" || key == "min_vote_bu") {
-				int64_t value = (*ecfg)[key].asInt64();
-				if (key == "candidate_pledge_amount" && old_cfg.candidate_pledge_amount() != value) {
-					change = true;
-					new_cfg.set_candidate_pledge_amount(value);
-				}
-				else if (key == "validators_refresh_interval" && old_cfg.validators_refresh_interval() != value) {
-					change = true;
-					new_cfg.set_validators_refresh_interval(value);
-				}
-				else if (key == "kol_pledge_amount" && old_cfg.kol_pledge_amount() != value) {
-					change = true;
-					new_cfg.set_kol_pledge_amount(value);
-				}
-				else if (key == "min_vote_bu" && old_cfg.min_vote_bu() != value) {
-					change = true;
-					new_cfg.set_min_vote_bu(value);
 				}
 			}
 			else {

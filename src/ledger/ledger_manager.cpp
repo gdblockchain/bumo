@@ -161,7 +161,7 @@ namespace bumo {
 		}
 
 		// election configuration
-		if (CHECK_VERSION_GT_1001)
+		if (CHECK_VERSION_GT_1002)
 		{
 			if (!loadElectionConfig()) {
 				LOG_ERROR("Failed to load election configuration!");
@@ -320,11 +320,6 @@ namespace bumo {
 		std::string str;
 		int32_t ret = db->Get(General::ELECTION_CONFIG, str);
 		if (ret == 0) {
-			election_config_.set_candidate_pledge_amount(500000000000000);
-			election_config_.set_kol_pledge_amount(10000000000000);
-			election_config_.set_min_vote_bu(100000000);
-			election_config_.set_validators_refresh_interval(86400); // unused for now
-			election_config_.set_block_reward_share("50:40:10");
 			election_config_.set_fee_allocation_share("70:20:10");
 			return ReadSharerRate(election_config_.fee_allocation_share());
 		} 
