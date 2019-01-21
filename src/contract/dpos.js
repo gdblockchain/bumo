@@ -426,6 +426,7 @@ function vote(type, address){
 
 function unVote(type, address, amount){
     assert(addressCheck(address), address + ' is not valid adress.');
+    assert(int64Compare(amount, 0) > 0, 'Unvote amount <= 0.');
 
     let key = voterKey(type, address);
     let votedAmount = storageLoad(key);
@@ -435,13 +436,12 @@ function unVote(type, address, amount){
     assert(com <= 0, 'Unvote number > voted number.');
 
     if(com === 0){
-        transferCoin(sender, votedAmount);
         storageDel(key);
     }
     else{
-        transferCoin(sender, amount);
         storageStore(key, int64Sub(votedAmount, amount));
     }
+    transferCoin(sender, amount);
 
     let formalSize = type === memberType.validator ? cfg.validatorsSize : cfg.kolsSize;
     decreaseStake(type, address, formalSize, amount);
