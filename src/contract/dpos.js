@@ -201,28 +201,6 @@ function addCandidates(type, address, pledge, maxSize){
     return saveObj(key, candidates);
 }
 
-function updateStake(type, node, formalSize, amount){
-    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-
-    let oldPos = candidates.indexOf(node);
-    node[1]    = int64Add(node[1], amount);
-    candidates.sort(doubleSort);
-    let newPos = candidates.indexOf(node);
-
-    if((oldPos > formalSize && newPos <= formalSize) ||
-       (oldPos <= formalSize && newPos > formalSize)){
-        rewardDistribution();
-
-        if(type === memberType.validator){
-            let validators = candidates.slice(0, cfg.validator_size);
-            setValidators(JSON.stringify(validators));
-        }
-    }
-
-    let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
-    return saveObj(key, candidates);
-}
-
 function deleteCandidate(type, address){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
@@ -249,6 +227,28 @@ function deleteCandidate(type, address){
 
     let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
     saveObj(key, candidates);
+}
+
+function updateStake(type, node, formalSize, amount){
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
+
+    let oldPos = candidates.indexOf(node);
+    node[1]    = int64Add(node[1], amount);
+    candidates.sort(doubleSort);
+    let newPos = candidates.indexOf(node);
+
+    if((oldPos > formalSize && newPos <= formalSize) ||
+       (oldPos <= formalSize && newPos > formalSize)){
+        rewardDistribution();
+
+        if(type === memberType.validator){
+            let validators = candidates.slice(0, cfg.validator_size);
+            setValidators(JSON.stringify(validators));
+        }
+    }
+
+    let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
+    return saveObj(key, candidates);
 }
 
 function apply(type){
