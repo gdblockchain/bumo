@@ -1,10 +1,10 @@
 'use strict';
 
-const configKey         = 'dos_config';
-const rewardKey         = 'block_reward';
 const committeeKey      = 'committee';
-const kolCandsKey       = 'kol_candidates';
 const validatorCandsKey = 'validator_candidates';
+const kolCandsKey       = 'kol_candidates';
+const rewardKey         = 'block_reward';
+const configKey         = 'dos_config';
 
 const memberType = {
    'committee' : 1,
@@ -19,7 +19,7 @@ const motionType = {
 };
 
 let sysCfg = [];
-let dpos = {};
+let elect = {};
 let cfg = {};
 
 function doubleSort(a, b){
@@ -59,24 +59,24 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function rewardInit(){
+function electionInit(){
     let rewards = loadObj(rewardKey);
     assert(rewards !== false, 'Faild to get all stake and reward distribution table.');
 
-    dpos.allStake = int64Add(rewards.allStake, thisPayCoinAmount);
-    dpos.distribution = rewards.distribution;
+    elect.allStake = int64Add(rewards.allStake, thisPayCoinAmount);
+    elect.distribution = rewards.distribution;
 
-    dpos.balance  = getBalance();
-    assert(dpos.balance !== false, 'Faild to get account balance.');
+    elect.balance  = getBalance();
+    assert(elect.balance !== false, 'Faild to get account balance.');
 
-    dpos.validatorCands = loadObj(validatorCandsKey);
-    assert(dpos.validatorCands !== false, 'Faild to get validator candidates.');
+    elect.validatorCands = loadObj(validatorCandsKey);
+    assert(elect.validatorCands !== false, 'Faild to get validator candidates.');
 
-    dpos.kolCands = loadObj(kolCandsKey);
-    assert(dpos.kolCands !== false, 'Faild to get kol candidates.');
+    elect.kolCands = loadObj(kolCandsKey);
+    assert(elect.kolCands !== false, 'Faild to get kol candidates.');
 
-    dpos.validators = dpos.validatorCands.slice(0, cfg.validatorsSize);
-    dpos.kols       = dpos.kolCands.slice(0, cfg.kolsSize);
+    elect.validators = elect.validatorCands.slice(0, cfg.validatorsSize);
+    elect.kols       = elect.kolCands.slice(0, cfg.kolsSize);
 }
 
 function distribute(twoDimenList, allReward){
@@ -85,44 +85,44 @@ function distribute(twoDimenList, allReward){
     let i = 0;
     for(i = 0; i < twoDimenList.length; i += 1){
         let name = twoDimenList[i][0];
-        if(dpos.distribution[name] === undefined){
-            dpos.distribution[name] = reward;
+        if(elect.distribution[name] === undefined){
+            elect.distribution[name] = reward;
         }
         else{
-            dpos.distribution[name] = int64Add(dpos.distribution[name], reward);
+            elect.distribution[name] = int64Add(elect.distribution[name], reward);
         }
     }
 
     let left = int64Mod(allReward, twoDimenList.length);
-    let element1st = dpos.distribution[twoDimenList[0][0]];
+    let element1st = elect.distribution[twoDimenList[0][0]];
     element1st = int64Add(element1st, left);
 }
 
 function rewardDistribution(){
-    let rewards = int64Sub(dpos.balance, dpos.allStake);
+    let rewards = int64Sub(elect.balance, elect.allStake);
     if(rewards === '0'){
         return;
     }
 
     let oneTenth = rewards / 10;
-    distribute(dpos.kols, oneTenth);
-    distribute(dpos.validators, oneTenth * 5);
-    distribute(dpos.validatorCands, oneTenth * 4);
+    distribute(elect.kols, oneTenth);
+    distribute(elect.validators, oneTenth * 5);
+    distribute(elect.validatorCands, oneTenth * 4);
 
     let left = rewards % 10;
-    dpos.distribution[dpos.validators[0][0]] = int64Add(dpos.distribution[dpos.validators[0][0]], left);
+    elect.distribution[elect.validators[0][0]] = int64Add(elect.distribution[elect.validators[0][0]], left);
 
     let distributed = {};
     distributed.allStake = getBalance();
-    distributed.distribution = dpos.distribution;
+    distributed.distribution = elect.distribution;
     saveObj(rewardKey, distributed);
 }
 
 function extract(){
-    rewardInit();
+    electionInit();
     rewardDistribution();
 
-    let income = dpos.distribution[sender];
+    let income = elect.distribution[sender];
     transferCoin(sender, income);
     log(sender + ' extracted block reward ' + income);
 }
@@ -175,7 +175,7 @@ function checkPledge(type){
 }
 
 function addCandidates(type, address, pledge, maxSize){
-    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let com = int64Compare(pledge, candidates[candidates.length - 1][1]);
     
     if(candidates.length >= maxSize && com <= 0){
@@ -202,7 +202,7 @@ function addCandidates(type, address, pledge, maxSize){
 }
 
 function increaseStake(type, node, formalSize){
-    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let oldPos = candidates.indexOf(node);
     
     node[1] = int64Add(node[1], thisPayCoinAmount);
@@ -225,8 +225,8 @@ function increaseStake(type, node, formalSize){
 function decreaseStake(type, address, formalSize, amount){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    rewardInit();
-    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
+    electionInit();
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let node = candidates.find(function(x){
         return x[0] === address;
     });
@@ -256,8 +256,8 @@ function decreaseStake(type, address, formalSize, amount){
 function updateCandidates(type, address, pledge){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    rewardInit();
-    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
+    electionInit();
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let node = candidates.find(function(x){
         return x[0] === address;
     });
@@ -275,8 +275,8 @@ function updateCandidates(type, address, pledge){
 function deleteCandidate(type, address){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    rewardInit();
-    let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
+    electionInit();
+    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let candidate = candidates.find(function(x){
         return x[0] === address;
     });
@@ -385,7 +385,7 @@ function approveOut(type, evil){
         let applicant     = loadObj(applicantKey);
         assert(applicant !== false, 'Faild to get ' + applicantKey + ' from metadata.');
 
-        let candidates = type === memberType.validator ? dpos.validatorCands : dpos.kolCands;
+        let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
         distribute(candidates, applicant.pledge);
         storageDel(applicantKey);
     }
@@ -476,10 +476,10 @@ function abolish(type, address, proof){
         assert(committee.includes(sender), 'Only committee members have the right to report other committee member.');
     }
     else if(type === memberType.validator){
-        assert(isExist(dpos.validators, sender), 'Only validator have the right to report other validator.');
+        assert(isExist(elect.validators, sender), 'Only validator have the right to report other validator.');
     }
     else if(type === memberType.kol){
-        assert(isExist(dpos.kols, sender), 'Only kol have the right to report other kol.');
+        assert(isExist(elect.kols, sender), 'Only kol have the right to report other kol.');
     }
     else{
         throw 'Unkown abolish type.';
@@ -524,11 +524,11 @@ function withdraw(type){
 
     deleteCandidate(type, sender);
 
-    if(dpos.distribution[sender] === undefined){
-        dpos.distribution[sender] = applicant.pledge;
+    if(elect.distribution[sender] === undefined){
+        elect.distribution[sender] = applicant.pledge;
     }
     else{
-        dpos.distribution[sender] = int64Add(dpos.distribution[sender], applicant.pledge);
+        elect.distribution[sender] = int64Add(elect.distribution[sender], applicant.pledge);
     }
 }
 
