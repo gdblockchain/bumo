@@ -201,46 +201,16 @@ function addCandidates(type, address, pledge, maxSize){
     return saveObj(key, candidates);
 }
 
-function increaseStake(type, node, formalSize){
+function updateElection(type, node, formalSize, amount){
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
+
     let oldPos = candidates.indexOf(node);
-    
-    node[1] = int64Add(node[1], thisPayCoinAmount);
+    node[1]    = int64Add(node[1], amount);
     candidates.sort(doubleSort);
     let newPos = candidates.indexOf(node);
 
-    if(oldPos > formalSize && newPos <= formalSize){
-        rewardDistribution();
-
-        if(type === memberType.validator){
-            let validators = candidates.slice(0, cfg.validator_size);
-            setValidators(JSON.stringify(validators));
-        }
-    }
-
-    let key = type === memberType.validator ? validatorCandsKey : kolCandsKey;
-    return saveObj(key, candidates);
-}
-
-function decreaseStake(type, address, formalSize, amount){
-    assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
-
-    electInit();
-    let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-    let node = candidates.find(function(x){
-        return x[0] === address;
-    });
-
-    if(node === undefined){
-        return true;
-    }
-    
-    let oldPos = candidates.indexOf(node);
-    node[1] = int64Sub(node[1], amount);
-    candidates.sort(doubleSort);
-    let newPos = candidates.indexOf(node);
-
-    if(oldPos <= formalSize && newPos > formalSize){
+    if((oldPos > formalSize && newPos <= formalSize) ||
+       (oldPos <= formalSize && newPos > formalSize)){
         rewardDistribution();
 
         if(type === memberType.validator){
@@ -268,7 +238,7 @@ function updateCandidates(type, address, pledge){
     }
     else{
         let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
-        increaseStake(type, node, formalSize);
+        updateElection(type, node, formalSize, thisPayCoinAmount);
     }
 }
 
@@ -277,17 +247,17 @@ function deleteCandidate(type, address){
 
     electInit();
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-    let candidate = candidates.find(function(x){
+    let node = candidates.find(function(x){
         return x[0] === address;
     });
 
-    if(candidate === undefined){
+    if(node === undefined){
         return; 
     }
 
     rewardDistribution();
 
-    let index = candidates.indexOf(candidate);
+    let index = candidates.indexOf(node);
     candidates.splice(index, 1);
     candidates.sort(doubleSort);
 
@@ -412,6 +382,7 @@ function vote(type, address){
 
     let key = voterKey(type, address);
     let voteAmount = storageLoad(key);
+    assert(voteAmount !== false, 'The account did not vote for: ' + address);
 
     if(voteAmount === false){
         voteAmount = thisPayCoinAmount;
@@ -435,16 +406,16 @@ function unVote(type, address, amount){
     let com = int64Compare(amount, votedAmount);
     assert(com <= 0, 'Unvote number > voted number.');
 
+    transferCoin(sender, amount);
     if(com === 0){
         storageDel(key);
     }
     else{
         storageStore(key, int64Sub(votedAmount, amount));
     }
-    transferCoin(sender, amount);
 
     let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
-    decreaseStake(type, address, formalSize, amount);
+    updateElection(type, address, formalSize, -amount);
 }
 
 function abolitionProposal(proof){
