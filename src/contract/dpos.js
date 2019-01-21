@@ -63,7 +63,7 @@ function electInit(){
     let rewards = loadObj(rewardKey);
     assert(rewards !== false, 'Faild to get all stake and reward distribution table.');
 
-    elect.allStake = int64Add(rewards.allStake, thisPayCoinAmount);
+    elect.allStake     = int64Add(rewards.allStake, thisPayCoinAmount);
     elect.distribution = rewards.distribution;
 
     elect.balance  = getBalance();
@@ -93,9 +93,9 @@ function distribute(twoDimenList, allReward){
         }
     }
 
-    let left = int64Mod(allReward, twoDimenList.length);
+    let left       = int64Mod(allReward, twoDimenList.length);
     let element1st = elect.distribution[twoDimenList[0][0]];
-    element1st = int64Add(element1st, left);
+    element1st     = int64Add(element1st, left);
 }
 
 function rewardDistribution(){
@@ -113,7 +113,7 @@ function rewardDistribution(){
     elect.distribution[elect.validators[0][0]] = int64Add(elect.distribution[elect.validators[0][0]], left);
 
     let distributed = {};
-    distributed.allStake = getBalance();
+    distributed.allStake     = getBalance();
     distributed.distribution = elect.distribution;
     saveObj(rewardKey, distributed);
 }
@@ -246,7 +246,7 @@ function updateStake(type, node, formalSize, amount){
 }
 
 function apply(type){
-    let key = proposalKey(motionType.apply, type, sender);
+    let key      = proposalKey(motionType.apply, type, sender);
     let proposal = loadObj(key);
 
     if(proposal === false){
@@ -320,7 +320,7 @@ function approveOut(type, evil){
     assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = proposalKey(motionType.abolish, type, evil);
+    let key      = proposalKey(motionType.abolish, type, evil);
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -387,7 +387,7 @@ function vote(type, address){
 
     electInit();
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
-    let node = candidates.find(function(x){ return x[0] === address; });
+    let node       = candidates.find(function(x){ return x[0] === address; });
 
     assert(node !== undefined, address + ' is not validator candidate or KOL candidate.');
     let formalSize = type === memberType.validator ? cfg.validator_size : cfg.kol_size;
@@ -399,7 +399,7 @@ function unVote(type, address, amount){
     assert(addressCheck(address), address + ' is not valid adress.');
     assert(int64Compare(amount, 0) > 0, 'Unvote amount <= 0.');
 
-    let key = voterKey(type, address);
+    let key         = voterKey(type, address);
     let votedAmount = storageLoad(key);
     assert(votedAmount !== false, 'The account did not vote for: ' + address);
 
@@ -535,7 +535,7 @@ function configure(item, value){
     assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
     assert(committee.includes(sender), 'Only the committee has the power to proposal to modify the configuration.');
 
-    let key = sender + '_configure_' + item;
+    let key      = sender + '_configure_' + item;
     let proposal = loadObj(key);
     if(proposal !== false && proposal.value === value){
         return;
@@ -550,7 +550,7 @@ function approveCfg(proposer, item){
     assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
     assert(committee.includes(sender), 'Only committee members have the right to approve.');
 
-    let key = proposer + '_configure_' + item;
+    let key      = proposer + '_configure_' + item;
     let proposal = loadObj(key);
     assert(proposal !== false, 'failed to get metadata: ' + key + '.');
         
@@ -594,7 +594,7 @@ function query(input_str){
 }
 
 function main(input_str){
-    let input = JSON.parse(input_str);
+    let input  = JSON.parse(input_str);
     let params = input.params;
 
     cfg = loadObj(configKey);
