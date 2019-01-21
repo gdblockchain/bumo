@@ -59,7 +59,7 @@ function transferCoin(dest, amount)
     log('Pay coin( ' + amount + ') to dest account(' + dest + ') succeed.');
 }
 
-function electionInit(){
+function electInit(){
     let rewards = loadObj(rewardKey);
     assert(rewards !== false, 'Faild to get all stake and reward distribution table.');
 
@@ -119,7 +119,7 @@ function rewardDistribution(){
 }
 
 function extract(){
-    electionInit();
+    electInit();
     rewardDistribution();
 
     let income = elect.distribution[sender];
@@ -225,7 +225,7 @@ function increaseStake(type, node, formalSize){
 function decreaseStake(type, address, formalSize, amount){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    electionInit();
+    electInit();
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let node = candidates.find(function(x){
         return x[0] === address;
@@ -256,7 +256,7 @@ function decreaseStake(type, address, formalSize, amount){
 function updateCandidates(type, address, pledge){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    electionInit();
+    electInit();
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let node = candidates.find(function(x){
         return x[0] === address;
@@ -275,7 +275,7 @@ function updateCandidates(type, address, pledge){
 function deleteCandidate(type, address){
     assert(type === memberType.validator || type === memberType.kol, 'Only validator and kol have candidate.');
 
-    electionInit();
+    electInit();
     let candidates = type === memberType.validator ? elect.validatorCands : elect.kolCands;
     let candidate = candidates.find(function(x){
         return x[0] === address;
