@@ -437,27 +437,40 @@ function isExist(twoDimenList, address){
     return element !== undefined;
 }
 
-function abolish(type, address, proof){
-    assert(addressCheck(address), address + ' is not valid adress.');
-
-    let committee = loadObj(committeeKey);
-    assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
-
+function reportPermission(type){
     if(type === memberType.committee){
+        let committee = loadObj(committeeKey);
+        assert(committee !== false, 'Faild to get ' + committeeKey + ' from metadata.');
         assert(committee.includes(sender), 'Only committee members have the right to report other committee member.');
     }
     else if(type === memberType.validator){
-        assert(isExist(elect.validators, sender), 'Only validator have the right to report other validator.');
+        let validatorCands = loadObj(validatorCandsKey);
+        assert(validatorCands !== false, 'Faild to get validator candidates.');
+
+        let validators = validatorCands.slice(0, cfg.validator_size);
+        assert(isExist(validators, sender), 'Only validator have the right to report other validator.');
     }
     else if(type === memberType.kol){
-        assert(isExist(elect.kols, sender), 'Only kol have the right to report other kol.');
+        let kolCands = loadObj(kolCandsKey);
+        assert(kolCands !== false, 'Faild to get kol candidates.');
+
+        let kols = kolCands.slice(0, cfg.kol_size);
+        assert(isExist(kols, sender), 'Only kol have the right to report other kol.');
     }
     else{
         throw 'Unkown abolish type.';
     }
 
-    let key = proposalKey(motionType.abolish, type, address);
+    return true;
+}
+
+function abolish(type, address, proof){
+    assert(addressCheck(address), address + ' is not valid adress.');
+    assert(reportPermission(type), sender + ' has no permission to report.');
+
+    let key      = proposalKey(motionType.abolish, type, address);
     let proposal = loadObj(key);
+
     if(proposal === false){
         proposal = abolitionProposal(proof);
         saveObj(key, proposal);
